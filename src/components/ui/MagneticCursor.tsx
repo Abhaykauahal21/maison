@@ -3,7 +3,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
 export const MagneticCursor: React.FC = () => {
-  const [enabled, setEnabled] = useState(false);
   const [visible, setVisible] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [clicked, setClicked] = useState(false);
@@ -25,8 +24,6 @@ export const MagneticCursor: React.FC = () => {
     // Only enable on devices with fine pointer (mouse/trackpad), not touchscreens
     const hasFinePointer = window.matchMedia("(pointer: fine)").matches;
     if (!hasFinePointer) return;
-
-    setEnabled(true);
 
     const onMouseMove = (e: MouseEvent) => {
       mousePos.current.x = e.clientX;
@@ -111,13 +108,11 @@ export const MagneticCursor: React.FC = () => {
     };
   }, [visible]);
 
-  if (!enabled) return null;
+  if (!visible) return null;
 
   return (
     <div
-      className={`pointer-events-none fixed inset-0 z-[9999] overflow-hidden transition-opacity duration-300 ${
-        visible ? "opacity-100" : "opacity-0"
-      }`}
+      className="pointer-events-none fixed inset-0 z-[9999] overflow-hidden transition-opacity duration-300 opacity-100"
       aria-hidden="true"
     >
       {/* 1. Inner Precision Dot */}
