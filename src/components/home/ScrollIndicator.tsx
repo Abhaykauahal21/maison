@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 
 export interface ScrollIndicatorProps {
@@ -5,10 +7,29 @@ export interface ScrollIndicatorProps {
 }
 
 export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({ className = "" }) => {
+  const handleClick = () => {
+    const el = document.getElementById("story");
+    el?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
-    <div className={`flex flex-col items-center gap-2 select-none ${className}`} aria-hidden="true">
-      <span className="font-serif text-xs tracking-wider text-white/80 italic">Scroll</span>
-      <div className="animate-pulse-line h-10 w-[1px] origin-top bg-white/70 sm:h-12" />
-    </div>
+    <button
+      type="button"
+      onClick={handleClick}
+      className={`group flex cursor-pointer flex-col items-center gap-2.5 select-none transition-transform duration-300 hover:scale-105 focus-visible:outline-none ${className}`}
+      aria-label="Scroll to next section"
+    >
+      <span className="font-serif text-xs tracking-[0.2em] text-[#dfccb5]/80 italic transition-colors duration-300 group-hover:text-white">
+        Scroll
+      </span>
+
+      {/* Vertical Track with Glowing Droplet */}
+      <div className="relative h-11 sm:h-14 w-[1.5px] overflow-hidden rounded-full bg-white/20">
+        <span
+          className="pointer-events-none absolute top-0 left-0 h-4 w-full rounded-full bg-gradient-to-b from-transparent via-[#f8ebd7] to-transparent shadow-[0_0_8px_#f8ebd7] animate-scroll-drop"
+          aria-hidden="true"
+        />
+      </div>
+    </button>
   );
 };
