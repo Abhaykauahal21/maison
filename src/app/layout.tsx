@@ -1,26 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Alex_Brush, Montserrat } from "next/font/google";
-import { MagneticCursor } from "@/components/ui/MagneticCursor";
+import { Alex_Brush } from "next/font/google";
 import "./globals.css";
-
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-serif",
-  display: "swap",
-});
 
 const alexBrush = Alex_Brush({
   subsets: ["latin"],
   weight: ["400"],
   variable: "--font-script",
-  display: "swap",
-});
-
-const montserrat = Montserrat({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-  variable: "--font-sans",
   display: "swap",
 });
 
@@ -43,10 +28,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${cormorant.variable} ${alexBrush.variable} ${montserrat.variable} h-full antialiased`}
+      className={`${alexBrush.variable} h-full antialiased`}
     >
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body className="h-full overflow-x-hidden bg-[#0d0c0b] text-white selection:bg-white/20 selection:text-white">
-        <MagneticCursor />
         {children}
       </body>
     </html>

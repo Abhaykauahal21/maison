@@ -27,7 +27,7 @@ export const StepSection: React.FC = () => {
           alt="Maison D'Vine Step 1 Vintage Scrapbook Paper"
           width={1952}
           height={848}
-          priority
+          loading="lazy"
           unoptimized
           className="pointer-events-none block h-auto w-full select-none"
         />
@@ -68,7 +68,7 @@ export const StepSection: React.FC = () => {
             alt="Maison D'Vine Step 1 Scrapbook Paper"
             width={541}
             height={1024}
-            priority
+            loading="lazy"
             unoptimized
             className="pointer-events-none block h-auto w-full select-none"
           />
@@ -114,7 +114,7 @@ export const StepSection: React.FC = () => {
                 src="/images/step-model.webp"
                 alt="Maison D'Vine Model in Crimson Gown Touching Stone Wall"
                 fill
-                priority
+                loading="lazy"
                 unoptimized
                 sizes="(max-width: 640px) 280px, 340px"
                 className="pointer-events-none object-cover object-[52%_22%]"

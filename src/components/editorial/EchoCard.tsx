@@ -35,6 +35,7 @@ export const EchoCard: React.FC<EchoCardProps> = ({
             src={imageSrc}
             alt={imageAlt}
             fill
+            loading="lazy"
             unoptimized
             sizes="160px"
             style={{ objectPosition }}
@@ -74,6 +75,7 @@ export const EchoCard: React.FC<EchoCardProps> = ({
           src={imageSrc}
           alt={imageAlt}
           fill
+          loading="lazy"
           unoptimized
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 30vw, 240px"
           style={{ objectPosition }}

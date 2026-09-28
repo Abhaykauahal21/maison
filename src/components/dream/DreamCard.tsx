@@ -33,6 +33,7 @@ export const DreamCard: React.FC<DreamCardProps> = ({
           src={imageSrc}
           alt={imageAlt}
           fill
+          loading="lazy"
           unoptimized
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 40vw, 20vw"
           className="pointer-events-none object-cover transition-transform duration-700 ease-out group-hover:scale-105"

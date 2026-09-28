@@ -56,7 +56,7 @@ export const EditorialSection: React.FC = () => {
           alt="The Echo Parchment"
           width={2048}
           height={846}
-          priority
+          loading="lazy"
           unoptimized
           className="pointer-events-none block h-auto w-full select-none"
         />
@@ -130,7 +130,7 @@ export const EditorialSection: React.FC = () => {
             alt="The Echo Parchment"
             width={487}
             height={1024}
-            priority
+            loading="lazy"
             unoptimized
             className="pointer-events-none block h-auto w-full select-none"
           />

@@ -23,6 +23,7 @@ export const StepPhoto: React.FC<StepPhotoProps> = ({
         src={imageSrc}
         alt={imageAlt}
         fill
+        loading="lazy"
         unoptimized
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 45vw, 28vw"
         className="pointer-events-none object-cover object-[52%_22%] transition-transform duration-700 ease-out group-hover:scale-104"

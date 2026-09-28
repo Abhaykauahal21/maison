@@ -26,7 +26,7 @@ export const DreamSection: React.FC = () => {
           alt="Maison D'Vine The Dream Collection"
           width={2048}
           height={822}
-          priority
+          loading="lazy"
           unoptimized
           className="pointer-events-none block h-auto w-full select-none"
         />
@@ -87,6 +87,7 @@ export const DreamSection: React.FC = () => {
             src="/images/dream-bg.png"
             alt="Maison D'Vine The Dream Collection"
             fill
+            loading="lazy"
             unoptimized
             sizes="100vw"
             className="pointer-events-none object-cover object-[48%_center] opacity-35"

@@ -2,37 +2,48 @@
 @import "tailwindcss";
 
 @theme {
-  --font-serif: "Bodoni Moda", "Didot", "Bodoni MT", var(--font-serif), "Cormorant Garamond", Georgia, serif;
-  --font-bodoni: "Bodoni Moda", "Didot", "Bodoni MT", var(--font-serif), "Cormorant Garamond", Georgia, serif;
+  --font-serif: "Bodoni Moda", serif;
+  --font-bodoni: "Bodoni Moda", serif;
+  --font-sans: "Bodoni Moda", serif;
   --font-script: var(--font-script), "Alex Brush", cursive;
-  --font-sans: var(--font-sans), Montserrat, system-ui, sans-serif;
 }
 
 :root {
-  --font-serif: var(--font-serif);
-  --font-bodoni: "Bodoni Moda", "Didot", "Bodoni MT", var(--font-serif), "Cormorant Garamond", Georgia, serif;
+  --font-serif: "Bodoni Moda", serif;
+  --font-bodoni: "Bodoni Moda", serif;
+  --font-sans: "Bodoni Moda", serif;
   --font-script: var(--font-script);
-  --font-sans: var(--font-sans);
+}
+
+html,
+body {
+  font-family: "Bodoni Moda", serif;
+  font-optical-sizing: auto;
 }
 
 body {
-  font-family: var(--font-sans);
+  font-family: "Bodoni Moda", serif;
+  font-optical-sizing: auto;
 }
 
-.font-serif {
-  font-family: var(--font-serif);
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: "Bodoni Moda", serif;
+  font-optical-sizing: auto;
 }
 
-.font-bodoni {
-  font-family: var(--font-bodoni);
+.font-serif,
+.font-bodoni,
+.font-sans {
+  font-family: "Bodoni Moda", serif !important;
+  font-optical-sizing: auto;
 }
 
 .font-script {
-  font-family: var(--font-script);
-}
-
-.font-sans {
-  font-family: var(--font-sans);
+  font-family: var(--font-script), "Alex Brush", cursive !important;
 }
 
 /* Subtle luxury animations */
