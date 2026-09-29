@@ -1,0 +1,74 @@
+<svg width="1920" height="900" viewBox="0 0 1920 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="38%" r="70%">
+      <stop offset="0%" stop-color="#8A6240" stop-opacity=".34"/>
+      <stop offset="48%" stop-color="#3A2418" stop-opacity=".12"/>
+      <stop offset="100%" stop-color="#120B08" stop-opacity=".58"/>
+    </radialGradient>
+
+    <linearGradient id="vignette" x1="0" y1="0" x2="1920" y2="0">
+      <stop stop-color="#0D0806" stop-opacity=".62"/>
+      <stop offset=".18" stop-color="#1D100A" stop-opacity=".05"/>
+      <stop offset=".82" stop-color="#1D100A" stop-opacity=".05"/>
+      <stop offset="1" stop-color="#0D0806" stop-opacity=".62"/>
+    </linearGradient>
+
+    <linearGradient id="floor" x1="960" y1="570" x2="960" y2="900">
+      <stop stop-color="#3A2418" stop-opacity=".05"/>
+      <stop offset="1" stop-color="#090604" stop-opacity=".68"/>
+    </linearGradient>
+
+    <filter id="blur">
+      <feGaussianBlur stdDeviation="22"/>
+    </filter>
+
+    <pattern id="stone" width="180" height="75" patternUnits="userSpaceOnUse">
+      <path d="M0 68 Q45 58 90 68 T180 68" stroke="#C79B70" stroke-opacity=".11" stroke-width="2"/>
+      <path d="M25 0V68 M112 0V68" stroke="#8D684C" stroke-opacity=".08" stroke-width="2"/>
+    </pattern>
+  </defs>
+
+  <!-- Base -->
+  <rect width="1920" height="900" fill="#21130C"/>
+  <rect width="1920" height="900" fill="url(#glow)"/>
+
+  <!-- Soft architectural side framing -->
+  <path d="M0 0H185V510H0Z" fill="#130B07" fill-opacity=".72"/>
+  <path d="M1735 0H1920V510H1735Z" fill="#130B07" fill-opacity=".72"/>
+  <path d="M0 0H120V530H0Z" fill="#6F5039" fill-opacity=".12"/>
+  <path d="M1800 0H1920V530H1800Z" fill="#6F5039" fill-opacity=".12"/>
+
+  <!-- Decorative floral/vine silhouettes -->
+  <g opacity=".2" stroke="#CDA27B" stroke-width="2" fill="none">
+    <path d="M25 400C90 330 105 215 175 150C215 113 240 75 252 25"/>
+    <path d="M1895 400C1830 330 1815 215 1745 150C1705 113 1680 75 1668 25"/>
+    <path d="M45 345C92 315 122 286 144 245"/>
+    <path d="M1875 345C1828 315 1798 286 1776 245"/>
+  </g>
+
+  <g fill="#D89B8C" fill-opacity=".2">
+    <circle cx="96" cy="318" r="18"/><circle cx="153" cy="218" r="13"/>
+    <circle cx="1824" cy="318" r="18"/><circle cx="1767" cy="218" r="13"/>
+    <circle cx="126" cy="135" r="10"/><circle cx="1794" cy="135" r="10"/>
+  </g>
+
+  <!-- Ground -->
+  <path d="M0 500H1920V900H0Z" fill="#2B1A11"/>
+  <rect y="500" width="1920" height="400" fill="url(#stone)" opacity=".9"/>
+  <rect y="500" width="1920" height="400" fill="url(#floor)"/>
+
+  <!-- Warm floor light -->
+  <ellipse cx="960" cy="650" rx="720" ry="190" fill="#B87842" fill-opacity=".13" filter="url(#blur)"/>
+
+  <!-- Thin luxury borders -->
+  <path d="M110 92H1810" stroke="#D4A77A" stroke-opacity=".42"/>
+  <path d="M110 808H1810" stroke="#D4A77A" stroke-opacity=".32"/>
+  <circle cx="110" cy="92" r="3" fill="#D4A77A" fill-opacity=".7"/>
+  <circle cx="1810" cy="92" r="3" fill="#D4A77A" fill-opacity=".7"/>
+  <circle cx="110" cy="808" r="3" fill="#D4A77A" fill-opacity=".6"/>
+  <circle cx="1810" cy="808" r="3" fill="#D4A77A" fill-opacity=".6"/>
+
+  <!-- Central negative-space veil -->
+  <rect x="260" y="115" width="1400" height="650" rx="8" fill="#120A06" fill-opacity=".08"/>
+  <rect width="1920" height="900" fill="url(#vignette)"/>
+</svg>

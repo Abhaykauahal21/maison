@@ -1,6 +1,5 @@
 "use client";
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Search, ShoppingBag, Menu } from "lucide-react";
 import { IconButton } from "@/components/ui/IconButton";
@@ -15,12 +14,31 @@ const navLinks = [
 
 export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // While EditorialSection freezes the page (body { position: fixed; top: -Ypx }),
+      // window.scrollY reads 0; the real offset lives in body.style.top.
+      const lockedY = Math.abs(parseFloat(document.body.style.top || "0")) || 0;
+      setIsScrolled(Math.max(window.scrollY, lockedY) > 25);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <>
-      <header className="absolute top-0 right-0 left-0 z-40 w-full transition-all">
-        {/* Structured 3-part layout matching IMAGE 1 with aligned left/right margins */}
-        <div className="flex w-full items-center justify-between px-4.5 sm:px-6 lg:px-[6.8vw] pt-4.5 sm:pt-6 lg:pt-8 pb-2">
+      <header
+        className={`fixed top-0 right-0 left-0 z-50 w-full transition-all duration-300 ease-out ${
+          isScrolled
+            ? "bg-[#0e0d0c]/40 backdrop-blur-md border-b border-white/[0.06] shadow-[0_4px_24px_rgba(0,0,0,0.25)] py-3 sm:py-3.5"
+            : "bg-transparent py-5 sm:py-6 lg:py-7 border-b border-transparent"
+        }`}
+      >
+        <div className="flex w-full items-center justify-between px-6 sm:px-8 lg:px-[6.2vw]">
           {/* LEFT: Elegant Wordmark Logo */}
           <div className="flex-1 text-left">
             <Link

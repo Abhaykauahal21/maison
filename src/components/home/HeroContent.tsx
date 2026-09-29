@@ -6,26 +6,28 @@ import { FilmCTA } from "@/components/home/FilmCTA";
 export interface HeroContentProps {
   className?: string;
   onOpenFilm?: () => void;
+  /** "editorial": side-by-side desktop/landscape layout. "stacked": phones and portrait tablets. */
+  layout?: "editorial" | "stacked";
 }
 
 export const HeroContent: React.FC<HeroContentProps> = ({
   className = "",
   onOpenFilm,
+  layout = "editorial",
 }) => {
+  const stacked = layout === "stacked";
   return (
-    <div className={`flex max-w-[440px] flex-col text-left text-white ${className}`}>
-      {/* Editorial Badge / Collection Marker */}
-      <div className="overflow-hidden mb-2 sm:mb-2.5">
-        <div className="animate-hero-tag inline-flex items-center gap-2">
-          <span className="h-[1px] w-6 bg-[#d6be9f]/60" />
-          <span className="font-sans text-[10px] sm:text-[11px] font-normal uppercase tracking-[0.32em] text-[#dfccb5]/90">
-            Couture Édition 2026
-          </span>
-        </div>
-      </div>
-
-      {/* Editorial Headline with Staggered Masked Slide-up Reveals */}
-      <h1 className="font-bodoni font-normal uppercase text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.55)] text-[clamp(42px,4.3vw,76px)] leading-[0.93] tracking-[-0.015em]">
+    <div
+      className={`flex flex-col text-left text-white ${
+        stacked ? "max-w-[420px] sm:max-w-[540px]" : "max-w-[420px]"
+      } ${className}`}
+    >
+      {/* Editorial Headline matching reference composition */}
+      <h1
+        className={`font-bodoni font-normal uppercase text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.65)] ${
+          stacked ? "text-[clamp(30px,min(9vw,6.5vh),68px)]" : "text-[clamp(36px,4.1vw,66px)]"
+        } leading-[0.95] tracking-[-0.015em]`}
+      >
         <span className="block overflow-hidden pb-1">
           <span className="block animate-hero-line-1">NOT JUST</span>
         </span>
@@ -33,14 +35,14 @@ export const HeroContent: React.FC<HeroContentProps> = ({
           <span className="block animate-hero-line-2">DRESSES,</span>
         </span>
         <span className="block overflow-hidden pb-1">
-          <span className="block animate-hero-line-3 bg-gradient-to-r from-white via-[#f7e0be] to-white bg-clip-text text-transparent animate-shimmer-text">
+          <span className="block animate-hero-line-3 text-white">
             BUT STORIES.
           </span>
         </span>
       </h1>
 
-      {/* Description - Refined editorial typography with smooth delayed fade up */}
-      <p className="animate-hero-desc mt-3.5 max-w-[360px] font-sans text-[13px] leading-[1.58] font-light tracking-[0.015em] text-[#e8ded4] drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)] sm:mt-4 sm:text-[14px]">
+      {/* Description - 3-line refined typography */}
+      <p className={`animate-hero-desc mt-3.5 font-sans text-[12.5px] sm:text-[13.5px] ${stacked ? "max-w-[335px] sm:max-w-[430px] md:text-[15px]" : "max-w-[335px]"} leading-[1.58] font-light tracking-[0.015em] text-[#eae2d8] drop-shadow-[0_1px_6px_rgba(0,0,0,0.7)] sm:mt-4`}>
         Every Maison D’Vine creation is inspired by a story — of her, of you, of every woman who
         dreams, feels, and evolves.
       </p>

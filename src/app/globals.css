@@ -1,29 +1,57 @@
-@import url("https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Allura&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap");
 @import "tailwindcss";
 
 @theme {
-  --font-serif: "Bodoni Moda", serif;
-  --font-bodoni: "Bodoni Moda", serif;
-  --font-sans: "Bodoni Moda", serif;
-  --font-script: var(--font-script), "Alex Brush", cursive;
+  --font-serif: "Playfair Display", serif;
+  --font-display: "Playfair Display", serif;
+  --font-playfair: "Playfair Display", serif;
+  --font-sans: "Playfair Display", serif;
+  --font-bodoni: "Playfair Display", serif;
+  --font-mono: "Playfair Display", serif;
+  --font-allura: "Allura", cursive;
+  --font-script: "Allura", "Alex Brush", cursive;
+  --font-cursive: "Allura", "Alex Brush", cursive;
 }
 
 :root {
-  --font-serif: "Bodoni Moda", serif;
-  --font-bodoni: "Bodoni Moda", serif;
-  --font-sans: "Bodoni Moda", serif;
-  --font-script: var(--font-script);
+  --font-serif: "Playfair Display", serif;
+  --font-display: "Playfair Display", serif;
+  --font-playfair: "Playfair Display", serif;
+  --font-sans: "Playfair Display", serif;
+  --font-bodoni: "Playfair Display", serif;
+  --font-mono: "Playfair Display", serif;
+  --font-allura: "Allura", cursive;
+  --font-script: "Allura", "Alex Brush", cursive;
+  --font-cursive: "Allura", "Alex Brush", cursive;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  font-family: "Playfair Display", serif;
+  font-optical-sizing: auto;
 }
 
 html,
 body {
-  font-family: "Bodoni Moda", serif;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: "Playfair Display", serif;
   font-optical-sizing: auto;
+  font-style: normal;
+}
+
+html {
+  /* Keeps layout stable when EditorialSection locks scrolling (overflow: hidden) */
+  scrollbar-gutter: stable;
+  overflow-x: clip;
 }
 
 body {
-  font-family: "Bodoni Moda", serif;
-  font-optical-sizing: auto;
+  overflow-x: clip;
 }
 
 button,
@@ -31,19 +59,43 @@ input,
 optgroup,
 select,
 textarea {
-  font-family: "Bodoni Moda", serif;
+  font-family: "Playfair Display", serif;
   font-optical-sizing: auto;
 }
 
 .font-serif,
+.font-sans,
+.font-display,
+.font-playfair,
+.font-playfair-display,
 .font-bodoni,
-.font-sans {
-  font-family: "Bodoni Moda", serif !important;
+.font-bodoni-moda,
+[class*="playfair-display"],
+[class*="bodoni-moda"] {
+  font-family: "Playfair Display", serif !important;
   font-optical-sizing: auto;
 }
 
-.font-script {
-  font-family: var(--font-script), "Alex Brush", cursive !important;
+.font-script,
+.font-script * {
+  font-family: var(--font-allura, "Allura"), "Allura", var(--font-script, "Alex Brush"), "Alex Brush", cursive !important;
+}
+
+.font-allura,
+.font-allura * {
+  font-family: var(--font-allura, "Allura"), "Allura", cursive !important;
+}
+
+.font-cursive,
+.font-cursive * {
+  font-family: var(--font-allura, "Allura"), "Allura", var(--font-script, "Alex Brush"), "Alex Brush", cursive !important;
+}
+
+.allura-regular,
+.allura-regular * {
+  font-family: var(--font-allura, "Allura"), "Allura", cursive !important;
+  font-weight: 400;
+  font-style: normal;
 }
 
 /* Subtle luxury animations */
@@ -232,8 +284,779 @@ textarea {
   animation: scrollDroplet 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
+@keyframes heroImageSettle {
+  0% {
+    transform: scale(1.1);
+    opacity: 0.35;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes heroGlowDrift {
+  0% {
+    transform: translate3d(-4%, 0, 0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate3d(4%, -2%, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes heroScriptWrite {
+  0% {
+    clip-path: inset(-10% 100% -10% 0);
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    clip-path: inset(-10% -10% -10% 0);
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroUnderlineDraw {
+  0% {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  100% {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-hero-image-settle {
+  animation: heroImageSettle 2.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-hero-glow {
+  animation: heroGlowDrift 12s ease-in-out infinite alternate;
+}
+
+.animate-hero-script {
+  animation: heroScriptWrite 1.1s cubic-bezier(0.4, 0, 0.2, 1) calc(1.3s + var(--i, 0) * 0.32s) both;
+}
+
+.animate-hero-underline {
+  stroke-dasharray: 1;
+  animation: heroUnderlineDraw 0.9s ease-out 2.6s both;
+}
+
+/* Hold hero entrance animations until the SiteLoader curtain starts opening */
+html:not([data-site-ready]) .animate-hero-image-settle,
+html:not([data-site-ready]) .animate-hero-line-1,
+html:not([data-site-ready]) .animate-hero-line-2,
+html:not([data-site-ready]) .animate-hero-line-3,
+html:not([data-site-ready]) .animate-hero-desc,
+html:not([data-site-ready]) .animate-hero-cta,
+html:not([data-site-ready]) .animate-hero-film,
+html:not([data-site-ready]) .animate-hero-script,
+html:not([data-site-ready]) .animate-hero-underline,
+html:not([data-site-ready]) .animate-hero-from-left,
+html:not([data-site-ready]) .animate-hero-from-right {
+  animation-play-state: paused;
+}
+
+/* ========================================================
+   Dream Section: haze -> focus wake, drifting mist, shooting star
+   ======================================================== */
+@keyframes dreamWake {
+  0% {
+    transform: scale(1.12);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes dreamMist {
+  0% {
+    transform: translate3d(-6%, 0, 0) scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(8%, -4%, 0) scale(1.3);
+    opacity: 0;
+  }
+}
+
+@keyframes dreamShooting {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(160deg);
+    opacity: 0;
+  }
+  3% {
+    opacity: 1;
+  }
+  13%,
+  100% {
+    transform: translate3d(-380px, 138px, 0) rotate(160deg);
+    opacity: 0;
+  }
+}
+
+.animate-dream-wake {
+  animation: dreamWake 2.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-dream-mist {
+  animation: dreamMist 3.2s ease-out both;
+}
+
+.animate-dream-shooting {
+  animation: dreamShooting 11s ease-in 3s infinite both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-dream-wake {
+    animation: none;
+  }
+  .animate-dream-mist,
+  .animate-dream-shooting {
+    display: none;
+  }
+}
+
+/* ========================================================
+   Step 1 Section: photo placed on paper, taped down, "developing" photo
+   ======================================================== */
+@keyframes stepPlace {
+  0% {
+    opacity: 0;
+    transform: translate3d(22vw, -18px, 0) rotate(9deg) scale(1.06);
+  }
+  55% {
+    opacity: 1;
+  }
+  78% {
+    transform: translate3d(0, 4px, 0) rotate(0.6deg) scale(0.995);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+}
+
+@keyframes stepDevelop {
+  0% {
+    filter: sepia(1) saturate(0.35) brightness(1.4) contrast(0.75) blur(5px);
+    transform: scale(1.14);
+  }
+  100% {
+    filter: none;
+    transform: scale(1);
+  }
+}
+
+@keyframes stepTape {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--r, 0deg)) scaleX(0);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(var(--r, 0deg)) scaleX(1);
+  }
+}
+
+.animate-step-place {
+  animation: stepPlace 1.5s cubic-bezier(0.22, 1, 0.36, 1) 0.25s backwards;
+}
+
+.animate-step-develop {
+  animation: stepDevelop 2.6s cubic-bezier(0.16, 1, 0.3, 1) 0.9s backwards;
+}
+
+.animate-step-tape {
+  transform: rotate(var(--r, 0deg));
+  transform-origin: left center;
+  animation: stepTape 0.5s ease-out backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-step-place,
+  .animate-step-develop,
+  .animate-step-tape {
+    animation: none;
+  }
+}
+
+/* ========================================================
+   India map: connectivity routes between pins
+   ======================================================== */
+@keyframes indiaRouteDraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes indiaPinPulse {
+  0% {
+    transform: scale(0.45);
+    opacity: 0.7;
+  }
+  70%,
+  100% {
+    transform: scale(2.3);
+    opacity: 0;
+  }
+}
+
+@keyframes indiaFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.india-route-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation-name: indiaRouteDraw;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  animation-fill-mode: forwards;
+}
+
+.india-pin-pulse {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: indiaPinPulse 3.2s ease-out infinite;
+}
+
+.india-hub-label {
+  animation: indiaFadeIn 1.2s ease-out 1.2s both;
+}
+
+@keyframes indiaCollageIn {
+  0% {
+    opacity: 0;
+    transform: translate3d(24vw, -10px, 0) rotate(8deg) scale(0.94);
+  }
+  60% {
+    opacity: 1;
+    transform: translate3d(-4px, 3px, 0) rotate(-1.2deg) scale(1.005);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+}
+
+@keyframes indiaCompassNeedle {
+  0%,
+  100% {
+    transform: rotate(-7deg);
+  }
+  50% {
+    transform: rotate(7deg);
+  }
+}
+
+.animate-india-collage {
+  animation: indiaCollageIn 1.5s cubic-bezier(0.22, 1, 0.36, 1) 0.4s backwards;
+}
+
+.animate-india-float {
+  animation: floatGentle 7s ease-in-out 2s infinite;
+}
+
+/* Handwriting wipe reused from the hero, staggered per line */
+.animate-india-script {
+  animation: heroScriptWrite 1.1s cubic-bezier(0.4, 0, 0.2, 1) calc(var(--d, 1.5s) + var(--i, 0) * 0.45s) both;
+}
+
+.india-compass-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: indiaRouteDraw 1.6s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+.india-compass-fade {
+  opacity: 0;
+  animation: indiaFadeIn 0.8s ease-out forwards;
+}
+
+.india-compass-needle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: indiaCompassNeedle 9s ease-in-out 3s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-india-collage,
+  .animate-india-float,
+  .animate-india-script,
+  .india-compass-needle {
+    animation: none;
+  }
+  .india-compass-draw {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+  .india-compass-fade {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* ========================================================
+   Closer Chapter: album-cover swing, iris photo reveal, light sweep, dust, heart
+   ======================================================== */
+@keyframes closerFrameIn {
+  0% {
+    opacity: 0;
+    transform: perspective(1400px) translate3d(-22vw, 0, 0) rotateY(24deg) rotate(-6deg);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(1400px) translate3d(0, 0, 0) rotateY(0deg) rotate(0deg);
+  }
+}
+
+@keyframes closerIris {
+  0% {
+    clip-path: circle(0% at 50% 45%);
+    filter: sepia(1) brightness(1.35) blur(4px);
+  }
+  100% {
+    clip-path: circle(80% at 50% 45%);
+    filter: none;
+  }
+}
+
+@keyframes closerSweep {
+  0% {
+    transform: translateX(0) skewX(-18deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translateX(520%) skewX(-18deg);
+    opacity: 0;
+  }
+}
+
+@keyframes closerMote {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate3d(var(--dx, 10px), -70px, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes closerRun {
+  to {
+    stroke-dashoffset: -1;
+  }
+}
+
+@keyframes closerHeartFill {
+  to {
+    fill: rgba(140, 70, 50, 0.55);
+  }
+}
+
+@keyframes closerBeat {
+  0%,
+  60%,
+  100% {
+    transform: scale(1);
+  }
+  10% {
+    transform: scale(1.2);
+  }
+  22% {
+    transform: scale(1);
+  }
+  34% {
+    transform: scale(1.13);
+  }
+}
+
+.animate-closer-frame {
+  transform-origin: 50% 100%;
+  animation: closerFrameIn 1.7s cubic-bezier(0.22, 1, 0.36, 1) 0.2s backwards;
+}
+
+.animate-closer-iris {
+  animation: closerIris 2.4s cubic-bezier(0.65, 0, 0.35, 1) 1s backwards;
+}
+
+.animate-closer-sweep {
+  animation: closerSweep 2.4s ease-in-out 0.3s both;
+}
+
+.animate-closer-mote {
+  opacity: 0;
+  animation: closerMote 8s ease-in-out infinite;
+}
+
+.closer-cta-run {
+  stroke-dasharray: 0.16 0.84;
+  animation: closerRun 4.5s linear 2.4s infinite;
+}
+
+.closer-heart-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  fill: transparent;
+  animation:
+    indiaRouteDraw 1.4s cubic-bezier(0.65, 0, 0.35, 1) 3.4s forwards,
+    closerHeartFill 1s ease 4.6s forwards;
+}
+
+.closer-heart-beat {
+  transform-origin: center;
+  animation: closerBeat 2.8s ease-in-out 5s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-closer-frame,
+  .animate-closer-iris,
+  .animate-closer-sweep,
+  .closer-cta-run,
+  .closer-heart-beat {
+    animation: none;
+  }
+  .animate-closer-sweep,
+  .animate-closer-mote {
+    display: none;
+  }
+  .closer-heart-draw {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ========================================================
+   Footer: golden wave through the wordmark, slow scene drift, back-to-top bob
+   ======================================================== */
+@keyframes footerWave {
+  0%,
+  22%,
+  100% {
+    color: #faf4e8;
+  }
+  11% {
+    color: #f3d9a4;
+  }
+}
+
+@keyframes footerDrift {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.06) translate3d(-1%, -0.5%, 0);
+  }
+}
+
+@keyframes footerBob {
+  0%,
+  100% {
+    transform: translateY(1px);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+.animate-footer-wave {
+  animation: footerWave 7s ease-in-out calc(2.4s + var(--i, 0) * 0.14s) infinite;
+}
+
+.animate-footer-drift {
+  animation: footerDrift 28s ease-in-out infinite alternate;
+}
+
+.animate-footer-bob {
+  display: inline-block;
+  animation: footerBob 2.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-footer-wave,
+  .animate-footer-drift,
+  .animate-footer-bob {
+    animation: none;
+  }
+}
+
+/* ========================================================
+   Site loader: two-page book cover that swings open into the screen
+   ======================================================== */
+.site-loader .loader-panel {
+  transition:
+    transform 1.3s cubic-bezier(0.77, 0, 0.175, 1),
+    opacity 0.5s ease-in 0.85s;
+  backface-visibility: hidden;
+}
+
+.site-loader .loader-panel-left {
+  transform-origin: left center;
+  background: linear-gradient(90deg, #f5efe7 0%, #f5efe7 72%, #e8dece 100%);
+}
+
+.site-loader .loader-panel-right {
+  transform-origin: right center;
+  background: linear-gradient(270deg, #f5efe7 0%, #f5efe7 72%, #e8dece 100%);
+}
+
+.site-loader[data-phase="opening"] .loader-panel-left {
+  transform: rotateY(102deg);
+  opacity: 0;
+}
+
+.site-loader[data-phase="opening"] .loader-panel-right {
+  transform: rotateY(-102deg);
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-loader .loader-panel {
+    transition: none;
+  }
+  .site-loader[data-phase="opening"] .loader-panel-left,
+  .site-loader[data-phase="opening"] .loader-panel-right {
+    transform: none;
+    opacity: 0;
+    transition: opacity 0.4s ease-out;
+  }
+}
+
+/* ========================================================
+   Directional entrances: things fly in from the left / right
+   ======================================================== */
+@keyframes heroFromLeft {
+  from {
+    opacity: 0;
+    transform: translate3d(-9vw, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes heroFromRight {
+  from {
+    opacity: 0;
+    transform: translate3d(9vw, 0, 0) rotate(3deg);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+}
+
+@keyframes slideLeftIn {
+  from {
+    opacity: 0;
+    transform: translate3d(-48px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animate-hero-from-left {
+  animation: heroFromLeft 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s backwards;
+}
+
+.animate-hero-from-right {
+  animation: heroFromRight 1.7s cubic-bezier(0.16, 1, 0.3, 1) 0.5s backwards;
+}
+
+.animate-slide-left-in {
+  animation: slideLeftIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-hero-from-left,
+  .animate-hero-from-right,
+  .animate-slide-left-in {
+    animation: none;
+  }
+  .india-route-draw {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+  .india-pin-pulse {
+    animation: none;
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-hero-image-settle,
+  .animate-hero-glow,
+  .animate-hero-script,
+  .animate-hero-underline {
+    animation: none;
+  }
+}
+
 .animate-ken-burns {
   animation: kenBurnsSlow 4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ========================================================
+   Editorial Echo Section Animations
+   ======================================================== */
+@keyframes echoTextMask {
+  0% {
+    transform: translateY(105%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes echoCardFloat {
+  0% {
+    transform: translateY(42px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes sunbeamShift {
+  0%, 100% {
+    opacity: 0.18;
+    transform: translateX(-4%) translateY(-2%) scale(1);
+  }
+  50% {
+    opacity: 0.32;
+    transform: translateX(4%) translateY(2%) scale(1.03);
+  }
+}
+
+.animate-sunbeam {
+  animation: sunbeamShift 12s ease-in-out infinite;
+}
+
+/* ========================================================
+   Couture Atelier Loader Animations
+   ======================================================== */
+@keyframes letterWave {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes spinClockwise {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spinCounterClockwise {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+.animate-letter-wave {
+  display: inline-block;
+  animation: letterWave 2.2s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spinClockwise 24s linear infinite;
+}
+
+.animate-spin-reverse-slow {
+  animation: spinCounterClockwise 18s linear infinite;
+}
+
+@keyframes spinSmooth {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spinSmoothReverse {
+  0% {
+    transform: rotate(360deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes loaderProgressFill {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+@keyframes sparklePulse {
+  0%, 100% {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 1;
+  }
+}
+
+.animate-spin-smooth {
+  animation: spinSmooth 1.3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-spin-orbit {
+  animation: spinSmoothReverse 8s linear infinite;
+}
+
+.animate-loader-progress {
+  animation: loaderProgressFill 1.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-sparkle-pulse {
+  animation: sparklePulse 2s ease-in-out infinite;
 }
 
 /* Smooth custom scrollbars */
@@ -252,4 +1075,64 @@ textarea {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #3f3f46;
+}
+
+/* ========================================================
+   Whispers Scrapbook Testimonial Transitions
+   ======================================================== */
+@keyframes testimonialSlideInNext {
+  0% {
+    opacity: 0;
+    transform: translateX(20px) scale(0.98);
+    filter: blur(4px);
+  }
+  60% {
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes testimonialSlideInPrev {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px) scale(0.98);
+    filter: blur(4px);
+  }
+  60% {
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes noteInkReveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.94) translateY(4px);
+    filter: blur(3px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+}
+
+.animate-testimonial-next {
+  animation: testimonialSlideInNext 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-testimonial-prev {
+  animation: testimonialSlideInPrev 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-note-ink {
+  animation: noteInkReveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }

@@ -1,20 +1,465 @@
-import React from "react";
-import { siteConfig } from "@/config/site";
-import { PageContainer } from "@/components/layout/page-container";
+"use client";
+
+import React, { useRef, useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { GoldMotes } from "@/components/common/GoldMotes";
+
+const WORDMARK = "MAISON D\u2019VINE";
+
+/**
+ * Giant wordmark: letters rise out of a mask one by one, then a slow golden wave
+ * keeps travelling through them.
+ */
+const Wordmark: React.FC<{ inView: boolean; className: string; lineHeight: number }> = ({
+  inView,
+  className,
+  lineHeight,
+}) => (
+  <h2
+    aria-label={WORDMARK}
+    className={className}
+    style={{ lineHeight, whiteSpace: "nowrap", textShadow: "0 8px 32px rgba(0,0,0,0.85)" }}
+  >
+    <span className="block overflow-hidden pt-[0.04em] pb-[0.08em]" aria-hidden="true">
+      {Array.from(WORDMARK).map((ch, i) => (
+        <span
+          key={i}
+          className={`inline-block transition-transform duration-[1300ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none ${
+            inView ? "animate-footer-wave" : ""
+          }`}
+          style={
+            {
+              transform: inView ? "translateY(0)" : "translateY(115%)",
+              transitionDelay: inView ? `${250 + i * 60}ms` : "0ms",
+              "--i": i,
+            } as React.CSSProperties
+          }
+        >
+          {ch === " " ? "\u00A0" : ch}
+        </span>
+      ))}
+    </span>
+  </h2>
+);
+
+const BackToTop: React.FC<{ className?: string }> = ({ className = "" }) => (
+  <button
+    type="button"
+    onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+    aria-label="Back to top"
+    className={`group inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-[#F3DFC1]/45 text-[#F3DFC1] transition-all duration-300 hover:border-[#F3DFC1] hover:bg-[#F3DFC1]/15 ${className}`}
+  >
+    <span className="animate-footer-bob text-sm leading-none transition-transform duration-300 group-hover:-translate-y-0.5" aria-hidden="true">
+      &uarr;
+    </span>
+  </button>
+);
 
 export const Footer: React.FC = () => {
-  const currentYear = new Date().getFullYear();
+  const footerRef = useRef<HTMLElement | null>(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = footerRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+        }
+      },
+      {
+        threshold: 0.08,
+        rootMargin: "0px 0px -20px 0px",
+      }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const navLinks = [
+    { label: "SHOP", href: "/#story" },
+    { label: "ABOUT", href: "/#journey" },
+    { label: "JOURNAL", href: "/#journal" },
+    { label: "CONTACT", href: "/#epilogue" },
+  ];
 
   return (
-    <footer className="border-t border-zinc-200 bg-white py-6">
-      <PageContainer
-        maxWidth="7xl"
-        className="flex items-center justify-between text-xs text-zinc-500"
-      >
-        <p>
-          &copy; {currentYear} {siteConfig.name}. All rights reserved.
-        </p>
-      </PageContainer>
+    <footer
+      ref={footerRef}
+      id="footer"
+      aria-label="Maison D'Vine Footer"
+      className="relative z-30 w-full max-w-full select-none bg-[#0e0d0c] overflow-x-clip"
+    >
+      {/* ========================================================
+          1. DESKTOP & TABLET VIEW (md: 768px+)
+          - Direct load of /images/footer-web.webp (2159 x 728)
+          - Full natural width and height with 100% pixel fidelity
+          - Zero downscaling, quality={100}, unoptimized
+          ======================================================== */}
+      <div className="relative hidden w-full max-w-full min-w-0 overflow-hidden md:block">
+        <div
+          className={`relative w-full max-w-full overflow-hidden transition-opacity duration-1000 ease-out ${
+            inView ? "opacity-100" : "opacity-95"
+          }`}
+        >
+          {/* Base high-resolution 2159 x 728 background image */}
+          <div className={inView ? "animate-footer-drift" : ""}>
+            <Image
+            src="/images/footer-web.webp"
+            alt="Maison D'Vine Tuscan Sunset Terrace Atmosphere"
+            width={2159}
+            height={728}
+            quality={100}
+            unoptimized
+            priority
+            className="pointer-events-none block h-auto w-full select-none"
+            style={{
+              width: "100%",
+              height: "auto",
+            }}
+          />
+          </div>
+
+          {/* Warm terrace light drifting across the scene, plus a little dust */}
+          <div
+            className="animate-hero-glow pointer-events-none absolute inset-0 z-[5]"
+            style={{
+              background:
+                "radial-gradient(45vw circle at 50% 70%, rgba(255, 214, 150, 0.16) 0%, rgba(255, 214, 150, 0.04) 50%, transparent 75%)",
+            }}
+            aria-hidden="true"
+          />
+          {inView && <GoldMotes count={16} className="z-[8]" />}
+
+          {/* Cinematic top gradient blend from previous section */}
+          <div
+            className="pointer-events-none absolute top-0 left-0 right-0 h-24 lg:h-32 z-10"
+            style={{
+              background:
+                "linear-gradient(180deg, #0e0d0c 0%, rgba(14,13,12,0.65) 45%, transparent 100%)",
+            }}
+            aria-hidden="true"
+          />
+
+          {/* Bottom subtle shadow anchor */}
+          <div
+            className="pointer-events-none absolute bottom-0 left-0 right-0 h-14 lg:h-20 z-10"
+            style={{
+              background:
+                "linear-gradient(0deg, rgba(14,13,12,0.6) 0%, transparent 100%)",
+            }}
+            aria-hidden="true"
+          />
+
+          {/* ====================================================
+              OVERLAID EDITORIAL CONTENT (Desktop / Tablet)
+              - Perfectly balanced hierarchy with zero clipping
+              ==================================================== */}
+          <div className="pointer-events-auto absolute inset-0 z-20 flex flex-col justify-between pt-5 md:pt-7 lg:pt-9 pb-3 md:pb-4 px-6 lg:px-12 xl:px-16 max-w-[1580px] mx-auto w-full max-w-full min-w-0">
+            
+            {/* Top Area: Navigation, Statement, Social Links */}
+            <div className="w-full flex flex-col items-center">
+              
+              {/* Minimal Top Navigation */}
+              <div
+                className={`w-full flex items-center justify-center gap-6 lg:gap-12 transition-all duration-1000 ease-out ${
+                  inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
+                }`}
+              >
+                <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-[#EAD5B8]/30 to-[#EAD5B8]/60 max-w-[140px] lg:max-w-[280px]" />
+
+                <nav className="flex items-center gap-8 lg:gap-14 text-[11px] lg:text-[12px] tracking-[0.32em] text-[#FBF6EE] uppercase font-serif drop-shadow-[0_2px_8px_rgba(0,0,0,0.75)]">
+                  {navLinks.map((item, i) => (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      className="group relative py-1 hover:text-[#EAD5B8]"
+                      style={{
+                        opacity: inView ? 1 : 0,
+                        transform: inView ? "translateY(0)" : "translateY(-10px)",
+                        transition: `opacity 800ms ease-out ${250 + i * 110}ms, transform 900ms cubic-bezier(0.16, 1, 0.3, 1) ${250 + i * 110}ms, color 300ms`,
+                      }}
+                    >
+                      <span>{item.label}</span>
+                      <span className="absolute bottom-0 left-0 w-0 h-[1px] bg-[#EAD5B8] transition-all duration-300 ease-out group-hover:w-full" />
+                    </Link>
+                  ))}
+                </nav>
+
+                <div className="flex-1 h-[1px] bg-gradient-to-l from-transparent via-[#EAD5B8]/30 to-[#EAD5B8]/60 max-w-[140px] lg:max-w-[280px]" />
+              </div>
+
+              {/* Tagline & Brand Philosophy */}
+              <div
+                className={`flex flex-col items-center text-center mt-3 lg:mt-4 transition-all duration-1000 delay-150 ease-out ${
+                  inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
+                }`}
+              >
+                <p className="font-serif text-[10.5px] lg:text-[11.5px] tracking-[0.36em] text-[#F3DFC1] uppercase font-medium drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+                  ARTISANAL LIVING, TIMELESS STORIES
+                </p>
+
+                <p className="mt-1.5 font-serif text-[12px] lg:text-[13.5px] text-[#FBF6EE]/90 max-w-[520px] leading-relaxed tracking-[0.015em] font-normal drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]">
+                  Curated pieces, thoughtful details, and timeless objects for a more beautiful, slower way of living.
+                </p>
+
+                {/* Minimal Social Links */}
+                <div className="mt-2.5 lg:mt-3 flex items-center justify-center gap-5 drop-shadow-[0_2px_6px_rgba(0,0,0,0.75)]">
+                  <SocialIcons inView={inView} />
+                </div>
+              </div>
+
+            </div>
+
+            {/* Bottom Area: Massive Wordmark + Colophon */}
+            <div className="w-full max-w-full min-w-0 flex flex-col items-center overflow-hidden">
+              
+              {/* THE GRAND FINALE: MASSIVE MAISON D'VINE WORDMARK */}
+              <div
+                className={`w-full max-w-full min-w-0 text-center overflow-hidden transition-all duration-1000 delay-300 ease-out select-none cursor-default py-1 ${
+                  inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+                }`}
+              >
+                <Wordmark
+                  inView={inView}
+                  lineHeight={0.95}
+                  className="w-full max-w-full font-serif font-normal uppercase text-[#FAF4E8] text-center tracking-[-0.03em] text-[clamp(2.5rem,10.2vw,14rem)]"
+                />
+              </div>
+
+              {/* Bottom Copyright & Legal Line */}
+              <div className="w-full mt-1.5 lg:mt-2.5 pt-2.5 lg:pt-3 border-t border-[#F3DFC1]/25 flex items-center justify-between text-[10px] lg:text-[10.5px] tracking-[0.2em] uppercase font-serif text-[#FBF6EE]/80 drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
+                <div>
+                  &copy; 2026 MAISON D’VINE
+                </div>
+
+                <div className="flex items-center gap-5 lg:gap-8 text-[#FBF6EE]/90">
+                  <a href="#privacy" className="hover:text-[#F3DFC1] transition-colors duration-200">
+                    Terms
+                  </a>
+                  <span className="text-[#F3DFC1]/40">&bull;</span>
+                  <a href="#privacy" className="hover:text-[#F3DFC1] transition-colors duration-200">
+                    Privacy
+                  </a>
+                  <span className="text-[#F3DFC1]/40">&bull;</span>
+                  <a href="#privacy" className="hover:text-[#F3DFC1] transition-colors duration-200">
+                    Cookies
+                  </a>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <span>All rights reserved.</span>
+                  <BackToTop />
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      {/* ========================================================
+          2. MOBILE VIEW (< 768px)
+          - Intentionally designed vertical flow
+          - Full natural high quality image with full width
+          - No clipping, no overflow
+          ======================================================== */}
+      <div className="relative block w-full max-w-full min-w-0 overflow-hidden md:hidden bg-[#0e0d0c] text-center">
+        {/* Background Image Container */}
+        <div className="relative w-full max-w-full overflow-hidden">
+          <Image
+            src="/images/footer-web.webp"
+            alt="Maison D'Vine Tuscan Sunset Terrace Atmosphere"
+            width={2159}
+            height={728}
+            quality={100}
+            unoptimized
+            priority
+            className="pointer-events-none block h-auto w-full select-none opacity-45 absolute inset-0 object-cover"
+          />
+
+          {/* Mobile Overlay Content */}
+          <div
+            className={`relative z-10 px-4 pt-10 pb-6 flex flex-col items-center max-w-full overflow-hidden transition-all duration-1000 ease-out ${
+              inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+            }`}
+          >
+            
+            {/* Top Navigation */}
+            <nav className="flex flex-wrap items-center justify-center gap-5 text-[11px] tracking-[0.28em] text-[#FBF6EE] uppercase font-serif">
+              {navLinks.map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="hover:text-[#EAD5B8] transition-colors duration-200"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+
+            {/* Tagline */}
+            <p className="mt-5 font-serif text-[10px] tracking-[0.32em] text-[#F3DFC1] uppercase font-medium">
+              ARTISANAL LIVING, TIMELESS STORIES
+            </p>
+
+            {/* Description */}
+            <p className="mt-2 font-serif text-[12px] text-[#FBF6EE]/85 max-w-[320px] leading-relaxed">
+              Curated pieces, thoughtful details, and timeless objects for a more beautiful, slower way of living.
+            </p>
+
+            {/* Social Icons */}
+            <div className="mt-4 flex items-center justify-center gap-5">
+              <SocialIcons inView={inView} />
+            </div>
+
+            {/* Massive Wordmark on Mobile (Carefully bounded) */}
+            <div className="mt-8 mb-3 w-full max-w-full min-w-0 overflow-hidden text-center px-2">
+              <Wordmark
+                inView={inView}
+                lineHeight={1}
+                className="w-full max-w-full font-serif font-normal uppercase text-[#FAF4E8] text-center tracking-[-0.02em] text-[clamp(2rem,8.5vw,3.6rem)]"
+              />
+            </div>
+
+            {/* Legal / Copyright */}
+            <div className="w-full pt-3 border-t border-[#F3DFC1]/20 flex flex-col items-center gap-2 text-[10px] tracking-[0.2em] uppercase font-serif text-[#FBF6EE]/75">
+              <div className="flex items-center gap-4 text-[#FBF6EE]/90">
+                <a href="#privacy" className="hover:text-[#F3DFC1]">Terms</a>
+                <span className="text-[#F3DFC1]/40">&bull;</span>
+                <a href="#privacy" className="hover:text-[#F3DFC1]">Privacy</a>
+                <span className="text-[#F3DFC1]/40">&bull;</span>
+                <a href="#privacy" className="hover:text-[#F3DFC1]">Cookies</a>
+              </div>
+              <div>
+                &copy; 2026 MAISON D’VINE. All rights reserved.
+              </div>
+              <BackToTop className="mt-1" />
+            </div>
+
+          </div>
+        </div>
+      </div>
     </footer>
   );
 };
+
+/* ==============================================================
+   Minimal, Monochrome Luxury Social Icons
+   (Instagram, Pinterest, YouTube, Email)
+   With subtle hover elevation animation
+   ============================================================== */
+const SocialIcons: React.FC<{ inView?: boolean }> = ({ inView = true }) => {
+  const pop = (i: number): React.CSSProperties => {
+    const d = 900 + i * 100;
+    return {
+      opacity: inView ? 1 : 0,
+      transform: inView ? "scale(1)" : "scale(0.4)",
+      transition: `opacity 600ms ease-out ${d}ms, transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1) ${d}ms, color 300ms, translate 300ms`,
+    };
+  };
+  return (
+    <div className="flex items-center gap-4">
+      {/* Instagram */}
+      <a
+        href="https://instagram.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Instagram"
+        className="text-[#FBF6EE]/80 hover:text-[#F3DFC1] transition-all duration-300 hover:-translate-y-0.5 p-1"
+        style={pop(0)}
+      >
+        <svg
+          width="17"
+          height="17"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+        </svg>
+      </a>
+
+      {/* Pinterest */}
+      <a
+        href="https://pinterest.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Pinterest"
+        className="text-[#FBF6EE]/80 hover:text-[#F3DFC1] transition-all duration-300 hover:-translate-y-0.5 p-1"
+        style={pop(1)}
+      >
+        <svg
+          width="17"
+          height="17"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M12 2a10 10 0 0 0-3.6 19.3c-.1-.8-.1-1.8.1-2.6l1.3-5.4s-.3-.6-.3-1.6c0-1.5.9-2.6 2-2.6.9 0 1.4.7 1.4 1.5 0 1-.6 2.4-.9 3.7-.3 1.1.6 2 1.6 2 2 0 3.3-2.5 3.3-5.5 0-2.3-1.6-4-4.3-4-3.1 0-5 2.3-5 4.8 0 .9.3 1.5.8 2 .1.1.1.2.1.3l-.3 1.2c0 .2-.2.3-.4.2-1.3-.6-1.9-2.2-1.9-3.6 0-2.7 2.3-5.9 6.8-5.9 3.6 0 6 2.6 6 5.4 0 3.8-2.1 6.5-5.2 6.5-1 0-2-.6-2.3-1.2l-.6 2.5c-.2.9-.8 2-1.2 2.7A10 10 0 1 0 12 2z" />
+        </svg>
+      </a>
+
+      {/* YouTube */}
+      <a
+        href="https://youtube.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="YouTube"
+        className="text-[#FBF6EE]/80 hover:text-[#F3DFC1] transition-all duration-300 hover:-translate-y-0.5 p-1"
+        style={pop(2)}
+      >
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z" />
+          <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" />
+        </svg>
+      </a>
+
+      {/* Email */}
+      <a
+        href="mailto:concierge@maisondvine.com"
+        aria-label="Email Concierge"
+        className="text-[#FBF6EE]/80 hover:text-[#F3DFC1] transition-all duration-300 hover:-translate-y-0.5 p-1"
+        style={pop(3)}
+      >
+        <svg
+          width="17"
+          height="17"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <rect x="2" y="4" width="20" height="16" rx="2" />
+          <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+        </svg>
+      </a>
+    </div>
+  );
+};
+
+export default Footer;
