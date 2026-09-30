@@ -2,6 +2,7 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
+import { OurStoryMobile } from "@/components/story/OurStoryMobile";
 
 export const OurStorySection: React.FC = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -32,7 +33,7 @@ export const OurStorySection: React.FC = () => {
       ref={sectionRef}
       id="our-story"
       aria-label="Our Story - The Atelier"
-      className="relative z-20 w-full select-none bg-[#0e0d0c] -mt-8 sm:-mt-12 md:-mt-16 lg:-mt-22 xl:-mt-28"
+      className="relative z-20 w-full select-none bg-[#0e0d0c] -mt-[22vw] md:-mt-16 lg:-mt-22 xl:-mt-28"
     >
       {/* Anchor for About navigation */}
       <div id="about" className="absolute -top-24 left-0 pointer-events-none" />
@@ -159,77 +160,11 @@ export const OurStorySection: React.FC = () => {
 
       {/* ========================================================
           2. MOBILE VIEW (< 768px)
-          - Fully responsive presentation with image & editorial text
-          - Maintains luxury atelier atmosphere and crisp typography
+          - Full-bleed atelier photo (/images/ourstroy-mobile.webp) with flickering lamp,
+            dust, a scroll-drawn gold thread, masked headline and handwritten notes
           ======================================================== */}
-      <div className="relative block w-full overflow-hidden md:hidden bg-[#0e0d0c] text-left">
-        {/* Atelier Visual on Mobile */}
-        <div className="relative w-full overflow-hidden">
-          <Image
-            src="/images/ourStroy.webp"
-            alt="Maison D'Vine - Our Story Atelier"
-            width={1713}
-            height={918}
-            quality={100}
-            unoptimized
-            priority
-            className="block h-auto w-full select-none"
-          />
-
-          {/* Mobile Overlay for Right Note */}
-          <div className="absolute top-[38%] right-2.5 z-10 max-w-[170px] text-right">
-            <p className="font-allura allura-regular font-script font-cursive text-xl xs:text-2xl leading-[1.1] text-[#f2e9dc]/95 -rotate-[5deg] tracking-wide drop-shadow-[0_2px_6px_rgba(0,0,0,0.85)]">
-              More than
-              <br />
-              a brand.
-              <br />
-              a journey.
-            </p>
-          </div>
-        </div>
-
-        {/* Editorial Text Content on Mobile */}
-        <div className="px-6 pt-6 pb-12">
-          {/* Eyebrow */}
-          <span className="font-sans text-[10px] font-semibold tracking-[0.24em] text-[#b8ab9a] uppercase">
-            OUR STORY
-          </span>
-
-          {/* Heading */}
-          <h2 className="mt-2 font-serif text-3xl sm:text-4xl font-normal leading-[1.06] text-white">
-            From a Feeling
-            <br />
-            to a Maison.
-          </h2>
-
-          {/* Paragraphs */}
-          <div className="mt-4 space-y-3 font-sans text-xs sm:text-[13px] leading-[1.65] text-[#ded6cb] max-w-[380px]">
-            <p>
-              Maison D&apos;Vine was born from a simple belief &mdash; that every woman carries a story, and what she wears should feel like a part of it.
-            </p>
-            <p>
-              What started as a personal journey has now become a space for stories, emotions and beautifully crafted dresses.
-            </p>
-          </div>
-
-          {/* Button */}
-          <div className="mt-6">
-            <button
-              type="button"
-              className="inline-flex items-center gap-3 bg-[#fdfcfb] px-6 py-3 text-xs font-sans font-medium tracking-[0.2em] text-[#191512] uppercase shadow-lg active:scale-95"
-            >
-              <span>READ FURTHER</span>
-              <span className="text-xs">&rarr;</span>
-            </button>
-          </div>
-
-          {/* Left note reflected on mobile */}
-          <div className="mt-8 pt-4 border-t border-white/10">
-            <p className="font-allura allura-regular font-script font-cursive text-2xl text-[#c7baa8] -rotate-[2deg] tracking-wide">
-              Built on stories. for her.
-            </p>
-          </div>
-        </div>
+      <div className="md:hidden">
+        <OurStoryMobile play={inView} />
       </div>
     </section>
   );

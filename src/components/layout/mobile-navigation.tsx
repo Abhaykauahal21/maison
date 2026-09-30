@@ -1,5 +1,6 @@
 "use client";
 
+import { smoothScrollTo } from "@/lib/smooth-scroll";
 import React, { useEffect } from "react";
 import Link from "next/link";
 import { useUiStore } from "@/store/ui-store";
@@ -77,7 +78,7 @@ export const MobileNavigation: React.FC = () => {
             onClick={() => {
               setMobileNavOpen(false);
               const contactEl = document.getElementById("contact");
-              contactEl?.scrollIntoView({ behavior: "smooth" });
+              smoothScrollTo(contactEl);
             }}
           >
             Get In Touch

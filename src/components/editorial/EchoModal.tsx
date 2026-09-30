@@ -102,6 +102,7 @@ export const EchoModal: React.FC<EchoModalProps> = ({
 
   return (
     <div
+      data-lenis-prevent
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 md:p-10 animate-fade-in"
       role="dialog"
       aria-modal="true"

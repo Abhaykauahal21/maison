@@ -2,6 +2,7 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
+import { FaqMobile } from "@/components/faq/FaqMobile";
 
 export interface FaqItem {
   id: string;
@@ -76,7 +77,7 @@ export const FaqSection: React.FC = () => {
       ref={sectionRef}
       id="faq"
       aria-label="Frequently Asked Questions"
-      className="relative z-30 w-full select-none bg-transparent -mt-8 sm:-mt-12 md:-mt-16 lg:-mt-22 xl:-mt-28 drop-shadow-[0_-12px_24px_rgba(0,0,0,0.5)]"
+      className="relative z-30 w-full select-none bg-transparent -mt-[10vw] md:-mt-16 lg:-mt-22 xl:-mt-28 drop-shadow-[0_-12px_24px_rgba(0,0,0,0.5)]"
     >
       {/* SVG filter definition for realistic organic torn paper deckled edges */}
       <svg className="sr-only" aria-hidden="true" focusable="false">
@@ -307,151 +308,11 @@ export const FaqSection: React.FC = () => {
 
       {/* ========================================================
           2. MOBILE VIEW (< 768px)
-          - Stacks vertically: Left content first, then FAQ Panel
-          - Cursive note and button positioned higher up with compact flow
-          - FAQ panel width: 100% with 5 items
-          - Background decorative collage visible behind parchment
+          - The torn parchment (echo-bg-mobile.png) is the page; questions sit on it as an
+            index with scroll-scrubbed motion and a word-by-word accordion
           ======================================================== */}
-      <div className="relative block w-full md:hidden bg-[#0e0d0c] overflow-hidden">
-        <div className="relative w-full px-5 sm:px-6 pt-12 pb-16">
-          {/* Base parchment backdrop image */}
-          <div className="pointer-events-none absolute inset-0 z-0 opacity-40 overflow-hidden">
-            <Image
-              src="/images/FAQ-page-web.webp"
-              alt="Maison D'Vine Vintage Parchment Background"
-              fill
-              unoptimized
-              className="object-cover object-top"
-            />
-            <div className="absolute inset-0 bg-[#f4ede4]/85 mix-blend-multiply" />
-          </div>
-
-          {/* Mobile Content Stack */}
-          <div className="relative z-10 flex flex-col gap-8">
-            {/* 1. Header & Left Content */}
-            <div className="flex flex-col text-left">
-              <span className="font-sans text-[11px] font-medium tracking-[0.24em] text-[#605043] uppercase">
-                QUESTIONS YOU MAY HAVE
-              </span>
-
-              <h2 className="mt-2 font-serif text-5xl font-normal leading-tight text-[#201813] tracking-tight">
-                FAQs
-              </h2>
-
-              <p className="mt-3 font-serif text-[15px] font-normal leading-relaxed text-[#483a30]">
-                Little questions,
-                <br />
-                thoughtful answers &mdash;
-                <br />
-                because your journey
-                <br />
-                with us should feel effortless.
-              </p>
-
-              {/* Script Note with Heart - nudged down */}
-              <div className="mt-7 select-none">
-                <p className="font-allura allura-regular font-script font-cursive text-3xl leading-snug text-[#413328] -rotate-[4deg] origin-left">
-                  Still wondering?
-                  <br />
-                  We&apos;re here for you
-                  <span className="inline-flex items-center ml-2.5 align-middle">
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="text-[#413328] rotate-6"
-                      aria-hidden="true"
-                    >
-                      <path d="M12 21 C10 19, 3.5 13.5, 3.5 8.5 C3.5 5.5, 6 3.5, 9 3.5 C10.8 3.5, 12 4.6, 12 5.5 C12 4.6, 13.2 3.5, 15 3.5 C18 3.5, 20.5 5.5, 20.5 8.5 C20.5 13.5, 14 19, 12 21 Z" />
-                    </svg>
-                  </span>
-                </p>
-              </div>
-
-              {/* View All FAQs Button - nudged down */}
-              <div className="mt-6">
-                <button
-                  type="button"
-                  className="group inline-flex items-center justify-between gap-6 border border-[#2b2118] bg-transparent px-6 py-3 text-xs font-serif font-medium tracking-[0.22em] text-[#2b2118] uppercase transition-all duration-300 hover:bg-[#2b2118] hover:text-[#faf6ee] active:scale-[0.98] cursor-pointer"
-                >
-                  <span>VIEW ALL FAQS</span>
-                  <span className="text-xs transition-transform duration-300 group-hover:translate-x-1">
-                    &rarr;
-                  </span>
-                </button>
-              </div>
-            </div>
-
-            {/* 2. Paper FAQ Panel on Mobile (Width 100%, 5 items) */}
-            <div className="relative w-full rounded-[3px] bg-[#fbf6ec] shadow-[0_12px_28px_rgba(42,26,14,0.16)] px-5 py-6 sm:px-7 sm:py-8 border border-[#ddcdb8]/70">
-              <div className="flex flex-col divide-y divide-[#ddcdb8]/75">
-                {FAQ_ITEMS.map((item, idx) => {
-                  const isOpen = openIndex === idx;
-                  return (
-                    <div key={item.id} className="py-3.5 first:pt-0 last:pb-0">
-                      <button
-                        type="button"
-                        onClick={() => handleToggle(idx)}
-                        aria-expanded={isOpen}
-                        aria-controls={`faq-answer-mobile-${idx}`}
-                        id={`faq-question-mobile-${idx}`}
-                        className="group flex w-full items-center justify-between text-left cursor-pointer focus:outline-none"
-                      >
-                        <span className="font-serif text-[#271f18] text-[15px] sm:text-base font-normal leading-snug tracking-[0.01em] group-hover:text-[#6a5340]">
-                          {item.question}
-                        </span>
-
-                        <span
-                          className={`ml-4 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border border-[#83705d]/45 text-[#3e3025] transition-all duration-300 ${
-                            isOpen
-                              ? "rotate-45 bg-[#ede4d4]/80 border-[#4a3b2f]/70"
-                              : "bg-transparent"
-                          }`}
-                          aria-hidden="true"
-                        >
-                          <svg
-                            width="8"
-                            height="8"
-                            viewBox="0 0 12 12"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1.2"
-                            strokeLinecap="round"
-                          >
-                            <line x1="6" y1="4.1" x2="6" y2="7.9" />
-                            <line x1="4.1" y1="6" x2="7.9" y2="6" />
-                          </svg>
-                        </span>
-                      </button>
-
-                      <div
-                        id={`faq-answer-mobile-${idx}`}
-                        role="region"
-                        aria-labelledby={`faq-question-mobile-${idx}`}
-                        className={`grid transition-all duration-300 ease-in-out ${
-                          isOpen
-                            ? "grid-rows-[1fr] opacity-100 pt-3"
-                            : "grid-rows-[0fr] opacity-0 pt-0"
-                        }`}
-                      >
-                        <div className="overflow-hidden">
-                          <p className="font-serif text-[#554536] text-[13px] sm:text-sm leading-relaxed pr-4 text-left">
-                            {item.answer}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="md:hidden">
+        <FaqMobile items={FAQ_ITEMS} openIndex={openIndex} onToggle={handleToggle} />
       </div>
     </section>
   );

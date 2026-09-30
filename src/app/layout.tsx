@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Alex_Brush, Allura } from "next/font/google";
 import { SiteLoader } from "@/components/common/SiteLoader";
+import { SmoothScroll } from "@/components/common/SmoothScroll";
 import "./globals.css";
 
 const alexBrush = Alex_Brush({
@@ -53,6 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="min-h-full bg-[#0d0c0b] text-white selection:bg-white/20 selection:text-white">
+        <SmoothScroll />
         <SiteLoader />
         {children}
       </body>

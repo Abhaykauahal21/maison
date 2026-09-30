@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { getLenis, smoothScrollBy } from "@/lib/smooth-scroll";
 import Image from "next/image";
 import { EchoCard } from "@/components/editorial/EchoCard";
 import { EchoParticles } from "@/components/editorial/EchoParticles";
@@ -9,6 +10,7 @@ import { EchoModal } from "@/components/editorial/EchoModal";
 const lookData = [
   {
     title: "SOLACE",
+    tag: "Floral Silk · Dawn",
     descLines: ["For the moments", "she finds herself."],
     imageSrc: "/images/solace.webp",
     imageAlt: "Maison D'Vine Solace Gown in Floral Silk",
@@ -19,6 +21,7 @@ const lookData = [
   },
   {
     title: "LONGING",
+    tag: "Crimson Tulle · Romance",
     descLines: ["For what lives", "between hearts."],
     imageSrc: "/images/longing.webp",
     imageAlt: "Maison D'Vine Longing Gown in Crimson Tulle",
@@ -29,6 +32,7 @@ const lookData = [
   },
   {
     title: "REVERIE",
+    tag: "Noir Satin · Midnight",
     descLines: ["For the dreams", "she doesn't say out loud."],
     imageSrc: "/images/reverie.webp",
     imageAlt: "Maison D'Vine Reverie Gown in Noir Satin",
@@ -41,6 +45,10 @@ const lookData = [
 
 export const EditorialSection: React.FC = () => {
   const containerRef = useRef<HTMLElement | null>(null);
+  const mobileRef = useRef<HTMLDivElement | null>(null);
+  const [mobileProgress, setMobileProgress] = useState(0);
+  const seg = (start: number, len: number) =>
+    Math.min(1, Math.max(0, (mobileProgress - start) / len));
   const [activeLook, setActiveLook] = useState(0);
   const [isPinned, setIsPinned] = useState(false);
   const [selectedCardIndex, setSelectedCardIndex] = useState(0);
@@ -68,6 +76,34 @@ export const EditorialSection: React.FC = () => {
   useEffect(() => {
     return () => {
       document.documentElement.style.overflow = "";
+      getLenis()?.start();
+    };
+  }, []);
+
+  // Scroll-linked progress for the mobile layout: 0 = below the fold, 1 = fully in view.
+  // Bidirectional, so everything plays forward on scroll down and rewinds on scroll up.
+  useEffect(() => {
+    const el = mobileRef.current;
+    if (!el) return;
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const rect = el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const raw = (vh * 0.92 - rect.top) / (rect.height * 0.55);
+      const p = Math.round(Math.min(1, Math.max(0, raw)) * 100) / 100;
+      setMobileProgress((prev) => (prev === p ? prev : p));
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
     };
   }, []);
 
@@ -86,11 +122,13 @@ export const EditorialSection: React.FC = () => {
   // position: fixed removed the scrollbar, reflowed the page (visible shift) and reset scrollY.
   // With html { scrollbar-gutter: stable } nothing reflows, and scrollY stays intact.
   const lockScroll = () => {
+    getLenis()?.stop();
     document.documentElement.style.overflow = "hidden";
   };
   const unlockScroll = () => {
     cancelAnimationFrame(snapRafRef.current);
     document.documentElement.style.overflow = "";
+    getLenis()?.start();
   };
 
   const pinAtTarget = useCallback((targetY: number) => {
@@ -127,7 +165,7 @@ export const EditorialSection: React.FC = () => {
     accumulatedWheelDeltaRef.current = 0;
 
     // Natural momentum continuation downwards
-    window.scrollBy({ top: 90, behavior: "smooth" });
+    smoothScrollBy(90);
   }, []);
 
   const unpinUp = useCallback(() => {
@@ -138,7 +176,7 @@ export const EditorialSection: React.FC = () => {
     accumulatedWheelDeltaRef.current = 0;
 
     // Natural momentum continuation upwards
-    window.scrollBy({ top: -90, behavior: "smooth" });
+    smoothScrollBy(-90);
   }, []);
 
   // Step transitions
@@ -449,13 +487,15 @@ export const EditorialSection: React.FC = () => {
                     <div
                       className={`transition-all duration-300 rounded-[2px] ${
                         isCurrentActive
-                          ? "ring-2 ring-[#221c17]/65 ring-offset-2 ring-offset-transparent shadow-xl"
+                          ? "shadow-xl"
                           : "hover:opacity-100"
                       }`}
                     >
                       <EchoCard
                         title={col.title}
                         descLines={col.descLines as [string, string]}
+                        tag={col.tag}
+                        index={idx + 1}
                         imageSrc={col.imageSrc}
                         imageAlt={col.imageAlt}
                         objectPosition={col.objectPosition}
@@ -477,8 +517,8 @@ export const EditorialSection: React.FC = () => {
           - Phones: locked to the artwork's aspect ratio, so the torn edges sit exactly at the ends
           - Tablets: a centred sheet that grows with its content
           ======================================================== */}
-      <div className="relative block h-auto w-full lg:hidden">
-        <div className="relative mx-auto flex aspect-[487/1024] w-full max-w-[760px] flex-col justify-between px-6 pt-16 pb-14 text-[#221c17] sm:aspect-auto sm:min-h-[780px] sm:px-14 sm:pt-24 sm:pb-20">
+      <div ref={mobileRef} className="relative block h-auto w-full lg:hidden">
+        <div className="relative mx-auto flex aspect-[487/1024] w-full max-w-[760px] flex-col px-6 pt-16 pb-14 text-[#221c17] sm:aspect-auto sm:min-h-[820px] sm:px-14 sm:pt-24 sm:pb-20">
           <Image
             src="/images/echo-bg-mobile.png"
             alt=""
@@ -492,85 +532,137 @@ export const EditorialSection: React.FC = () => {
 
           {/* Title block: kept clear of the dried flowers in the top-right corner */}
           <div className="relative z-10 w-full pr-[16%] text-left">
-            <div className="font-sans text-[11px] font-medium tracking-[0.25em] text-[#3a3026] uppercase sm:text-xs">
-              CHAPTER 0
+            <div
+              className="flex items-center gap-2.5 font-sans text-[11px] font-medium tracking-[0.25em] text-[#3a3026] uppercase sm:text-xs"
+              style={{
+                opacity: seg(0.05, 0.25),
+                transform: `translate3d(0, ${(1 - seg(0.05, 0.25)) * 14}px, 0)`,
+                transition: "opacity 0.25s linear, transform 0.25s linear",
+              }}
+            >
+              <span>CHAPTER 0</span>
+              <span
+                className="h-px bg-[#3a3026]/50 transition-[width] duration-200 ease-out"
+                style={{ width: seg(0.15, 0.3) * 36 }}
+              />
             </div>
 
-            <h2 className="mt-1 font-bodoni text-[28px] leading-[0.92] font-normal tracking-[0.02em] text-[#14100c] uppercase min-[400px]:text-[32px] sm:mt-2 sm:text-[48px]">
-              THE ECHO
-            </h2>
+            <div className="overflow-hidden pb-1">
+              <h2
+                className="mt-1 font-bodoni text-[28px] leading-[0.92] font-normal tracking-[0.02em] text-[#14100c] uppercase min-[400px]:text-[32px] sm:mt-2 sm:text-[48px]"
+                style={{
+                  transform: `translate3d(0, ${(1 - seg(0.1, 0.3)) * 105}%, 0)`,
+                  opacity: seg(0.1, 0.15),
+                  transition: "transform 0.25s linear, opacity 0.25s linear",
+                }}
+              >
+                THE ECHO
+              </h2>
+            </div>
 
-            <div key={activeLook} className="animate-slide-left-in mt-1.5 sm:mt-3">
-              <p className="font-serif text-[13px] leading-tight text-[#2c231b] italic sm:text-lg">
+            <div
+              key={activeLook}
+              className="mt-1.5 sm:mt-3"
+              style={{ opacity: seg(0.15, 0.25) }}
+            >
+              <p
+                className="animate-echo-rise font-serif text-[13px] leading-tight text-[#2c231b] italic sm:text-lg"
+                style={{ animationDelay: "0ms" }}
+              >
                 &ldquo;{currentContent.quote}&rdquo;
               </p>
-              <p className="mt-1.5 font-sans text-xs leading-relaxed text-[#4a3e33] sm:mt-2.5 sm:text-[15px] sm:leading-[1.7]">
+              <p
+                className="animate-echo-rise mt-1.5 font-sans text-xs leading-relaxed text-[#4a3e33] sm:mt-2.5 sm:text-[15px] sm:leading-[1.7]"
+                style={{ animationDelay: "120ms" }}
+              >
                 {currentContent.desc}
               </p>
             </div>
           </div>
 
-          {/* Looks */}
-          <div className="relative z-10 my-4 flex w-full flex-col gap-3 sm:my-8 sm:gap-4">
+          {/* Looks: accordion-style stack, the active look expands and the rest recede */}
+          <div className="relative z-10 my-4 flex min-h-0 w-full flex-1 flex-col gap-2.5 sm:my-8 sm:min-h-[360px] sm:gap-3.5">
             {lookData.map((col, idx) => {
-              const isRevealed = idx <= activeLook;
-              const translateX = isRevealed ? 0 : 90;
-              const opacity = isRevealed ? (idx === activeLook ? 1 : 0.75) : 0;
-
+              const isActive = idx === activeLook;
               return (
                 <div
                   key={col.title}
-                  className="h-20 w-full cursor-pointer will-change-transform min-[400px]:h-24 sm:h-28"
+                  className="min-h-0 w-full cursor-pointer will-change-transform"
                   style={{
-                    opacity,
-                    transform: `translate3d(${translateX}px, 0, 0)`,
-                    pointerEvents: isRevealed ? "auto" : "none",
+                    flexGrow: isActive ? 2.2 : 1,
+                    flexBasis: 0,
+                    opacity: seg(0.2 + idx * 0.17, 0.25),
+                    transform: `translate3d(${
+                      (1 - seg(0.2 + idx * 0.17, 0.25)) * 80
+                    }px, 0, 0)`,
                     transition:
-                      "opacity 0.4s ease-out, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1)",
+                      "flex-grow 0.7s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s linear, transform 0.25s linear",
                   }}
-                  onClick={() => setLook(idx)}
+                  onClick={() => (isActive ? openLook(idx) : setLook(idx))}
                 >
                   <EchoCard
                     variant="horizontal"
+                    active={isActive}
                     title={col.title}
                     descLines={col.descLines as [string, string]}
+                        tag={col.tag}
+                        index={idx + 1}
                     imageSrc={col.imageSrc}
                     imageAlt={col.imageAlt}
                     objectPosition={col.objectPosition}
-                    onClick={() => openLook(idx)}
+                    onClick={() => {}}
                   />
                 </div>
               );
             })}
           </div>
 
-          {/* CTA + look indicator */}
-          <div className="relative z-10 flex w-full items-center justify-between gap-4 pt-2">
-            <button
-              type="button"
-              onClick={() => openLook(activeLook)}
-              className="group inline-flex cursor-pointer items-center space-x-3.5 border border-[#221c17] bg-transparent px-5 py-2 font-sans text-[10.5px] font-medium tracking-[0.2em] text-[#1c1815] uppercase transition-all hover:bg-[#1c1815] hover:text-[#f4efe8] sm:px-7 sm:py-3 sm:text-xs"
-            >
-              <span>{currentContent.cta}</span>
-              <span className="text-xs transition-transform duration-300 group-hover:translate-x-1">
-                →
-              </span>
-            </button>
-
-            <div className="flex items-center gap-1 font-mono text-[9.5px] text-[#7a6b5d] sm:text-[11px]">
-              <span>LOOK {activeLook + 1}/3</span>
-              <div className="ml-1 flex items-center gap-1">
-                {[0, 1, 2].map((i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => setLook(i)}
-                    className={`h-1.5 rounded-full transition-all duration-300 ${
-                      i === activeLook ? "w-3 bg-[#1c1815]" : "w-1.5 bg-[#cfc4b5]"
-                    }`}
-                    aria-label={`Go to look ${i + 1}`}
+          {/* CTA + progress + swipe hint */}
+          <div
+            className="relative z-10 flex w-full flex-col gap-3"
+            style={{
+              opacity: seg(0.5, 0.3),
+              transform: `translate3d(0, ${(1 - seg(0.5, 0.3)) * 18}px, 0)`,
+              transition: "opacity 0.25s linear, transform 0.25s linear",
+            }}
+          >
+            <div className="flex h-px w-full gap-1.5" aria-hidden="true">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="relative h-px flex-1 bg-[#221c17]/15">
+                  <div
+                    className="absolute inset-y-0 left-0 h-[2px] -translate-y-1/2 bg-[#1c1815] transition-[width] duration-700 ease-out"
+                    style={{ width: i <= activeLook ? "100%" : "0%", top: "50%" }}
                   />
-                ))}
+                </div>
+              ))}
+            </div>
+
+            <div className="flex w-full items-center justify-between gap-4">
+              <button
+                type="button"
+                onClick={() => openLook(activeLook)}
+                className="group inline-flex cursor-pointer items-center space-x-3.5 border border-[#221c17] bg-transparent px-5 py-2 font-sans text-[10.5px] font-medium tracking-[0.2em] text-[#1c1815] uppercase transition-all hover:bg-[#1c1815] hover:text-[#f4efe8] active:scale-95 sm:px-7 sm:py-3 sm:text-xs"
+              >
+                <span key={activeLook} className="animate-echo-rise">
+                  {currentContent.cta}
+                </span>
+                <span className="text-xs transition-transform duration-300 group-hover:translate-x-1">
+                  →
+                </span>
+              </button>
+
+              <div className="flex items-center gap-2 font-mono text-[9.5px] text-[#7a6b5d] sm:text-[11px]">
+                <span>
+                  {String(activeLook + 1).padStart(2, "0")} / 03
+                </span>
+                {activeLook < 2 && (
+                  <span
+                    className="animate-echo-swipe-hint text-[#3a3026]"
+                    aria-hidden="true"
+                  >
+                    ↓
+                  </span>
+                )}
               </div>
             </div>
           </div>

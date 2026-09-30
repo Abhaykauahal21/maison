@@ -3,6 +3,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import { IndiaRoutes, IndiaCompass } from "@/components/india/IndiaRoutes";
+import { IndiaMobileMap } from "@/components/india/IndiaMobileMap";
 import { useParallax } from "@/hooks/use-parallax";
 import { SlideIn } from "@/components/common/SlideIn";
 
@@ -36,7 +37,7 @@ export const IndiaSection: React.FC = () => {
     <section
       ref={sectionRef}
       id="journey"
-      className="relative z-30 w-full select-none bg-transparent -mt-2 sm:-mt-3 md:-mt-4 lg:-mt-6 xl:-mt-8"
+      className="relative z-30 w-full select-none bg-transparent -mt-[13vw] md:-mt-4 lg:-mt-6 xl:-mt-8"
     >
       {/* ========================================================
           1. DESKTOP & TABLET VIEW (md: 768px+)
@@ -189,63 +190,39 @@ export const IndiaSection: React.FC = () => {
 
       {/* ========================================================
           2. MOBILE VIEW (< 768px)
-          - Fully responsive presentation ensuring text readability, map & right collage clarity
+          - Torn parchment sheet: copy left, hand-drawn map right (india-mobile-sheet.webp)
+          - Live routes, city names and a spotlight tour over the map
+          - Scrapbook photo laid over the lower half, on a blurred garden backdrop
           ======================================================== */}
-      <div className="relative block w-full overflow-hidden md:hidden bg-[#0d0c0a] px-4 pt-10 pb-8 text-left">
-        {/* Left Editorial Text for Mobile */}
+      <div className="relative block w-full overflow-hidden pb-10 md:hidden">
+        {/* Backdrop only behind the lower part, so the wavy top edge lets the page above show through */}
         <div
-          className={`relative z-20 mb-6 flex flex-col px-2 transition-all duration-1000 ease-out ${
-            inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
-          }`}
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-[35%] bottom-0 bg-[#0d0c0a]"
+          style={{
+            WebkitMaskImage: "linear-gradient(180deg, transparent 0%, #000 30%, #000 72%, transparent 100%)",
+            maskImage: "linear-gradient(180deg, transparent 0%, #000 30%, #000 72%, transparent 100%)",
+          }}
         >
-          <span className="font-sans text-[10px] font-semibold tracking-[0.24em] text-[#b8ab9a] uppercase">
-            OUR STORIES ACROSS INDIA
-          </span>
-
-          <h2 className="mt-2 font-serif text-3xl xs:text-4xl font-normal leading-[0.96] text-white">
-            Growing
-            <br />
-            Together
-          </h2>
-
-          <p className="mt-3 font-sans text-xs leading-[1.6] text-[#ded6cb] max-w-[320px]">
-            Right now, our stories live in and around NCR &mdash; with incredible women who made them their own. We&apos;re on our way to more cities, more stories, more you.
-          </p>
-
-          <p className="mt-3 font-allura allura-regular font-script font-cursive text-3xl text-[#e8dfd4] -rotate-3 origin-left tracking-wide">
-            More cities. More stories. Soon...
-          </p>
+          <Image
+            src="/images/story-mobile.webp"
+            alt=""
+            fill
+            unoptimized
+            sizes="100vw"
+            className="scale-110 object-cover opacity-55 blur-[7px] select-none"
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(180deg, rgba(13,12,10,0) 0%, rgba(13,12,10,0.35) 30%, rgba(13,12,10,0.35) 82%, rgba(13,12,10,0.35) 100%)",
+            }}
+          />
         </div>
 
-        {/* Scrollable / Zoomable High-Res Map Asset on Mobile */}
-        <div className="relative w-full overflow-x-auto scrollbar-none rounded-[2px] shadow-2xl">
-          <div className="relative min-w-[620px] w-full">
-            <Image
-              src="/images/India-web.webp"
-              alt="Maison D'Vine Stories Across India"
-              width={1853}
-              height={849}
-              quality={100}
-              unoptimized
-              className="pointer-events-none block h-auto w-full select-none"
-            />
-            {inView && <IndiaRoutes />}
-          </div>
-        </div>
-
-        {/* Right Collage on Mobile */}
-        <div className="mt-8 flex w-full justify-center px-2">
-          <div className={`w-full max-w-[380px] drop-shadow-2xl ${inView ? "animate-india-collage" : "opacity-0"}`}>
-            <Image
-              src="/images/IndiaPage-right-collage.webp"
-              alt="Mehak S. - Choreographer Story across India"
-              width={1047}
-              height={1503}
-              quality={100}
-              unoptimized
-              className="block h-auto w-full select-none"
-            />
-          </div>
+        <div className="relative w-full">
+          <IndiaMobileMap />
         </div>
       </div>
     </section>

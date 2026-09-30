@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Sparkles, Heart, Gift, BookOpen } from "lucide-react";
 import { useParallax } from "@/hooks/use-parallax";
 import { SlideIn } from "@/components/common/SlideIn";
+import { CloserChapterMobile } from "@/components/closer/CloserChapterMobile";
 
 interface BenefitItem {
   icon: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>;
@@ -120,7 +121,7 @@ export const CloserChapterSection: React.FC = () => {
       ref={sectionRef}
       id="closer"
       aria-label="A Closer Chapter"
-      className="closeChapter relative z-30 w-full max-w-full select-none bg-transparent -mt-8 sm:-mt-12 md:-mt-16 lg:-mt-22 xl:-mt-28 overflow-x-clip"
+      className="closeChapter relative z-30 w-full max-w-full select-none bg-transparent -mt-[20vw] md:-mt-16 lg:-mt-22 xl:-mt-28 overflow-x-clip"
     >
       {/* Anchor for navigation */}
       <div id="epilogue" className="absolute -top-24 left-0 pointer-events-none" />
@@ -383,149 +384,11 @@ export const CloserChapterSection: React.FC = () => {
 
       {/* ========================================================
           2. MOBILE VIEW (< 768px)
-          - Intentionally redesigned vertical flow
-          - Order: Photo-frame + image -> Eyebrow -> Heading -> Description -> Benefits -> CTA -> Handwritten note
-          - Uses existing background cleanly
-          - Scrapbook composition scales smoothly
+          - Full-bleed torn parchment (closechapter-mobile.webp) with the scrapbook frame and
+            photo laid on it, scroll-scrubbed reveals throughout
           ======================================================== */}
-      <div className="relative block w-full overflow-hidden md:hidden bg-[#0d0c0a] text-left">
-        {/* Background layer */}
-        <div className="relative w-full">
-          <Image
-            src="/images/closer-chapter-bg.webp"
-            alt="Maison D'Vine - Closer Chapter"
-            width={1983}
-            height={793}
-            quality={100}
-            unoptimized
-            priority
-            className="pointer-events-none block h-auto w-full select-none opacity-40 absolute top-0 left-0 object-cover"
-          />
-
-          <div className="relative z-10 px-5 pt-10 pb-12 flex flex-col items-center">
-            
-            {/* 1. Photo-frame + Image */}
-            <div className={`w-full max-w-[340px] flex justify-center mb-8 ${inView ? "animate-closer-frame" : "opacity-0"}`}>
-              <div
-                className="relative w-full"
-                style={{ aspectRatio: "1096 / 1436" }}
-              >
-                {/* Photo inside frame */}
-                <div
-                  className="absolute overflow-hidden shadow-[0_4px_16px_rgba(40,30,20,0.25)]"
-                  style={{
-                    top: "9.89%",
-                    left: "38.14%",
-                    width: "33.30%",
-                    height: "55.71%",
-                    transform: "rotate(5.2deg)",
-                    transformOrigin: "0 0",
-                    zIndex: 15,
-                  }}
-                >
-                  <Image
-                    src="/images/close-chapter-photo.webp"
-                    alt="Private Archive"
-                    fill
-                    sizes="(max-width: 640px) 70vw, 340px"
-                    quality={100}
-                    priority
-                    className={`object-cover ${inView ? "animate-closer-iris" : "opacity-0"}`}
-                  />
-                </div>
-
-                {/* Scrapbook frame */}
-                <div className="relative w-full h-full z-10 pointer-events-none select-none">
-                  <Image
-                    src="/images/photoFrameclosechapter.webp"
-                    alt="Private Archive Scrapbook Frame"
-                    fill
-                    sizes="(max-width: 640px) 90vw, 340px"
-                    quality={100}
-                    priority
-                    className="object-contain"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* 2. THE PRIVATE ARCHIVE */}
-            <div className="w-full max-w-[420px] flex flex-col">
-              <span className="font-serif text-[11px] font-semibold tracking-[0.26em] text-[#b8ab99] uppercase">
-                THE PRIVATE ARCHIVE
-              </span>
-
-              {/* 3. A CLOSER CHAPTER */}
-              <h2
-                aria-label="A CLOSER CHAPTER"
-                className="mt-2 font-serif text-3xl xs:text-4xl font-normal leading-[0.96] text-[#f7f2ea]"
-              >
-                <ConvergeText lines={["A CLOSER", "CHAPTER"]} inView={inView} />
-              </h2>
-
-              {/* 4. Description */}
-              <p className="mt-3.5 font-serif text-xs xs:text-[13px] leading-[1.62] text-[#d6ccc0] font-normal">
-                An exclusive space for early access, special drops, and stories that we share only with our closest community.
-              </p>
-
-              {/* 5. Benefits */}
-              <ul className="mt-5 space-y-3">
-                {benefits.map((benefit) => {
-                  const IconComponent = benefit.icon;
-                  return (
-                    <li key={benefit.text} className="flex items-center gap-3.5">
-                      <div className="flex-shrink-0 text-[#cbb8a3]">
-                        <IconComponent strokeWidth={1.3} className="w-[18px] h-[18px]" />
-                      </div>
-                      <span className="font-serif text-[#ece2d6] text-[13px] tracking-wide leading-normal">
-                        {benefit.text}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-
-              {/* 6. CTA */}
-              <div className="mt-7">
-                <button
-                  type="button"
-                  className="group w-full inline-flex items-center justify-between gap-4 bg-[#f5ede1] hover:bg-white text-[#191411] h-[52px] px-6 rounded-none text-[12px] tracking-[0.2em] uppercase font-serif font-medium shadow-xl transition-colors duration-300"
-                >
-                  <span>JOIN THE PRIVATE ARCHIVE</span>
-                  <span className="text-[17px] transition-transform duration-300 group-hover:translate-x-1">
-                    &rarr;
-                  </span>
-                </button>
-              </div>
-
-              {/* 7. Handwritten Note */}
-              <div className="mt-9 flex flex-col items-center justify-center select-none">
-                <p className="font-script font-allura font-cursive text-[#d8cbbb] text-3xl leading-[1.1] text-center -rotate-3">
-                  A closer chapter
-                  <br />
-                  for our inner circle
-                </p>
-                <svg
-                  width="24"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="mt-2 text-[#d8cbbb]/80 stroke-current -rotate-[6deg]"
-                >
-                  <path
-                    d="M12 20.5C12 20.5 3.5 15.2 3.5 8.7C3.5 5.8 5.7 3.5 8.5 3.5C10.2 3.5 11.6 4.4 12 5.5C12.4 4.4 13.8 3.5 15.5 3.5C18.3 3.5 20.5 5.8 20.5 8.7C20.5 15.2 12 20.5 12 20.5Z"
-                    stroke="currentColor"
-                    strokeWidth="1.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-            </div>
-
-          </div>
-        </div>
+      <div className="md:hidden">
+        <CloserChapterMobile />
       </div>
     </section>
   );

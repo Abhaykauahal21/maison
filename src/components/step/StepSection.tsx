@@ -5,6 +5,7 @@ import Image from "next/image";
 import { StepContent } from "@/components/step/StepContent";
 import { StepPhoto } from "@/components/step/StepPhoto";
 import { StepDetails } from "@/components/step/StepDetails";
+import { StepMotion } from "@/components/step/StepMotion";
 import { SlideIn } from "@/components/common/SlideIn";
 import { useParallax } from "@/hooks/use-parallax";
 
@@ -46,7 +47,7 @@ export const StepSection: React.FC = () => {
     <section
       ref={sectionRef}
       id="step-1"
-      className="relative z-20 -mt-1 w-full bg-transparent text-[#1c1815] select-none sm:-mt-2 md:-mt-3 lg:-mt-4 xl:-mt-5 drop-shadow-[0_-10px_20px_rgba(0,0,0,0.4)] drop-shadow-[0_14px_28px_rgba(0,0,0,0.55)]"
+      className="relative z-20 -mt-[7vw] w-full bg-transparent text-[#1c1815] select-none md:-mt-[4.5vw] drop-shadow-[0_-10px_20px_rgba(0,0,0,0.4)] drop-shadow-[0_14px_28px_rgba(0,0,0,0.55)]"
     >
       {/* ========================================================
           1. DESKTOP & TABLET EDITORIAL LAYOUT (md: 768px+)
@@ -67,6 +68,8 @@ export const StepSection: React.FC = () => {
           unoptimized
           className="pointer-events-none block h-auto w-full select-none"
         />
+
+        <StepMotion variant="desktop" />
 
         {/* Content layer positioned proportionally over the paper matching reference */}
         <div className="pointer-events-auto absolute inset-0 z-20">
@@ -133,7 +136,7 @@ export const StepSection: React.FC = () => {
         <div className="relative w-full overflow-hidden">
           {/* Exact Mobile Paper Asset (541 x 1024) spanning 100% full width */}
           <Image
-            src="/images/step-bg-mobile.jpg"
+            src="/images/step-bg-mobile.webp"
             alt="Maison D'Vine Step 1 Scrapbook Paper"
             width={541}
             height={1024}
@@ -141,6 +144,8 @@ export const StepSection: React.FC = () => {
             unoptimized
             className="pointer-events-none block h-auto w-full select-none"
           />
+
+          <StepMotion variant="mobile" />
 
           {/* Content overlay positioned exactly over the paper */}
           <div className="pointer-events-auto absolute inset-0 z-10">

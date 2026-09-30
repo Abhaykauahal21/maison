@@ -19,13 +19,27 @@ export const StepContent: React.FC<StepContentProps> = ({
       {/* LEFT CONTENT */}
       <div className="absolute left-0 top-0 flex flex-col">
         {/* Main Heading — Masked Curtain Slide Up */}
-        <div className="overflow-hidden pb-1">
+        <div className="pb-1" style={{ perspective: "700px" }}>
           <h2
-            className={`font-bodoni text-6xl sm:text-7xl md:text-7xl lg:text-[4.8vw] xl:text-[5.1vw] font-normal leading-[0.9] tracking-[0.015em] text-[#120e0a] uppercase whitespace-nowrap transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-              inView ? "translate-y-0 opacity-100" : "translate-y-[115%] opacity-0"
-            }`}
+            aria-label="STEP 1"
+            className="font-bodoni text-6xl sm:text-7xl md:text-7xl lg:text-[4.8vw] xl:text-[5.1vw] font-normal leading-[0.9] tracking-[0.015em] text-[#120e0a] uppercase whitespace-nowrap"
           >
-            STEP 1
+            {Array.from("STEP 1").map((ch, i) => (
+              <span
+                key={i}
+                aria-hidden="true"
+                className="inline-block origin-bottom transition-[opacity,transform] duration-[1300ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
+                style={{
+                  opacity: inView ? 1 : 0,
+                  transform: inView
+                    ? "rotateX(0deg) translateY(0)"
+                    : "rotateX(-95deg) translateY(40%)",
+                  transitionDelay: inView ? `${i * 90}ms` : "0ms",
+                }}
+              >
+                {ch === " " ? " " : ch}
+              </span>
+            ))}
           </h2>
         </div>
 

@@ -7,6 +7,7 @@ import { BlogCard } from "./BlogCard";
 import { JournalButton } from "./JournalButton";
 import { JournalQuote } from "./JournalQuote";
 import { JournalBackground } from "./JournalBackground";
+import { BlogMobile } from "./BlogMobile";
 import { SlideIn } from "@/components/common/SlideIn";
 
 const HEADING = "BLOGPOSTS";
@@ -40,7 +41,7 @@ export const BlogSection: React.FC = () => {
       ref={sectionRef}
       id="blog"
       aria-label="Blogposts and Journal"
-      className="relative z-20 w-full select-none bg-[#0e0d0c] -mt-8 sm:-mt-12 md:-mt-16 lg:-mt-22 xl:-mt-28 overflow-hidden"
+      className="relative z-20 w-full select-none bg-[#0e0d0c] -mt-[10vw] md:-mt-16 lg:-mt-22 xl:-mt-28 overflow-clip"
     >
       {/* Anchor for journal navigation */}
       <div id="journal" className="absolute -top-24 left-0 pointer-events-none" />
@@ -52,7 +53,7 @@ export const BlogSection: React.FC = () => {
           - Underlaps beneath FAQ section above (z-20 under z-30)
           ======================================================== */}
       <div
-        className={`pointer-events-none absolute inset-0 z-0 overflow-hidden transition-opacity duration-1000 ease-out ${
+        className={`pointer-events-none absolute inset-0 z-0 hidden overflow-hidden md:block transition-opacity duration-1000 ease-out ${
           inView ? "opacity-100" : "opacity-90"
         }`}
       >
@@ -77,7 +78,9 @@ export const BlogSection: React.FC = () => {
           - Subtle vintage film-strip perforation details
           - Soft vignette and parchment texture
           ======================================================== */}
-      <JournalBackground />
+      <div className="hidden md:block">
+        <JournalBackground />
+      </div>
 
       {/* ========================================================
           3. REAL HTML / REACT CONTENT LAYER (SHARP, SELECTABLE, EDITABLE)
@@ -86,8 +89,12 @@ export const BlogSection: React.FC = () => {
           - Upper-right: Handwritten script decorative quote
           - Lower: 3 equal-width editorial blog cards in one row
           ======================================================== */}
+      <div className="md:hidden">
+        <BlogMobile />
+      </div>
+
       <div
-        className="relative z-20 mx-auto w-full max-w-[1420px] px-6 sm:px-8 md:px-10 lg:px-14 xl:px-16 pt-20 sm:pt-24 md:pt-28 lg:pt-32 pb-20 sm:pb-24 md:pb-28 lg:pb-32"
+        className="relative z-20 mx-auto hidden w-full max-w-[1420px] md:block px-6 sm:px-8 md:px-10 lg:px-14 xl:px-16 pt-20 sm:pt-24 md:pt-28 lg:pt-32 pb-20 sm:pb-24 md:pb-28 lg:pb-32"
       >
         {/* Upper Editorial Row: Header on Left & Script Quote on Right */}
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-8 md:gap-10 pb-12 sm:pb-14 md:pb-16 lg:pb-18">

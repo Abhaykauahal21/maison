@@ -1,5 +1,6 @@
 "use client";
 
+import { smoothScrollTo } from "@/lib/smooth-scroll";
 import React from "react";
 import { FilmCTA } from "@/components/home/FilmCTA";
 
@@ -53,7 +54,7 @@ export const HeroContent: React.FC<HeroContentProps> = ({
           type="button"
           onClick={() => {
             const el = document.getElementById("story");
-            el?.scrollIntoView({ behavior: "smooth" });
+            smoothScrollTo(el);
           }}
           className="group relative inline-flex cursor-pointer items-center space-x-3.5 overflow-hidden rounded-none bg-[#f2e7db] px-7 py-3 text-xs font-sans font-medium tracking-[0.15em] text-[#141210] uppercase shadow-[0_4px_20px_rgba(0,0,0,0.25)] transition-all duration-300 hover:bg-white hover:shadow-[0_8px_30px_rgba(242,231,219,0.25)] hover:scale-[1.02] active:scale-[0.98] sm:text-[13px]"
         >

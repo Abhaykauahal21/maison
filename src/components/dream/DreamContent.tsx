@@ -1,11 +1,14 @@
 "use client";
 
+import { smoothScrollTo } from "@/lib/smooth-scroll";
 import React from "react";
 import { ScrollTextReveal } from "@/components/common/ScrollTextReveal";
 
 export interface DreamContentProps {
   className?: string;
   inView?: boolean;
+  /** "head" = eyebrow, heading, subtitle; "body" = description + CTA; "all" = both. */
+  part?: "all" | "head" | "body";
 }
 
 const HEADING = "THE DREAM";
@@ -13,11 +16,15 @@ const HEADING = "THE DREAM";
 export const DreamContent: React.FC<DreamContentProps> = ({
   className = "",
   inView = true,
+  part = "all",
 }) => {
+  const showHead = part !== "body";
+  const showBody = part !== "head";
   return (
     <div className={`flex flex-col justify-between text-left ${className}`}>
       {/* Top text group: Eyebrow, Main Heading, Subtitle, Description */}
       <div className="w-full">
+        {showHead && (<>
         {/* Eyebrow with a gold rule that draws itself in */}
         <div
           className={`flex items-center gap-3 font-sans text-xs sm:text-sm lg:text-[0.82vw] font-medium tracking-[0.28em] text-[#d4cbbf] uppercase transition-all duration-700 ${
@@ -72,8 +79,16 @@ export const DreamContent: React.FC<DreamContentProps> = ({
           />
         </div>
 
+        </>)}
+
+        {showBody && (
+        <>
         {/* Paragraph Description — Scroll-Based Word Reveal */}
-        <div className="mt-4 sm:mt-5 max-w-[390px] lg:max-w-[26vw]">
+        <div
+          className={`mt-4 sm:mt-5 max-w-[390px] lg:max-w-[26vw] ${
+            part === "body" ? "border-l border-[#e6c98f]/60 pl-3.5" : ""
+          }`}
+        >
           <ScrollTextReveal
             text="The Dream Collection is inspired by the first chapter of every journey — her aspirations, her what-ifs, and the courage to dream it all."
             as="p"
@@ -81,11 +96,38 @@ export const DreamContent: React.FC<DreamContentProps> = ({
             unrevealedOpacity={0.25}
           />
         </div>
+
+        {/* Mobile/tablet only: the three threads of the collection, pulled from the copy */}
+        {part === "body" && (
+          <ul className="mt-5 grid grid-cols-3 gap-2 sm:mt-6 sm:gap-3">
+            {["Aspirations", "What-ifs", "Courage"].map((label, i) => (
+              <li
+                key={label}
+                className="border-t border-[#e6c98f]/40 pt-2 transition-[opacity,transform] duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
+                style={{
+                  opacity: inView ? 1 : 0,
+                  transform: inView ? "translateY(0)" : "translateY(16px)",
+                  transitionDelay: inView ? `${900 + i * 140}ms` : "0ms",
+                }}
+              >
+                <span className="block font-mono text-[9px] tracking-[0.2em] text-[#e6c98f]">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span className="mt-0.5 block font-serif text-[12px] text-[#f2e7db] italic sm:text-sm">
+                  {label}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+        </>
+        )}
       </div>
 
       {/* CTA Button */}
+      {showBody && (
       <div
-        className={`pt-8 lg:pt-8 transition-all duration-900 delay-450 ease-out ${
+        className={`pt-6 sm:pt-8 lg:pt-8 transition-all duration-900 delay-450 ease-out ${
           inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
         }`}
       >
@@ -93,7 +135,7 @@ export const DreamContent: React.FC<DreamContentProps> = ({
           type="button"
           onClick={() => {
             const el = document.getElementById("step-1");
-            el?.scrollIntoView({ behavior: "smooth" });
+            smoothScrollTo(el);
           }}
           className="group relative inline-flex cursor-pointer items-center space-x-3 overflow-hidden bg-[#fdfbf7] px-6 py-2.5 sm:px-7 sm:py-3 lg:px-6 lg:py-2.5 text-[11px] sm:text-xs lg:text-[0.72vw] font-sans font-medium tracking-[0.2em] text-[#1c1815] uppercase shadow-[0_4px_20px_rgba(0,0,0,0.35)] transition-all duration-300 hover:bg-white hover:shadow-black/50 hover:scale-[1.02] active:scale-[0.98]"
         >
@@ -109,6 +151,7 @@ export const DreamContent: React.FC<DreamContentProps> = ({
           </span>
         </button>
       </div>
+      )}
     </div>
   );
 };

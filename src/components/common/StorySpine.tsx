@@ -1,5 +1,6 @@
 "use client";
 
+import { smoothScrollTo } from "@/lib/smooth-scroll";
 import React, { useEffect, useState } from "react";
 
 interface Chapter {
@@ -124,12 +125,12 @@ export const StorySpine: React.FC = () => {
 
   const scrollToChapter = (id: string) => {
     if (id === "hero") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      smoothScrollTo(0);
       return;
     }
     const el = document.getElementById(id);
     if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
+      smoothScrollTo(el);
     }
   };
 

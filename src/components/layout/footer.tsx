@@ -1,9 +1,11 @@
 "use client";
 
+import { smoothScrollTo } from "@/lib/smooth-scroll";
 import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { GoldMotes } from "@/components/common/GoldMotes";
+import { FooterMobile } from "@/components/layout/FooterMobile";
 
 const WORDMARK = "MAISON D\u2019VINE";
 
@@ -46,7 +48,7 @@ const Wordmark: React.FC<{ inView: boolean; className: string; lineHeight: numbe
 const BackToTop: React.FC<{ className?: string }> = ({ className = "" }) => (
   <button
     type="button"
-    onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+    onClick={() => smoothScrollTo(0)}
     aria-label="Back to top"
     className={`group inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-[#F3DFC1]/45 text-[#F3DFC1] transition-all duration-300 hover:border-[#F3DFC1] hover:bg-[#F3DFC1]/15 ${className}`}
   >
@@ -92,7 +94,7 @@ export const Footer: React.FC = () => {
       ref={footerRef}
       id="footer"
       aria-label="Maison D'Vine Footer"
-      className="relative z-30 w-full max-w-full select-none bg-[#0e0d0c] overflow-x-clip"
+      className="relative z-20 md:z-30 -mt-[14vw] md:mt-0 w-full max-w-full select-none bg-[#0e0d0c] overflow-x-clip"
     >
       {/* ========================================================
           1. DESKTOP & TABLET VIEW (md: 768px+)
@@ -265,85 +267,11 @@ export const Footer: React.FC = () => {
 
       {/* ========================================================
           2. MOBILE VIEW (< 768px)
-          - Intentionally designed vertical flow
-          - Full natural high quality image with full width
-          - No clipping, no overflow
+          - The Tuscan terrace stays the backdrop (panning domes -> sun with the scroll)
+          - Scroll-scrubbed reveals, two-line wordmark
           ======================================================== */}
-      <div className="relative block w-full max-w-full min-w-0 overflow-hidden md:hidden bg-[#0e0d0c] text-center">
-        {/* Background Image Container */}
-        <div className="relative w-full max-w-full overflow-hidden">
-          <Image
-            src="/images/footer-web.webp"
-            alt="Maison D'Vine Tuscan Sunset Terrace Atmosphere"
-            width={2159}
-            height={728}
-            quality={100}
-            unoptimized
-            priority
-            className="pointer-events-none block h-auto w-full select-none opacity-45 absolute inset-0 object-cover"
-          />
-
-          {/* Mobile Overlay Content */}
-          <div
-            className={`relative z-10 px-4 pt-10 pb-6 flex flex-col items-center max-w-full overflow-hidden transition-all duration-1000 ease-out ${
-              inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-            }`}
-          >
-            
-            {/* Top Navigation */}
-            <nav className="flex flex-wrap items-center justify-center gap-5 text-[11px] tracking-[0.28em] text-[#FBF6EE] uppercase font-serif">
-              {navLinks.map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="hover:text-[#EAD5B8] transition-colors duration-200"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-
-            {/* Tagline */}
-            <p className="mt-5 font-serif text-[10px] tracking-[0.32em] text-[#F3DFC1] uppercase font-medium">
-              ARTISANAL LIVING, TIMELESS STORIES
-            </p>
-
-            {/* Description */}
-            <p className="mt-2 font-serif text-[12px] text-[#FBF6EE]/85 max-w-[320px] leading-relaxed">
-              Curated pieces, thoughtful details, and timeless objects for a more beautiful, slower way of living.
-            </p>
-
-            {/* Social Icons */}
-            <div className="mt-4 flex items-center justify-center gap-5">
-              <SocialIcons inView={inView} />
-            </div>
-
-            {/* Massive Wordmark on Mobile (Carefully bounded) */}
-            <div className="mt-8 mb-3 w-full max-w-full min-w-0 overflow-hidden text-center px-2">
-              <Wordmark
-                inView={inView}
-                lineHeight={1}
-                className="w-full max-w-full font-serif font-normal uppercase text-[#FAF4E8] text-center tracking-[-0.02em] text-[clamp(2rem,8.5vw,3.6rem)]"
-              />
-            </div>
-
-            {/* Legal / Copyright */}
-            <div className="w-full pt-3 border-t border-[#F3DFC1]/20 flex flex-col items-center gap-2 text-[10px] tracking-[0.2em] uppercase font-serif text-[#FBF6EE]/75">
-              <div className="flex items-center gap-4 text-[#FBF6EE]/90">
-                <a href="#privacy" className="hover:text-[#F3DFC1]">Terms</a>
-                <span className="text-[#F3DFC1]/40">&bull;</span>
-                <a href="#privacy" className="hover:text-[#F3DFC1]">Privacy</a>
-                <span className="text-[#F3DFC1]/40">&bull;</span>
-                <a href="#privacy" className="hover:text-[#F3DFC1]">Cookies</a>
-              </div>
-              <div>
-                &copy; 2026 MAISON D’VINE. All rights reserved.
-              </div>
-              <BackToTop className="mt-1" />
-            </div>
-
-          </div>
-        </div>
+      <div className="md:hidden">
+        <FooterMobile navLinks={navLinks} social={<SocialIcons inView />} backToTop={<BackToTop />} />
       </div>
     </footer>
   );

@@ -22,6 +22,28 @@ const RUNWAY_MS = MIN_MS - 350;
 
 type Phase = "loading" | "fading" | "opening" | "done";
 
+/**
+ * Torn paper edge (viewBox 1200 x 60). The cover is one sheet of paper; when the site is ready it
+ * is lifted away upwards and this ragged edge is the last thing to leave the screen.
+ */
+const tearPath = (seed: number, base: number, amp: number) => {
+  let d = `M0 0 L1200 0 L1200 ${base}`;
+  for (let x = 1200; x >= 0; x -= 8) {
+    // low frequencies (broad, uneven tear) with a little fibre on top
+    const n =
+      (Math.sin(x * 0.011 + seed) * 0.5 +
+        Math.sin(x * 0.037 + seed * 2) * 0.3 +
+        Math.sin(x * 0.121 + seed * 3) * 0.14 +
+        Math.sin(x * 0.33 + seed * 5) * 0.06 +
+        1) /
+      2;
+    d += ` L${x} ${(base + amp * n).toFixed(1)}`;
+  }
+  return `${d} Z`;
+};
+const TEAR_BACK = tearPath(1.3, 10, 34);
+const TEAR_FRONT = tearPath(4.1, 5, 24);
+
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - Math.min(1, Math.max(0, t)), 3);
 
 export const SiteLoader: React.FC = () => {
@@ -78,9 +100,13 @@ export const SiteLoader: React.FC = () => {
         const a = path.getPointAtLength(at);
         const b = path.getPointAtLength(Math.min(len, at + 2));
         const angle = (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
-        needle.setAttribute("transform", `translate(${a.x.toFixed(1)} ${a.y.toFixed(1)}) rotate(${angle.toFixed(1)})`);
+        needle.setAttribute(
+          "transform",
+          `translate(${a.x.toFixed(1)} ${a.y.toFixed(1)}) rotate(${angle.toFixed(1)})`
+        );
       }
-      if (counterRef.current) counterRef.current.textContent = String(Math.round(p * 100)).padStart(3, "0");
+      if (counterRef.current)
+        counterRef.current.textContent = String(Math.round(p * 100)).padStart(3, "0");
 
       const letters = Math.ceil(Math.min(1, p / 0.85) * BRAND.length);
       if (letters !== lastLetters) {
@@ -110,11 +136,11 @@ export const SiteLoader: React.FC = () => {
                 window.setTimeout(() => {
                   setPhase("done");
                   document.body.style.overflow = "";
-                }, 1350),
+                }, 1350)
               );
-            }, 450),
+            }, 450)
           );
-        }, 450),
+        }, 450)
       );
     };
 
@@ -155,119 +181,140 @@ export const SiteLoader: React.FC = () => {
 
   return (
     <div
-      className="site-loader fixed inset-0 z-[9999] overflow-hidden pointer-events-none select-none"
+      className="site-loader pointer-events-none fixed inset-0 z-[9999] overflow-hidden select-none"
       data-phase={phase}
       aria-hidden="true"
-      style={{ perspective: "1800px" }}
     >
-      {/* Book cover: two halves that swing open into the screen */}
-      <div className="loader-panel loader-panel-left absolute top-0 left-0 h-full w-1/2 will-change-transform" />
-      <div className="loader-panel loader-panel-right absolute top-0 right-0 h-full w-1/2 will-change-transform" />
+      {/* One sheet of paper: lifted away upwards when the site is ready, torn edge last */}
+      <div className="loader-cover absolute inset-0 will-change-transform">
+        <div className="loader-paper absolute inset-0" />
+        <svg
+          className="loader-tear pointer-events-none absolute left-0 w-full"
+          style={{ top: "calc(100% - 1px)", height: 60 }}
+          viewBox="0 0 1200 60"
+          preserveAspectRatio="none"
+        >
+          <path d={TEAR_BACK} fill="#e3d8c6" />
+          <path d={TEAR_FRONT} fill="#f5efe7" />
+        </svg>
 
-      {/* Gold spine that fades as the cover opens */}
-      <div
-        className="absolute top-0 bottom-0 left-1/2 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-[#b8a07a] to-transparent transition-opacity duration-500"
-        style={{ opacity: phase === "opening" ? 0 : 0.7 }}
-      />
+        {/* Cover contents */}
+        <div className="pointer-events-auto absolute inset-0 z-10 flex flex-col justify-between px-6 py-8 sm:px-14 sm:py-12">
+          {/* Debossed double frame, like a book cover */}
+          <div className="pointer-events-none absolute inset-3 border border-[#d9cdbd] sm:inset-5" />
+          <div className="pointer-events-none absolute inset-[18px] border border-[#e6dccd] sm:inset-[26px]" />
 
-      {/* Cover contents */}
-      <div
-        className="pointer-events-auto absolute inset-0 z-10 flex flex-col justify-between px-6 py-8 sm:px-14 sm:py-12"
-        style={{
-          opacity: contentHidden ? 0 : 1,
-          transform: contentHidden ? "scale(0.97) translateY(-18px)" : "scale(1) translateY(0)",
-          transition: "opacity 0.45s ease-out, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
-        }}
-      >
-        {/* Debossed double frame, like a book cover */}
-        <div className="pointer-events-none absolute inset-3 border border-[#d9cdbd] sm:inset-5" />
-        <div className="pointer-events-none absolute inset-[18px] border border-[#e6dccd] sm:inset-[26px]" />
-
-        {/* Top header */}
-        <div className="relative flex w-full items-center justify-between border-b border-[#ded5c8] pb-3 sm:pb-4">
-          <div className="flex items-center gap-2.5">
-            <span className="h-1.5 w-1.5 animate-ping rounded-full bg-[#9e8365] opacity-80" />
-            <span className="font-sans text-[10px] font-normal tracking-[0.3em] text-[#7a6d5f] uppercase sm:text-[11px]">
-              PARIS · ATELIER HAUTE COUTURE
+          {/* Top header */}
+          <div className="relative flex w-full items-center justify-between border-b border-[#ded5c8] pb-3 sm:pb-4">
+            <div className="flex items-center gap-2.5">
+              <span className="h-1.5 w-1.5 animate-ping rounded-full bg-[#9e8365] opacity-80" />
+              <span className="font-sans text-[10px] font-normal tracking-[0.3em] text-[#7a6d5f] uppercase sm:text-[11px]">
+                PARIS · ATELIER HAUTE COUTURE
+              </span>
+            </div>
+            <span className="font-serif text-[11px] tracking-wider text-[#7a6d5f] italic sm:text-[12px]">
+              Édition 2026
             </span>
           </div>
-          <span className="font-serif text-[11px] italic tracking-wider text-[#7a6d5f] sm:text-[12px]">
-            Édition 2026
-          </span>
-        </div>
 
-        {/* Centre: the needle stitching the brand into being */}
-        <div className="relative my-auto flex flex-col items-center text-center">
-          <span className="mb-4 font-sans text-[10px] font-medium tracking-[0.42em] text-[#9e8365] uppercase sm:text-[11px]">
-            Chapter 00
-          </span>
+          {/* Centre: the needle stitching the brand into being */}
+          <div className="relative my-auto flex flex-col items-center text-center">
+            <span className="mb-4 font-sans text-[10px] font-medium tracking-[0.42em] text-[#9e8365] uppercase sm:text-[11px]">
+              Chapter 00
+            </span>
 
-          <svg
-            viewBox="0 0 600 120"
-            className="h-auto w-[min(82vw,560px)] overflow-visible"
-            fill="none"
-          >
-            {/* faint pattern line the needle follows */}
-            <path d={THREAD_PATH} stroke="#d9cdbd" strokeWidth="1" strokeDasharray="2 7" strokeLinecap="round" />
-            {/* the thread itself */}
-            <path
-              ref={threadRef}
-              d={THREAD_PATH}
-              stroke="#1c1815"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-            {/* the needle */}
-            <g ref={needleRef} transform="translate(10 74)">
-              <line x1="-16" y1="0" x2="15" y2="0" stroke="#9e8365" strokeWidth="1.7" strokeLinecap="round" />
-              <ellipse cx="-11" cy="0" rx="3" ry="1.1" stroke="#9e8365" strokeWidth="0.9" fill="#f5efe7" />
-              <circle cx="15" cy="0" r="1.2" fill="#1c1815" />
-            </g>
-          </svg>
-
-          {/* Brand: each letter appears as the thread passes */}
-          <h1
-            aria-label={BRAND}
-            className="mt-6 font-bodoni text-3xl font-normal tracking-[0.24em] whitespace-nowrap text-[#1c1815] uppercase sm:mt-8 sm:text-5xl sm:tracking-[0.28em] md:text-6xl"
-          >
-            {Array.from(BRAND).map((ch, i) => (
-              <span
-                key={i}
-                aria-hidden="true"
-                className="inline-block transition-[opacity,transform,filter] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
-                style={{
-                  opacity: i < lettersShown ? 1 : 0,
-                  transform: i < lettersShown ? "translateY(0)" : "translateY(0.35em)",
-                  filter: i < lettersShown ? "blur(0px)" : "blur(6px)",
-                }}
-              >
-                {ch === " " ? " " : ch}
-              </span>
-            ))}
-          </h1>
-
-          {/* The story so far */}
-          <div className="mt-4 flex h-8 items-center justify-center sm:mt-5 sm:h-9">
-            <p
-              key={lineIdx}
-              className="animate-fade-in font-serif text-base tracking-wide text-[#594d40] italic sm:text-lg md:text-xl"
+            <svg
+              viewBox="0 0 600 120"
+              className="h-auto w-[min(82vw,560px)] overflow-visible"
+              fill="none"
             >
-              {STORY_LINES[lineIdx]}
-            </p>
+              {/* faint pattern line the needle follows */}
+              <path
+                d={THREAD_PATH}
+                stroke="#d9cdbd"
+                strokeWidth="1"
+                strokeDasharray="2 7"
+                strokeLinecap="round"
+              />
+              {/* the thread itself */}
+              <path
+                ref={threadRef}
+                d={THREAD_PATH}
+                stroke="#1c1815"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+              {/* the needle */}
+              <g ref={needleRef} transform="translate(10 74)">
+                <line
+                  x1="-16"
+                  y1="0"
+                  x2="15"
+                  y2="0"
+                  stroke="#9e8365"
+                  strokeWidth="1.7"
+                  strokeLinecap="round"
+                />
+                <ellipse
+                  cx="-11"
+                  cy="0"
+                  rx="3"
+                  ry="1.1"
+                  stroke="#9e8365"
+                  strokeWidth="0.9"
+                  fill="#f5efe7"
+                />
+                <circle cx="15" cy="0" r="1.2" fill="#1c1815" />
+              </g>
+            </svg>
+
+            {/* Brand: each letter appears as the thread passes */}
+            <h1
+              aria-label={BRAND}
+              className="font-bodoni mt-6 text-3xl font-normal tracking-[0.24em] whitespace-nowrap text-[#1c1815] uppercase sm:mt-8 sm:text-5xl sm:tracking-[0.28em] md:text-6xl"
+            >
+              {Array.from(BRAND).map((ch, i) => (
+                <span
+                  key={i}
+                  aria-hidden="true"
+                  className="inline-block transition-[opacity,transform,filter] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                  style={{
+                    opacity: i < lettersShown ? 1 : 0,
+                    transform: i < lettersShown ? "translateY(0)" : "translateY(0.35em)",
+                    filter: i < lettersShown ? "blur(0px)" : "blur(6px)",
+                  }}
+                >
+                  {ch === " " ? " " : ch}
+                </span>
+              ))}
+            </h1>
+
+            {/* The story so far */}
+            <div
+              className="mt-4 flex h-8 items-center justify-center transition-opacity duration-500 sm:mt-5 sm:h-9"
+              style={{ opacity: contentHidden ? 0 : 1 }}
+            >
+              <p
+                key={lineIdx}
+                className="animate-fade-in font-serif text-base tracking-wide text-[#594d40] italic sm:text-lg md:text-xl"
+              >
+                {STORY_LINES[lineIdx]}
+              </p>
+            </div>
           </div>
-        </div>
 
-        {/* Bottom: chapter + page-number style progress */}
-        <div className="relative flex w-full items-center justify-between border-t border-[#ded5c8] pt-3 font-sans text-[10.5px] tracking-[0.22em] text-[#8c7f72] uppercase sm:pt-4 sm:text-[11.5px]">
-          <span className="flex items-center gap-1.5">
-            <span>STORY CHAPTER</span>
-            <span className="font-mono text-[#594d40]">00</span>
-          </span>
+          {/* Bottom: chapter + page-number style progress */}
+          <div className="relative flex w-full items-center justify-between border-t border-[#ded5c8] pt-3 font-sans text-[10.5px] tracking-[0.22em] text-[#8c7f72] uppercase sm:pt-4 sm:text-[11.5px]">
+            <span className="flex items-center gap-1.5">
+              <span>STORY CHAPTER</span>
+              <span className="font-mono text-[#594d40]">00</span>
+            </span>
 
-          <span className="flex items-baseline gap-1 font-mono text-[#594d40] tabular-nums">
-            <span ref={counterRef}>000</span>
-            <span className="text-[#8c7f72]">%</span>
-          </span>
+            <span className="flex items-baseline gap-1 font-mono text-[#594d40] tabular-nums">
+              <span ref={counterRef}>000</span>
+              <span className="text-[#8c7f72]">%</span>
+            </span>
+          </div>
         </div>
       </div>
     </div>

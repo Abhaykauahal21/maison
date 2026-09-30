@@ -1,5 +1,6 @@
 "use client";
 
+import { smoothScrollTo } from "@/lib/smooth-scroll";
 import React from "react";
 
 export interface ScrollIndicatorProps {
@@ -9,7 +10,7 @@ export interface ScrollIndicatorProps {
 export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({ className = "" }) => {
   const handleClick = () => {
     const el = document.getElementById("story");
-    el?.scrollIntoView({ behavior: "smooth" });
+    smoothScrollTo(el);
   };
 
   return (

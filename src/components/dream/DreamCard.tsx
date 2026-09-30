@@ -93,7 +93,7 @@ export const DreamCard: React.FC<DreamCardProps> = ({
 
       {/* Card Content Overlay */}
       <div
-        className="relative z-20 flex flex-col justify-end p-4 sm:p-5 lg:p-3.5 xl:p-4.5"
+        className="relative z-20 flex flex-col justify-end p-3 sm:p-5 lg:p-3.5 xl:p-4.5"
         style={{
           opacity: inView ? 1 : 0,
           transform: inView ? "translateY(0)" : "translateY(14px)",
@@ -107,14 +107,14 @@ export const DreamCard: React.FC<DreamCardProps> = ({
         </div>
 
         {/* Poetic Description: 2 lines */}
-        <p className="mt-2.5 font-serif text-[11px] sm:text-xs lg:text-[0.68vw] leading-[1.48] tracking-wide text-[#d4cbbf] italic transition-colors group-hover:text-white">
+        <p className="mt-1.5 sm:mt-2.5 font-serif text-[10.5px] sm:text-xs lg:text-[0.68vw] leading-[1.48] tracking-wide text-[#d4cbbf] italic transition-colors group-hover:text-white">
           {descriptionLines[0]}
           <br />
           {descriptionLines[1]}
         </p>
 
         {/* CTA: VIEW DETAILS → */}
-        <div className="mt-3.5 flex items-center space-x-1.5 text-[9px] sm:text-[10px] lg:text-[0.62vw] font-sans font-medium tracking-[0.2em] text-[#f2e7db] uppercase transition-colors group-hover:text-white">
+        <div className="mt-2.5 sm:mt-3.5 flex items-center space-x-1.5 text-[8.5px] sm:text-[10px] lg:text-[0.62vw] font-sans font-medium tracking-[0.2em] text-[#f2e7db] uppercase transition-colors group-hover:text-white">
           <span>{ctaText}</span>
           <span className="text-xs lg:text-[0.72vw] transition-transform duration-300 group-hover:translate-x-1.5">
             →
