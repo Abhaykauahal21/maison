@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { makeTops, nearViewport } from "@/lib/scrub";
 
 /**
  * Mobile composition for "Our Stories Across India": one torn parchment sheet (copy on the
@@ -135,17 +136,25 @@ export const IndiaMobileMap: React.FC = () => {
 
     let raf = 0;
     let liveNow = false;
+    const driftA = root.querySelector<HTMLElement>("[data-drift-a]");
+    const driftB = root.querySelector<HTMLElement>("[data-drift-b]");
+    const T = makeTops();
     const prog = (el: Element, lag = 0, span = 0.17) => {
-      const r = el.getBoundingClientRect();
       const vh = window.innerHeight;
-      return smooth((vh * 1.0 - r.top - lag) / (vh * span));
+      return smooth((vh * 1.0 - T.top(el) - lag) / (vh * span));
     };
 
     const update = () => {
       raf = 0;
       const vh = window.innerHeight;
       const rr = root.getBoundingClientRect();
-      root.style.setProperty("--mp", clamp01((vh - rr.top) / (vh + rr.height)).toFixed(4));
+      // offscreen: nothing to do (this handler runs on every scroll, for every section)
+      if (!nearViewport(rr, vh)) return;
+      // all reads first (one style/layout pass), then all writes
+      T.read([sheet, photo, svg], risers, rules, fades, inks);
+      const mp = clamp01((vh - rr.top) / (vh + rr.height));
+      if (driftA) driftA.style.transform = `translate3d(0, ${((mp - 0.5) * -16).toFixed(1)}px, 0)`;
+      if (driftB) driftB.style.transform = `translate3d(0, ${((mp - 0.5) * -34).toFixed(1)}px, 0)`;
 
       if (sheet) {
         const e = prog(sheet, 0, 0.35);
@@ -235,14 +244,15 @@ export const IndiaMobileMap: React.FC = () => {
       <div
         data-s="sheet"
         className="relative w-full will-change-transform"
-        style={{ filter: "drop-shadow(0 18px 30px rgba(0,0,0,0.6))", opacity: 0.2 }}
+        style={{ opacity: 0.2 }}
       >
         <div
+          data-drift-a
           className="relative w-full will-change-transform"
           style={{
             aspectRatio: `${W} / ${H}`,
             containerType: "inline-size",
-            transform: "translate3d(0, calc((var(--mp, 0.5) - 0.5) * -16px), 0)",
+            transform: "translate3d(0, 0, 0)",
           }}
         >
           <Image
@@ -251,8 +261,8 @@ export const IndiaMobileMap: React.FC = () => {
             width={W}
             height={H}
             unoptimized
-            priority
             className="pointer-events-none block h-full w-full select-none"
+            style={{ filter: "drop-shadow(0 18px 30px rgba(0,0,0,0.6))" }}
           />
 
           {/* Live map layer, same coordinate space as the sheet */}
@@ -459,12 +469,13 @@ export const IndiaMobileMap: React.FC = () => {
 
       {/* ===== Scrapbook photo laid over the lower half ===== */}
       <div
+        data-drift-b
         className="absolute z-10 will-change-transform"
         style={{
           left: "3%",
           width: "70%",
           bottom: "0.5%",
-          transform: "translate3d(0, calc((var(--mp, 0.5) - 0.5) * -34px), 0)",
+          transform: "translate3d(0, 0, 0)",
         }}
       >
         <div

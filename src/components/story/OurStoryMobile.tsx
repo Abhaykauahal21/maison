@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import Image from "next/image";
+import { makeTops, nearViewport } from "@/lib/scrub";
 
 /**
  * OUR STORY: mobile (< md).
@@ -34,7 +35,7 @@ const STYLES = `
 .om-mote { position: absolute; border-radius: 9999px; background: radial-gradient(circle, rgba(255,222,150,.95), rgba(255,190,100,0) 70%); opacity: 0; animation: om-mote ease-in-out infinite; }
 @keyframes om-mote { 0% { opacity: 0; transform: translate3d(0,8px,0); } 30% { opacity: .85; } 100% { opacity: 0; transform: translate3d(var(--dx, 14px),-46px,0); } }
 
-.om-thread { stroke-dasharray: 1; stroke-dashoffset: var(--off, 1); }
+.om-thread { stroke-dasharray: 1; stroke-dashoffset: 1; }
 
 .om-btn { position: relative; overflow: hidden; isolation: isolate; }
 .om-btn::before { content: ""; position: absolute; inset: 0; z-index: -1; background: #d9bd83; transform: translateX(-101%); transition: transform .55s cubic-bezier(.22,1,.36,1); }
@@ -100,6 +101,8 @@ export const OurStoryMobile: React.FC<{ play: boolean }> = ({ play }) => {
     const fades = q("[data-s='fade']");
     const rules = q("[data-s='rule']");
     const inks = q("[data-s='ink']");
+    const drift = root.querySelector<HTMLElement>("[data-drift]");
+    const thread = root.querySelector<SVGPathElement>(".om-thread");
     const paras = q("[data-words]").map((el) => ({
       el,
       words: Array.from(el.querySelectorAll<HTMLElement>("[data-w]")),
@@ -112,10 +115,10 @@ export const OurStoryMobile: React.FC<{ play: boolean }> = ({ play }) => {
     let leanNow = 0;
 
     // e: 0 when the element is still below the reading line, 1 once it has risen `span` above it
+    const T = makeTops();
     const prog = (el: HTMLElement, lag = 0) => {
-      const r = el.getBoundingClientRect();
       const vh = window.innerHeight;
-      return smooth((vh * 1.0 - r.top - lag) / (vh * 0.17));
+      return smooth((vh * 1.0 - T.top(el) - lag) / (vh * 0.17));
     };
 
     const update = () => {
@@ -124,9 +127,14 @@ export const OurStoryMobile: React.FC<{ play: boolean }> = ({ play }) => {
 
       // Section progress: photo drift + thread
       const rr = root.getBoundingClientRect();
+      // offscreen: nothing to do (this handler runs on every scroll, for every section)
+      if (!nearViewport(rr, vh)) return;
+      // all reads first (one style/layout pass), then all writes
+      T.read(risers, fades, rules, inks, paras.map((p) => p.el));
+      const paraH = new Map(paras.map((p) => [p.el, p.el.getBoundingClientRect().height]));
       const t = clamp01((vh - rr.top) / (vh + rr.height));
-      root.style.setProperty("--sp", t.toFixed(4));
-      root.style.setProperty("--off", (1 - clamp01((t - 0.18) / 0.5)).toFixed(4));
+      if (drift) drift.style.transform = `translate3d(0, ${((t - 0.5) * -34).toFixed(1)}px, 0)`;
+      if (thread) thread.style.strokeDashoffset = (1 - clamp01((t - 0.18) / 0.5)).toFixed(4);
 
       risers.forEach((el) => {
         const inner = el.querySelector<HTMLElement>("[data-inner]");
@@ -159,10 +167,10 @@ export const OurStoryMobile: React.FC<{ play: boolean }> = ({ play }) => {
 
       // Paragraphs: words light up one after another as the block passes the reading line
       paras.forEach(({ el, words }) => {
-        const r = el.getBoundingClientRect();
+        const top = T.top(el);
         const start = vh * 0.98;
         const end = vh * 0.62;
-        const p = clamp01((start - r.top) / (start - end + r.height * 0.25));
+        const p = clamp01((start - top) / (start - end + (paraH.get(el) ?? 0) * 0.25));
         const n = words.length;
         words.forEach((w, i) => {
           const e = smooth(p * (n + 7) - i - 1);
@@ -212,7 +220,7 @@ export const OurStoryMobile: React.FC<{ play: boolean }> = ({ play }) => {
       {/* ===== Photograph: drifts with the scroll ===== */}
       <div
         className="absolute inset-x-0 -top-[5%] -bottom-[5%] will-change-transform"
-        style={{ transform: "translate3d(0, calc((var(--sp, 0.5) - 0.5) * -34px), 0)" }}
+        data-drift
       >
         <div className="om-photo om-a absolute inset-0">
           <Image
@@ -220,7 +228,6 @@ export const OurStoryMobile: React.FC<{ play: boolean }> = ({ play }) => {
             alt="Maison D'Vine atelier: the designer sketching beside a gown on the form"
             fill
             unoptimized
-            priority
             sizes="100vw"
             className="pointer-events-none object-cover object-[62%_20%] select-none"
           />

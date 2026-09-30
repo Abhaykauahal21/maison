@@ -55,9 +55,10 @@ export const FooterMobile: React.FC<{
       raf = 0;
       const vh = window.innerHeight;
       const r = root.getBoundingClientRect();
+      // offscreen: nothing to do (this handler runs on every scroll, for every section)
+      if (r.width === 0 || r.bottom < -window.innerHeight || r.top > window.innerHeight * 2) return;
       // 0 when the footer's top edge reaches the bottom of the screen, 1 when it is fully in view
       const t = clamp01((vh - r.top) / Math.min(r.height, vh));
-      root.style.setProperty("--t", t.toFixed(4));
 
       // Backdrop: slow pan from the domes to the sun, and a little parallax
       if (imgRef.current) {
@@ -117,7 +118,6 @@ export const FooterMobile: React.FC<{
             alt=""
             fill
             unoptimized
-            priority
             sizes="100vw"
             className="object-cover select-none"
             style={{ objectPosition: "inherit" }}

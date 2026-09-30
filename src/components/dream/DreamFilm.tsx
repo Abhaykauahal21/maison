@@ -136,7 +136,6 @@ export const DreamFilm: React.FC = () => {
         const a = 0.21 + i * 0.014;
         const e = sm(p, a, a + 0.035);
         w.style.opacity = String(0.12 + 0.88 * e);
-        w.style.filter = `blur(${(1 - e) * 5}px)`;
       });
 
       // III: three threads + the story

@@ -13,6 +13,7 @@ export const IndiaSection: React.FC = () => {
   const textParallaxRef = useParallax<HTMLDivElement>(0.03, 16);
   const collageParallaxRef = useParallax<HTMLDivElement>(0.06, 30);
 
+
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
@@ -55,7 +56,6 @@ export const IndiaSection: React.FC = () => {
           height={849}
           quality={100}
           unoptimized
-          priority
           className="pointer-events-none block h-auto w-full select-none drop-shadow-[0_-8px_20px_rgba(0,0,0,0.35)] drop-shadow-[0_12px_24px_rgba(0,0,0,0.45)]"
           style={{
             objectFit: "cover",
@@ -65,7 +65,7 @@ export const IndiaSection: React.FC = () => {
         />
 
         {/* Animated connectivity between the pins on the map */}
-        {inView && <IndiaRoutes />}
+        <IndiaRoutes />
 
         {/* Slow warm light drifting across the map */}
         {inView && (
@@ -178,7 +178,6 @@ export const IndiaSection: React.FC = () => {
                     height={1503}
                     quality={100}
                     unoptimized
-                    priority
                     className="pointer-events-none block h-auto w-full select-none"
                   />
                 </div>

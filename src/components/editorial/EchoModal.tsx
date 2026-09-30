@@ -65,10 +65,14 @@ export const EchoModal: React.FC<EchoModalProps> = ({
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [inquired, setInquired] = useState(false);
 
-  useEffect(() => {
+  // Reset to the requested look when a different one is opened (adjusting state during render,
+  // the React-recommended way to derive state from a prop, instead of an effect)
+  const [prevInitial, setPrevInitial] = useState(initialIndex);
+  if (prevInitial !== initialIndex) {
+    setPrevInitial(initialIndex);
     setCurrentIndex(initialIndex);
     setInquired(false);
-  }, [initialIndex]);
+  }
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

@@ -5,7 +5,9 @@ import { getLenis, smoothScrollBy } from "@/lib/smooth-scroll";
 import Image from "next/image";
 import { EchoCard } from "@/components/editorial/EchoCard";
 import { EchoParticles } from "@/components/editorial/EchoParticles";
+import { EchoNote } from "@/components/editorial/EchoNote";
 import { EchoModal } from "@/components/editorial/EchoModal";
+import { useMatches } from "@/hooks/use-matches";
 
 const lookData = [
   {
@@ -46,6 +48,8 @@ const lookData = [
 export const EditorialSection: React.FC = () => {
   const containerRef = useRef<HTMLElement | null>(null);
   const mobileRef = useRef<HTMLDivElement | null>(null);
+  const wide = useMatches("(min-width: 1024px)");
+  const showMobile = wide !== true;
   const [mobileProgress, setMobileProgress] = useState(0);
   const seg = (start: number, len: number) =>
     Math.min(1, Math.max(0, (mobileProgress - start) / len));
@@ -84,7 +88,7 @@ export const EditorialSection: React.FC = () => {
   // Bidirectional, so everything plays forward on scroll down and rewinds on scroll up.
   useEffect(() => {
     const el = mobileRef.current;
-    if (!el) return;
+    if (!el || !showMobile) return;
     let raf = 0;
     const update = () => {
       raf = 0;
@@ -105,7 +109,7 @@ export const EditorialSection: React.FC = () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
     };
-  }, []);
+  }, [showMobile]);
 
   const openLook = useCallback((index: number) => {
     setSelectedCardIndex(index);
@@ -247,7 +251,10 @@ export const EditorialSection: React.FC = () => {
   }, [pinAtTarget]);
 
   // Wheel listener: controls card progression when pinned
+  // The non-passive wheel / touchmove listeners exist ONLY while pinned: a non-passive listener on
+  // window makes the browser wait for the main thread on every gesture, even when it does nothing.
   useEffect(() => {
+    if (!isPinned) return;
     const handleWheel = (e: WheelEvent) => {
       if (!isPinnedRef.current) return;
 
@@ -276,7 +283,7 @@ export const EditorialSection: React.FC = () => {
 
     window.addEventListener("wheel", handleWheel, { passive: false });
     return () => window.removeEventListener("wheel", handleWheel);
-  }, [stepNext, stepPrev]);
+  }, [isPinned, stepNext, stepPrev]);
 
   // Touch gesture support for mobile / tablet
   useEffect(() => {
@@ -285,6 +292,9 @@ export const EditorialSection: React.FC = () => {
         touchStartYRef.current = e.touches[0].clientY;
       }
     };
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    const stopStart = () => window.removeEventListener("touchstart", handleTouchStart);
+    if (!isPinned) return stopStart;
 
     const handleTouchMove = (e: TouchEvent) => {
       if (!isPinnedRef.current) return;
@@ -309,13 +319,12 @@ export const EditorialSection: React.FC = () => {
       }
     };
 
-    window.addEventListener("touchstart", handleTouchStart, { passive: true });
     window.addEventListener("touchmove", handleTouchMove, { passive: false });
     return () => {
-      window.removeEventListener("touchstart", handleTouchStart);
+      stopStart();
       window.removeEventListener("touchmove", handleTouchMove);
     };
-  }, [stepNext, stepPrev]);
+  }, [isPinned, stepNext, stepPrev]);
 
   // Keyboard navigation support
   useEffect(() => {
@@ -350,17 +359,17 @@ export const EditorialSection: React.FC = () => {
           - Cards enter 1-by-1 smoothly with each scroll gesture
           - Left editorial content smoothly cross-fades per look
           ======================================================== */}
+      {wide !== false && (
       <div className="relative hidden w-full overflow-x-clip lg:block">
         <div
           className="relative w-full overflow-x-clip"
         >
           {/* Exact background asset in normal flow - NO CROP, NO STRETCH, NO GAPS */}
           <Image
-            src="/images/echo-bg.png"
+            src="/images/closer-chapter-bg.webp"
             alt="The Echo Parchment"
-            width={2048}
-            height={846}
-            priority
+            width={1983}
+            height={793}
             unoptimized
             className="pointer-events-none block h-auto w-full select-none"
             style={{
@@ -371,6 +380,9 @@ export const EditorialSection: React.FC = () => {
 
           {/* Floating Atelier Dried Botanical Particles */}
           <EchoParticles />
+
+          {/* Dried flowers + handwritten note (recreated in HTML; the old PNG had them baked in) */}
+          <EchoNote />
 
           {/* Atmospheric Sunlight Beam */}
           <div
@@ -509,22 +521,23 @@ export const EditorialSection: React.FC = () => {
           </div>
         </div>
       </div>
+      )}
 
       {/* ========================================================
           2. PHONE & TABLET EDITORIAL LAYOUT (< 1024px)
-          - Parchment sheet from /images/echo-bg-mobile.png (487 x 1024, torn top/bottom,
+          - Parchment sheet from /images/echo-bg-mobile.webp (487 x 1024, torn top/bottom,
             dried flowers top-right)
           - Phones: locked to the artwork's aspect ratio, so the torn edges sit exactly at the ends
           - Tablets: a centred sheet that grows with its content
           ======================================================== */}
+      {showMobile && (
       <div ref={mobileRef} className="relative block h-auto w-full lg:hidden">
         <div className="relative mx-auto flex aspect-[487/1024] w-full max-w-[760px] flex-col px-6 pt-16 pb-14 text-[#221c17] sm:aspect-auto sm:min-h-[820px] sm:px-14 sm:pt-24 sm:pb-20">
           <Image
-            src="/images/echo-bg-mobile.png"
+            src="/images/echo-bg-mobile.webp"
             alt=""
             aria-hidden="true"
             fill
-            priority
             unoptimized
             sizes="(max-width: 760px) 100vw, 760px"
             className="pointer-events-none z-0 object-fill select-none"
@@ -668,6 +681,7 @@ export const EditorialSection: React.FC = () => {
           </div>
         </div>
       </div>
+      )}
 
       {/* Interactive Haute Couture Lookbook Modal */}
       <EchoModal

@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { BLOG_POSTS } from "./types";
 import { smoothScrollTo } from "@/lib/smooth-scroll";
+import { makeTops, nearViewport } from "@/lib/scrub";
 
 /**
  * BLOGPOSTS: mobile (< md).
@@ -81,17 +82,24 @@ export const BlogMobile: React.FC = () => {
     const inks = q("[data-s='ink']");
     const fades = q("[data-s='fade']");
 
+    const drift = root.querySelector<HTMLElement>("[data-drift]");
+
     let raf = 0;
+    const T = makeTops();
     const prog = (el: Element, lag = 0, span = 0.17) => {
-      const r = el.getBoundingClientRect();
       const vh = window.innerHeight;
-      return smooth((vh * 1.0 - r.top - lag) / (vh * span));
+      return smooth((vh * 1.0 - T.top(el) - lag) / (vh * span));
     };
     const update = () => {
       raf = 0;
       const vh = window.innerHeight;
       const rr = root.getBoundingClientRect();
-      root.style.setProperty("--sp", clamp01((vh - rr.top) / (vh + rr.height)).toFixed(4));
+      // offscreen: nothing to do (this handler runs on every scroll, for every section)
+      if (!nearViewport(rr, vh)) return;
+      // all reads first (one style/layout pass), then all writes
+      T.read(risers, rules, inks, fades);
+      const sp = clamp01((vh - rr.top) / (vh + rr.height));
+      if (drift) drift.style.transform = `translate3d(0, ${((sp - 0.5) * -40).toFixed(1)}px, 0)`;
 
       risers.forEach((el) => {
         const inner = el.querySelector<HTMLElement>("[data-inner]");
@@ -139,11 +147,15 @@ export const BlogMobile: React.FC = () => {
     let lastActive = -1;
     let lastSwiped = false;
 
-    const apply = (p: number) => {
-      const cards = Array.from(strip.children) as HTMLElement[];
+    const cards = Array.from(strip.children) as HTMLElement[];
+    let step = 0;
+    const measureStep = () => {
       const first = cards[0];
       const second = cards[1];
-      const step = first && second ? second.offsetLeft - first.offsetLeft : 0;
+      step = first && second ? second.offsetLeft - first.offsetLeft : 0;
+    };
+    measureStep();
+    const apply = (p: number) => {
       strip.style.transform = `translate3d(${(-p * (n - 1) * step).toFixed(2)}px, 0, 0)`;
       const pos = p * (n - 1);
       cards.forEach((card, i) => {
@@ -185,6 +197,12 @@ export const BlogMobile: React.FC = () => {
     };
     const onScroll = () => {
       measure();
+      if (target === cur) return; // settled (e.g. the deck is far offscreen): nothing to write
+      if (!raf) raf = requestAnimationFrame(tick);
+    };
+    const onResize = () => {
+      measureStep();
+      measure();
       if (!raf) raf = requestAnimationFrame(tick);
     };
 
@@ -192,11 +210,11 @@ export const BlogMobile: React.FC = () => {
     cur = target;
     apply(cur);
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
+    window.addEventListener("resize", onResize);
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("resize", onResize);
     };
   }, []);
 
@@ -216,7 +234,7 @@ export const BlogMobile: React.FC = () => {
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 -inset-y-[4%] will-change-transform"
-        style={{ transform: "translate3d(0, calc((var(--sp, 0.5) - 0.5) * -40px), 0)" }}
+        data-drift
       >
         <Image
           src="/images/BlogPage-web.webp"

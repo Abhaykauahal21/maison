@@ -13,7 +13,7 @@ export interface ScrollTextRevealProps {
 export const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({
   text,
   className = "",
-  as: Component = "p",
+  as = "p",
   unrevealedOpacity = 0.22,
   highlightClass = "text-current",
 }) => {
@@ -44,10 +44,11 @@ export const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({
   }, []);
 
   const words = text.split(" ");
+  const Tag = as as React.ElementType;
 
   return (
-    <Component
-      ref={containerRef as any}
+    <Tag
+      ref={containerRef}
       className={`inline-block select-none ${className}`}
     >
       {words.map((word, i) => {
@@ -75,6 +76,6 @@ export const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({
           </span>
         );
       })}
-    </Component>
+    </Tag>
   );
 };

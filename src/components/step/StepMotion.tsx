@@ -67,6 +67,8 @@ export const StepMotion: React.FC<StepMotionProps> = ({ variant }) => {
       raf = 0;
       const rect = root.getBoundingClientRect();
       const vh = window.innerHeight;
+      // offscreen (or the hidden layout): nothing to do
+      if (rect.width === 0 || rect.bottom < -vh || rect.top > vh * 2) return;
       // p: 0 as the section enters at the bottom, 1 as it leaves at the top
       const p = clamp01((vh - rect.top) / (vh + rect.height));
       // q: reading progress, 0 when its top hits the lower part of the screen, 1 mid-section

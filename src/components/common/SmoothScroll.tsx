@@ -13,6 +13,9 @@ import { setLenis } from "@/lib/smooth-scroll";
 export function SmoothScroll() {
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // Touch-only devices keep native scrolling (Lenis does not smooth touch anyway), so skip its
+    // always-on requestAnimationFrame loop there.
+    if (window.matchMedia("(hover: none) and (pointer: coarse)").matches) return;
 
     const lenis = new Lenis({
       duration: 1.15,

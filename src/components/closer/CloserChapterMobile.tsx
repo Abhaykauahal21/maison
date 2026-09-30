@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import Image from "next/image";
+import { makeTops, nearViewport } from "@/lib/scrub";
 import { Sparkles, Heart, Gift, BookOpen } from "lucide-react";
 
 /**
@@ -40,7 +41,8 @@ const STYLES = `
 @keyframes cm-float { 0%,100% { transform: translate3d(0,0,0) rotate(0deg); } 50% { transform: translate3d(0,-5px,0) rotate(.45deg); } }
 .cm-seal { animation: cm-seal 3.6s ease-in-out infinite; }
 @keyframes cm-seal { 0%,100% { opacity: .25; transform: scale(.92); } 50% { opacity: .75; transform: scale(1.12); } }
-.cm-shine { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 38%, rgba(255,240,205,.5) 50%, transparent 62%); mix-blend-mode: soft-light; background-size: 260% 100%; }
+.cm-shine { position: absolute; inset: 0; overflow: hidden; mix-blend-mode: soft-light; }
+.cm-shine-band { position: absolute; top: 0; bottom: 0; left: 0; width: 260%; background: linear-gradient(115deg, transparent 38%, rgba(255,240,205,.5) 50%, transparent 62%); will-change: transform; }
 .cm-btn::after { content: ""; position: absolute; top: 0; bottom: 0; width: 34%; left: -50%; background: linear-gradient(100deg, transparent, rgba(255,255,255,.22), transparent); animation: cm-sheen 5s ease-in-out 1s infinite; }
 @keyframes cm-sheen { 0%, 60% { left: -50%; } 100% { left: 130%; } }
 @media (prefers-reduced-motion: reduce) { .cm-float, .cm-seal, .cm-btn::after { animation: none; } }
@@ -116,19 +118,25 @@ export const CloserChapterMobile: React.FC = () => {
     const iris = root.querySelector<HTMLElement>("[data-s='iris']");
     const shine = root.querySelector<HTMLElement>("[data-shine]");
 
+    const drift = root.querySelector<HTMLElement>("[data-drift]");
+
     let raf = 0;
+    const T = makeTops();
     const prog = (el: Element, lag = 0, span = 0.17) => {
-      const r = el.getBoundingClientRect();
       const vh = window.innerHeight;
-      return smooth((vh * 0.76 - r.top - lag) / (vh * span));
+      return smooth((vh * 0.76 - T.top(el) - lag) / (vh * span));
     };
 
     const update = () => {
       raf = 0;
       const vh = window.innerHeight;
       const rr = root.getBoundingClientRect();
+      // offscreen: nothing to do (this handler runs on every scroll, for every section)
+      if (!nearViewport(rr, vh)) return;
+      // all reads first (one style/layout pass), then all writes
+      T.read([frame, iris], risers, convs, rules, fades, wipes, icons, inks, draws);
       const t = clamp01((vh - rr.top) / (vh + rr.height));
-      root.style.setProperty("--sp", t.toFixed(4));
+      if (drift) drift.style.transform = `translate3d(0, ${((t - 0.5) * -26).toFixed(1)}px, 0)`;
 
       if (frame) {
         const e = prog(frame, 0, 0.42);
@@ -141,7 +149,8 @@ export const CloserChapterMobile: React.FC = () => {
         const im = iris.firstElementChild as HTMLElement | null;
         if (im) im.style.transform = `scale(${(1.4 - 0.4 * e).toFixed(4)})`;
       }
-      if (shine) shine.style.backgroundPositionX = `${(120 - t * 240).toFixed(1)}%`;
+      // Same sweep the old background-position animation drew, now a compositor-only transform
+      if (shine) shine.style.transform = `translate3d(${(-0.6154 * (120 - t * 240)).toFixed(2)}%, 0, 0)`;
 
       risers.forEach((el) => {
         const inner = el.querySelector<HTMLElement>("[data-inner]");
@@ -154,7 +163,6 @@ export const CloserChapterMobile: React.FC = () => {
         const e = prog(el, Number(el.dataset.lag || 0), 0.24);
         el.style.opacity = String(e.toFixed(3));
         el.style.transform = `translate3d(${(Number(el.dataset.off) * (1 - e)).toFixed(3)}em, 0, 0)`;
-        el.style.filter = `blur(${((1 - e) * 9).toFixed(1)}px)`;
       });
       rules.forEach((el) => {
         el.style.transform = `scaleX(${prog(el, Number(el.dataset.lag || 0), 0.14).toFixed(3)})`;
@@ -208,22 +216,23 @@ export const CloserChapterMobile: React.FC = () => {
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-x-0 -inset-y-[1%] will-change-transform"
-          style={{
-            transform: "translate3d(0, calc((var(--sp, 0.5) - 0.5) * -26px), 0)",
-            filter: "drop-shadow(0 -12px 20px rgba(0,0,0,0.5))",
-          }}
+          data-drift
         >
-          <Image
-            src="/images/closechapter-mobile.webp"
-            alt=""
-            fill
-            unoptimized
-            priority
-            sizes="100vw"
-            className="object-fill select-none"
-          />
+          {/* The shadow filter sits on the static parchment only; the shine moves outside of it */}
           <div
-            data-shine
+            className="absolute inset-0"
+            style={{ filter: "drop-shadow(0 -12px 20px rgba(0,0,0,0.5))" }}
+          >
+            <Image
+              src="/images/closechapter-mobile.webp"
+              alt=""
+              fill
+              unoptimized
+              sizes="100vw"
+              className="object-fill select-none"
+            />
+          </div>
+          <div
             className="cm-shine"
             style={{
               WebkitMaskImage: "url(/images/closechapter-mobile.webp)",
@@ -231,7 +240,9 @@ export const CloserChapterMobile: React.FC = () => {
               WebkitMaskSize: "100% 100%",
               maskSize: "100% 100%",
             }}
-          />
+          >
+            <div data-shine className="cm-shine-band" />
+          </div>
         </div>
 
         {/* Gold dust */}
@@ -261,10 +272,7 @@ export const CloserChapterMobile: React.FC = () => {
           <div
             data-s="frame"
             className="will-change-transform"
-            style={{
-              opacity: 0,
-              filter: "drop-shadow(0 2.4cqw 2.6cqw rgba(60,35,12,0.4))",
-            }}
+            style={{ opacity: 0 }}
           >
             <div className="cm-float">
               {/* Crop the trailing flower stem: show the top 81% of the artwork */}
@@ -312,6 +320,7 @@ export const CloserChapterMobile: React.FC = () => {
                     unoptimized
                     sizes="70vw"
                     className="pointer-events-none z-[3] object-contain select-none"
+                    style={{ filter: "drop-shadow(0 2.4cqw 2.6cqw rgba(60,35,12,0.4))" }}
                   />
 
                   {/* The wax seal breathes */}

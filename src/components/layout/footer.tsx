@@ -38,7 +38,13 @@ const Wordmark: React.FC<{ inView: boolean; className: string; lineHeight: numbe
             } as React.CSSProperties
           }
         >
-          {ch === " " ? "\u00A0" : ch}
+          {/* scroll layer: the letters converge as the footer arrives */}
+          <span data-fs className="inline-block will-change-transform">
+            {/* mouse layer: letters near the cursor lift and glow */}
+            <span data-fm className="inline-block will-change-transform">
+              {ch === " " ? "\u00A0" : ch}
+            </span>
+          </span>
         </span>
       ))}
     </span>
@@ -60,7 +66,120 @@ const BackToTop: React.FC<{ className?: string }> = ({ className = "" }) => (
 
 export const Footer: React.FC = () => {
   const footerRef = useRef<HTMLElement | null>(null);
+  const deskRef = useRef<HTMLDivElement | null>(null);
   const [inView, setInView] = useState(false);
+
+  // Desktop only. Scroll: the terrace settles (dolly + parallax), the sun blooms, the wordmark
+  // letters converge. Mouse: the terrace shifts against the cursor, a warm light follows it over
+  // the stone, and the wordmark letters near the cursor lift and glow.
+  useEffect(() => {
+    const root = deskRef.current;
+    if (!root) return;
+    const bg = root.querySelector<HTMLElement>("[data-fbg]");
+    const sun = root.querySelector<HTMLElement>("[data-fsun]");
+    const light = root.querySelector<HTMLElement>("[data-flight]");
+    const scrollEls = Array.from(root.querySelectorAll<HTMLElement>("[data-fs]"));
+    const mouseEls = Array.from(root.querySelectorAll<HTMLElement>("[data-fm]"));
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+
+    let t = 0; // scroll progress: 0 as the footer's top reaches the screen bottom, 1 when it is in view
+    let inside = false;
+    let tx = 0; // mouse target, in px relative to the footer
+    let ty = 0;
+    let mx = 0;
+    let my = 0;
+    let raf = 0;
+
+    const paint = () => {
+      const e = t * t * (3 - 2 * t);
+      const w = root.clientWidth || 1;
+      const h = root.clientHeight || 1;
+      const nx = mx / w - 0.5; // -0.5 .. 0.5
+      const ny = my / h - 0.5;
+      if (bg) {
+        bg.style.transform = `translate3d(${(-nx * 26).toFixed(1)}px, ${((1 - e) * -34 - ny * 14).toFixed(1)}px, 0) scale(${(1.14 - 0.1 * e).toFixed(4)})`;
+      }
+      if (sun) {
+        sun.style.opacity = (0.25 + 0.75 * e).toFixed(3);
+        sun.style.transform = `translate3d(0,0,0) scale(${(0.75 + 0.35 * e).toFixed(3)})`;
+      }
+      scrollEls.forEach((el, i) => {
+        const c = (scrollEls.length - 1) / 2;
+        el.style.transform = `translate3d(${((i - c) * 0.045 * (1 - e)).toFixed(3)}em, 0, 0)`;
+      });
+    };
+
+    const frame = () => {
+      raf = 0;
+      mx += (tx - mx) * 0.1;
+      my += (ty - my) * 0.1;
+      paint();
+      if (light) light.style.transform = `translate3d(${mx.toFixed(1)}px, ${my.toFixed(1)}px, 0)`;
+
+      // letters near the cursor lift and glow
+      const gx = root.getBoundingClientRect().left + mx;
+      const gy = root.getBoundingClientRect().top + my;
+      const reach = Math.max(120, window.innerWidth * 0.1);
+      mouseEls.forEach((el) => {
+        const r = el.getBoundingClientRect();
+        const d = Math.hypot(gx - (r.left + r.width / 2), (gy - (r.top + r.height / 2)) * 0.7);
+        const f = inside ? Math.pow(clamp01(1 - d / reach), 2) : 0;
+        el.style.transform = f > 0.003 ? `translate3d(0, ${(-f * 0.11).toFixed(3)}em, 0) scale(${(1 + f * 0.09).toFixed(3)})` : "";
+        el.style.textShadow = f > 0.02 ? `0 0 ${(f * 26).toFixed(1)}px rgba(255, 214, 140, ${(f * 0.95).toFixed(2)})` : "";
+      });
+
+      const settled = Math.abs(tx - mx) < 0.4 && Math.abs(ty - my) < 0.4;
+      if (inside || !settled) raf = requestAnimationFrame(frame);
+    };
+    const kick = () => {
+      if (!raf) raf = requestAnimationFrame(frame);
+    };
+
+    const onScroll = () => {
+      const r = root.getBoundingClientRect();
+      const vh = window.innerHeight;
+      if (r.width === 0 || r.bottom < -100 || r.top > vh + 100) return;
+      t = clamp01((vh - r.top) / Math.min(r.height, vh));
+      paint();
+    };
+    const onMove = (ev: MouseEvent) => {
+      const r = root.getBoundingClientRect();
+      tx = ev.clientX - r.left;
+      ty = ev.clientY - r.top;
+      if (!inside) {
+        inside = true;
+        mx = tx;
+        my = ty;
+        if (light) light.style.opacity = "1";
+      }
+      kick();
+    };
+    const onLeave = () => {
+      inside = false;
+      tx = root.clientWidth / 2;
+      ty = root.clientHeight / 2;
+      if (light) light.style.opacity = "0";
+      kick();
+    };
+
+    tx = mx = root.clientWidth / 2;
+    ty = my = root.clientHeight / 2;
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    if (!reduce) {
+      root.addEventListener("mousemove", onMove);
+      root.addEventListener("mouseleave", onLeave);
+    }
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      root.removeEventListener("mousemove", onMove);
+      root.removeEventListener("mouseleave", onLeave);
+    };
+  }, []);
 
   useEffect(() => {
     const el = footerRef.current;
@@ -102,28 +221,73 @@ export const Footer: React.FC = () => {
           - Full natural width and height with 100% pixel fidelity
           - Zero downscaling, quality={100}, unoptimized
           ======================================================== */}
-      <div className="relative hidden w-full max-w-full min-w-0 overflow-hidden md:block">
+      <div
+        ref={deskRef}
+        className="relative hidden w-full max-w-full min-w-0 overflow-hidden md:block"
+      >
         <div
           className={`relative w-full max-w-full overflow-hidden transition-opacity duration-1000 ease-out ${
             inView ? "opacity-100" : "opacity-95"
           }`}
         >
-          {/* Base high-resolution 2159 x 728 background image */}
-          <div className={inView ? "animate-footer-drift" : ""}>
-            <Image
-            src="/images/footer-web.webp"
-            alt="Maison D'Vine Tuscan Sunset Terrace Atmosphere"
-            width={2159}
-            height={728}
-            quality={100}
-            unoptimized
-            priority
-            className="pointer-events-none block h-auto w-full select-none"
+          {/* Base high-resolution 2159 x 728 background image (scroll dolly + mouse parallax) */}
+          <div data-fbg className="will-change-transform" style={{ transform: "scale(1.14)" }}>
+            <div className={inView ? "animate-footer-drift" : ""}>
+              <Image
+                src="/images/footer-web.webp"
+                alt="Maison D'Vine Tuscan Sunset Terrace Atmosphere"
+                width={2159}
+                height={728}
+                quality={100}
+                unoptimized
+                className="pointer-events-none block h-auto w-full select-none"
+                style={{
+                  width: "100%",
+                  height: "auto",
+                }}
+              />
+            </div>
+          </div>
+
+          {/* The setting sun blooms as the footer arrives (sun sits at ~73% x, 19% y of the photo) */}
+          <div
+            data-fsun
+            className="pointer-events-none absolute z-[4] will-change-transform"
             style={{
-              width: "100%",
-              height: "auto",
+              left: "73.3%",
+              top: "19%",
+              width: "38vw",
+              height: "38vw",
+              marginLeft: "-19vw",
+              marginTop: "-19vw",
+              opacity: 0.25,
+              background:
+                "radial-gradient(closest-side, rgba(255,226,160,0.55), rgba(255,170,80,0.18) 42%, transparent 100%)",
+              mixBlendMode: "screen",
             }}
+            aria-hidden="true"
           />
+
+          {/* Warm light that follows the cursor over the stone */}
+          <div
+            className="pointer-events-none absolute inset-0 z-[6] overflow-hidden"
+            aria-hidden="true"
+          >
+            <div
+              data-flight
+              className="absolute top-0 left-0 will-change-transform"
+              style={{
+                width: "30vw",
+                height: "30vw",
+                marginLeft: "-15vw",
+                marginTop: "-15vw",
+                opacity: 0,
+                transition: "opacity 0.6s ease",
+                background:
+                  "radial-gradient(closest-side, rgba(255,222,160,0.4), rgba(255,190,110,0.12) 55%, transparent 100%)",
+                mixBlendMode: "screen",
+              }}
+            />
           </div>
 
           {/* Warm terrace light drifting across the scene, plus a little dust */}

@@ -8,6 +8,7 @@ import { StepDetails } from "@/components/step/StepDetails";
 import { StepMotion } from "@/components/step/StepMotion";
 import { SlideIn } from "@/components/common/SlideIn";
 import { useParallax } from "@/hooks/use-parallax";
+import { useMatches } from "@/hooks/use-matches";
 
 // Washi-tape strips that "stick" the photo onto the scrapbook paper
 const TAPES = [
@@ -17,6 +18,7 @@ const TAPES = [
 
 export const StepSection: React.FC = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
+  const wide = useMatches("(min-width: 768px)");
   const [inView, setInView] = useState(false);
   const textParallaxRef = useParallax<HTMLDivElement>(0.03, 18);
   const photoParallaxRef = useParallax<HTMLDivElement>(0.06, 30);
@@ -47,7 +49,7 @@ export const StepSection: React.FC = () => {
     <section
       ref={sectionRef}
       id="step-1"
-      className="relative z-20 -mt-[7vw] w-full bg-transparent text-[#1c1815] select-none md:-mt-[4.5vw] drop-shadow-[0_-10px_20px_rgba(0,0,0,0.4)] drop-shadow-[0_14px_28px_rgba(0,0,0,0.55)]"
+      className="relative z-20 -mt-[7vw] w-full bg-transparent text-[#1c1815] select-none md:-mt-[4.5vw]"
     >
       {/* ========================================================
           1. DESKTOP & TABLET EDITORIAL LAYOUT (md: 768px+)
@@ -57,8 +59,10 @@ export const StepSection: React.FC = () => {
           - Central photo frame containing crimson gown model
           - Right-bottom editorial details (THE BEGINNING, VIEW DETAILS →)
           ======================================================== */}
+      {wide !== false && (
       <div className="relative hidden w-full overflow-x-clip md:block">
-        {/* Full width edge-to-edge background asset (step-bg.webp) */}
+        {/* Full width edge-to-edge background asset (step-bg.webp). The shadow lives on this static
+            image only (not on the section), so the animated layers above never re-trigger the filter. */}
         <Image
           src="/images/step-bg.webp"
           alt="Maison D'Vine Step 1 Vintage Scrapbook Paper"
@@ -66,7 +70,7 @@ export const StepSection: React.FC = () => {
           height={848}
           loading="lazy"
           unoptimized
-          className="pointer-events-none block h-auto w-full select-none"
+          className="pointer-events-none block h-auto w-full select-none drop-shadow-[0_-10px_20px_rgba(0,0,0,0.4)] drop-shadow-[0_14px_28px_rgba(0,0,0,0.55)]"
         />
 
         <StepMotion variant="desktop" />
@@ -126,14 +130,16 @@ export const StepSection: React.FC = () => {
           </div>
         </div>
       </div>
+      )}
 
       {/* ========================================================
           2. MOBILE EDITORIAL LAYOUT (< 768px)
           Exact match to Reference Screenshot media_1790505231799.png
           100% Full Width Edge-to-Edge using step-bg-mobile.jpg provided by user
           ======================================================== */}
-      <div className="relative block w-full px-0 py-0 overflow-hidden md:hidden">
-        <div className="relative w-full overflow-hidden">
+      {wide !== true && (
+      <div className="relative block w-full px-0 py-0 overflow-x-clip md:hidden">
+        <div className="relative w-full overflow-x-clip">
           {/* Exact Mobile Paper Asset (541 x 1024) spanning 100% full width */}
           <Image
             src="/images/step-bg-mobile.webp"
@@ -142,7 +148,7 @@ export const StepSection: React.FC = () => {
             height={1024}
             loading="lazy"
             unoptimized
-            className="pointer-events-none block h-auto w-full select-none"
+            className="pointer-events-none block h-auto w-full select-none drop-shadow-[0_-10px_20px_rgba(0,0,0,0.4)] drop-shadow-[0_14px_28px_rgba(0,0,0,0.55)]"
           />
 
           <StepMotion variant="mobile" />
@@ -262,6 +268,7 @@ export const StepSection: React.FC = () => {
           </div>
         </div>
       </div>
+      )}
     </section>
   );
 };

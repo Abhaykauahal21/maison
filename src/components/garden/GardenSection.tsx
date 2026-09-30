@@ -4,6 +4,7 @@ import React, { useRef, useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { GardenParticles } from "@/components/garden/GardenParticles";
 import { smoothScrollTo } from "@/lib/smooth-scroll";
+import { makeTops, nearViewport } from "@/lib/scrub";
 
 export interface TestimonialItem {
   id: string;
@@ -405,15 +406,16 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
     let raf = 0;
     const desk = window.matchMedia("(min-width: 768px)");
 
+    const T = makeTops();
     const progM = (el: Element, lag = 0, span = 0.17) => {
-      const r = el.getBoundingClientRect();
       const vh = window.innerHeight;
-      return sm(vh * 0.92 - r.top - lag, 0, vh * span);
+      return sm(vh * 0.92 - T.top(el) - lag, 0, vh * span);
     };
 
     const applyDesktop = () => {
       const vh = window.innerHeight;
       const r = track.getBoundingClientRect();
+      if (!nearViewport(r, vh, 0.5)) return;
       const enter = clamp01((vh - r.top) / (vh * 0.95));
       const span = Math.max(1, r.height - vh);
       const p = clamp01(-r.top / span);
@@ -462,8 +464,11 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
     const applyMobile = () => {
       const vh = window.innerHeight;
       const rr = mob.getBoundingClientRect();
+      // offscreen: nothing to do (this handler runs on every scroll, for every section)
+      if (!nearViewport(rr, vh)) return;
+      // all reads first (one style/layout pass), then all writes
+      T.read(mRises, mRules, mFades, [mLeft, mRight, mPaper]);
       const mp = clamp01((vh - rr.top) / (vh + rr.height));
-      mob.style.setProperty("--mp", mp.toFixed(4));
 
       if (mBg) {
         const e = sm(vh - rr.top, 0, vh * 0.6);
@@ -650,7 +655,6 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
                   src="/images/story-web.webp"
                   alt="Sunlit garden at golden hour"
                   fill
-                  priority
                   quality={90}
                   sizes="100vw"
                   className="pointer-events-none object-cover select-none"
@@ -813,7 +817,6 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
                 src="/images/story-mobile.webp"
                 alt="Sunlit garden at golden hour"
                 fill
-                priority
                 quality={85}
                 sizes="100vw"
                 className="object-cover select-none"
@@ -873,15 +876,15 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
           </div>
 
           <div className="mx-auto mt-8 w-full max-w-[640px]">
-            <div
-              className="relative z-10 flex items-start justify-between gap-[2vw]"
-              style={{ filter: "drop-shadow(0 14px 18px rgba(30,14,4,0.45))" }}
-            >
+            {/* Shadows sit on each moving piece (cached with its layer) instead of a wrapper that
+                would be re-filtered every scroll frame */}
+            <div className="relative z-10 flex items-start justify-between gap-[2vw]">
               <div
                 data-gw="left"
-                className="relative w-[51%]"
+                className="relative w-[51%] will-change-transform"
                 style={{
                   aspectRatio: `${RECTS.left[2] - RECTS.left[0]} / ${RECTS.left[3] - RECTS.left[1]}`,
+                  filter: "drop-shadow(0 14px 18px rgba(30,14,4,0.45))",
                   ...crop(RECTS.left),
                 }}
               >
@@ -899,9 +902,10 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
               </div>
               <div
                 data-gw="right"
-                className="relative mt-[8%] w-[48%]"
+                className="relative mt-[8%] w-[48%] will-change-transform"
                 style={{
                   aspectRatio: `${RECTS.right[2] - RECTS.right[0]} / ${RECTS.right[3] - RECTS.right[1]}`,
+                  filter: "drop-shadow(0 14px 18px rgba(30,14,4,0.45))",
                   ...crop(RECTS.right),
                 }}
               >
@@ -919,11 +923,12 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
               </div>
             </div>
 
-            <div
-              className="relative z-20 -mt-[6vw] w-full sm:-mt-10"
-              style={{ filter: "drop-shadow(0 16px 20px rgba(30,14,4,0.5))" }}
-            >
-              <div data-gw="paper" className="w-full" style={crop(RECTS.center)}>
+            <div className="relative z-20 -mt-[6vw] w-full sm:-mt-10">
+              <div
+                data-gw="paper"
+                className="w-full will-change-transform"
+                style={{ filter: "drop-shadow(0 16px 20px rgba(30,14,4,0.5))", ...crop(RECTS.center) }}
+              >
                 <div className="px-[11%] pt-[13%] pb-[13%]">
                   <TestimonialView
                     key={currentIndex}

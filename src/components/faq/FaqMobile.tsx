@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import Image from "next/image";
+import { makeTops, nearViewport } from "@/lib/scrub";
 
 export interface FaqMobileItem {
   id: string;
@@ -11,7 +12,7 @@ export interface FaqMobileItem {
 
 /**
  * FAQ: mobile (< md).
- * The torn parchment (/images/echo-bg-mobile.png: torn top + bottom, dried flowers in the corner)
+ * The torn parchment (/images/echo-bg-mobile.webp: torn top + bottom, dried flowers in the corner)
  * IS the page: questions sit straight on the paper as an index, no boxes.
  *
  * Scroll-scrubbed (plays forward and backward with your thumb):
@@ -25,7 +26,8 @@ export interface FaqMobileItem {
  */
 
 const STYLES = `
-.fq-sheen { background: linear-gradient(105deg, transparent 38%, rgba(255,250,235,.42) 50%, transparent 62%); mix-blend-mode: soft-light; }
+.fq-sheen { mix-blend-mode: soft-light; }
+.fq-sheen-band { background: linear-gradient(105deg, transparent 38%, rgba(255,250,235,.42) 50%, transparent 62%); will-change: transform; }
 .fq-row-btn:focus-visible { outline: 1px solid #8a6a3a; outline-offset: 4px; }
 .fq-word { display: inline-block; opacity: 0; animation: fq-word .55s cubic-bezier(.22,1,.36,1) var(--d, 0s) both; }
 @keyframes fq-word { from { opacity: 0; transform: translateY(8px); filter: blur(2px); } to { opacity: 1; transform: none; filter: none; } }
@@ -85,21 +87,28 @@ export const FaqMobile: React.FC<{
     const inks = q<HTMLElement>("[data-s='ink']");
     const draws = q<SVGPathElement>("[data-s='draw']");
     const fades = q<HTMLElement>("[data-s='fade']");
+    const sheen = root.querySelector<HTMLElement>("[data-sheen]");
+    const drift = root.querySelector<HTMLElement>("[data-drift]");
 
     let raf = 0;
+    const T = makeTops();
     const prog = (el: Element, lag = 0, span = 0.17) => {
-      const r = el.getBoundingClientRect();
       const vh = window.innerHeight;
-      return smooth((vh * 1.0 - r.top - lag) / (vh * span));
+      return smooth((vh * 1.0 - T.top(el) - lag) / (vh * span));
     };
 
     const update = () => {
       raf = 0;
       const vh = window.innerHeight;
       const rr = root.getBoundingClientRect();
+      // offscreen: nothing to do (this handler runs on every scroll, for every section)
+      if (!nearViewport(rr, vh)) return;
+      // all reads first (one style/layout pass), then all writes
+      T.read(risers, rows, rules, inks, draws, fades);
       const t = clamp01((vh - rr.top) / (vh + rr.height));
-      root.style.setProperty("--sp", t.toFixed(4));
-      root.style.setProperty("--sheen", `${(t * 260 - 80).toFixed(1)}%`);
+      if (drift) drift.style.transform = `translate3d(0, ${((t - 0.5) * -22).toFixed(1)}px, 0)`;
+      // Band of light crossing the paper (same path the old background-position sweep drew)
+      if (sheen) sheen.style.transform = `translate3d(${(-0.5455 * (t * 260 - 80)).toFixed(2)}%, 0, 0)`;
 
       risers.forEach((el) => {
         const inner = el.querySelector<HTMLElement>("[data-inner]");
@@ -153,23 +162,29 @@ export const FaqMobile: React.FC<{
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 -inset-y-[2%] will-change-transform"
-        style={{
-          transform: "translate3d(0, calc((var(--sp, 0.5) - 0.5) * -22px), 0)",
-          filter: "drop-shadow(0 -10px 18px rgba(0,0,0,0.45))",
-        }}
+        data-drift
       >
-        <Image
-          src="/images/echo-bg-mobile.png"
-          alt=""
-          fill
-          unoptimized
-          sizes="100vw"
-          className="object-fill select-none"
-        />
+        {/* The shadow filter sits on the static paper only; the sheen moves outside of it */}
         <div
-          className="fq-sheen absolute inset-0"
-          style={{ backgroundPositionX: "var(--sheen, 0%)", backgroundSize: "220% 100%" }}
-        />
+          className="absolute inset-0"
+          style={{ filter: "drop-shadow(0 -10px 18px rgba(0,0,0,0.45))" }}
+        >
+          <Image
+            src="/images/echo-bg-mobile.webp"
+            alt=""
+            fill
+            unoptimized
+            sizes="100vw"
+            className="object-fill select-none"
+          />
+        </div>
+        <div className="fq-sheen absolute inset-0 overflow-hidden">
+          <div
+            data-sheen
+            className="fq-sheen-band absolute inset-y-0 left-0 w-[220%]"
+            style={{ transform: "translate3d(43.64%, 0, 0)" }}
+          />
+        </div>
       </div>
 
       {/* ===== Copy on the paper ===== */}
@@ -218,6 +233,17 @@ export const FaqMobile: React.FC<{
 
         {/* Questions as an index on the paper */}
         <div className="mt-8">
+          <div
+            data-s="fade"
+            className="mb-2 flex items-center justify-between font-serif text-[9.5px] tracking-[0.26em] text-[#7a6a59] uppercase"
+            style={{ opacity: 0.2 }}
+          >
+            <span>The index</span>
+            <span className="tabular-nums">
+              {String((openIndex ?? -1) + 1).padStart(2, "0")} /{" "}
+              {String(items.length).padStart(2, "0")}
+            </span>
+          </div>
           {items.map((item, idx) => {
             const isOpen = openIndex === idx;
             const words = item.answer.split(" ");
@@ -249,7 +275,7 @@ export const FaqMobile: React.FC<{
                   aria-expanded={isOpen}
                   aria-controls={`faq-answer-mobile-${idx}`}
                   id={`faq-question-mobile-${idx}`}
-                  className="fq-row-btn group flex w-full cursor-pointer items-start gap-4 py-[18px] text-left"
+                  className="fq-row-btn group flex w-full cursor-pointer items-start gap-4 py-[18px] text-left transition-colors duration-200 active:bg-[#8a6a3a]/[0.07]"
                 >
                   <span
                     className="mt-[3px] w-6 shrink-0 font-serif text-[11px] tracking-[0.18em] transition-colors duration-500"

@@ -7,10 +7,12 @@ import { ScrollIndicator } from "@/components/home/ScrollIndicator";
 import { HeroParticles } from "@/components/home/HeroParticles";
 import { FilmModal } from "@/components/home/FilmModal";
 import { EditorialText } from "@/components/home/EditorialText";
+import { useMatches } from "@/hooks/use-matches";
 
 export const Hero: React.FC = () => {
   const [isFilmOpen, setIsFilmOpen] = useState(false);
   const sectionRef = useRef<HTMLElement | null>(null);
+  const wide = useMatches("(min-width: 768px) and (orientation: landscape)");
 
   // "Cover" reveal: the hero stays pinned while the Editorial section slides over it.
   // --cover (0 -> 1) is derived from the Editorial section's position, which stays
@@ -20,6 +22,8 @@ export const Hero: React.FC = () => {
     if (!hero) return;
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let raf = 0;
+    let lastCover = "";
+    let lastVis = "";
 
     const update = () => {
       raf = 0;
@@ -28,9 +32,18 @@ export const Hero: React.FC = () => {
       const vh = window.innerHeight;
       const top = story.getBoundingClientRect().top;
       const cover = Math.min(1, Math.max(0, (vh - 100 - top) / Math.max(1, vh - 145)));
-      hero.style.setProperty("--cover", reduceMotion ? "0" : cover.toFixed(3));
+      // write only when the value changes: a custom property write restyles the whole hero
+      const coverStr = reduceMotion ? "0" : cover.toFixed(3);
+      if (coverStr !== lastCover) {
+        lastCover = coverStr;
+        hero.style.setProperty("--cover", coverStr);
+      }
       // Once fully covered, hide the pinned hero so it never bleeds through later sections.
-      hero.style.visibility = cover >= 1 ? "hidden" : "visible";
+      const vis = cover >= 1 ? "hidden" : "visible";
+      if (vis !== lastVis) {
+        lastVis = vis;
+        hero.style.visibility = vis;
+      }
     };
     const schedule = () => {
       if (!raf) raf = requestAnimationFrame(update);
@@ -71,6 +84,7 @@ export const Hero: React.FC = () => {
           - Right handwritten script: Different Stories Same Sisterhood
           - Bottom edge designed to be overlapped by parchment page below
           ======================================================== */}
+        {wide !== false && (
         <div className="relative hidden h-[100dvh] max-h-[1050px] min-h-[520px] w-full overflow-hidden md:landscape:block">
           {/* Full hero image layer with framing matching reference (scroll parallax wrapper) */}
           <div
@@ -138,11 +152,13 @@ export const Hero: React.FC = () => {
             </div>
           </div>
         </div>
+        )}
 
         {/* ========================================================
           2. MOBILE (< 768px)
           Vertical screen adaptation anchored comfortably above fold
           ======================================================== */}
+        {wide !== true && (
         <div className="relative block h-[100dvh] max-h-[1100px] min-h-[600px] w-full overflow-hidden md:landscape:hidden">
           <div className="animate-hero-image-settle absolute inset-0 z-0">
             <Image
@@ -181,6 +197,7 @@ export const Hero: React.FC = () => {
             </div>
           </div>
         </div>
+        )}
 
         {/* Darkens the pinned hero as the next section slides over it */}
         <div
