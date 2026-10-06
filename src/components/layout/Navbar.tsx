@@ -29,7 +29,6 @@ const tearPath = (seed: number, base: number, amp: number) => {
   }
   return `${d} Z`;
 };
-const TEAR_BACK = tearPath(2.2, 6, 14);
 const TEAR_FRONT = tearPath(5.6, 2, 10);
 
 const TAPE_CLIP =
@@ -85,7 +84,7 @@ export const Navbar: React.FC = () => {
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-x-0 top-0 h-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
-          style={{ transform: scrolled ? "translate3d(0,0,0)" : "translate3d(0,-115%,0)" }}
+          style={{ transform: scrolled ? "translate3d(0,0,0)" : "translate3d(0,calc(-100% - 40px),0)" }}
         >
           <div
             className="absolute inset-0"
@@ -100,14 +99,8 @@ export const Navbar: React.FC = () => {
             viewBox="0 0 1200 24"
             preserveAspectRatio="none"
           >
-            <path d={TEAR_BACK} fill="#d9cbb0" />
             <path d={TEAR_FRONT} fill="#f1e8d6" />
           </svg>
-          {/* soft contact shadow under the tear */}
-          <div
-            className="absolute inset-x-0 h-3 bg-gradient-to-b from-black/25 to-transparent"
-            style={{ top: "calc(100% + 10px)" }}
-          />
           {/* washi tape holding the strip up */}
           {[
             { side: "left-[2.5%]", rot: "-32deg" },

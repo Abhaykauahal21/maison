@@ -72,7 +72,7 @@ export const DreamContent: React.FC<DreamContentProps> = ({
         {/* Subtitle — Scroll-Based Word Reveal */}
         <div className="mt-3.5 sm:mt-4">
           <ScrollTextReveal
-            text="Where her story begins to take shape."
+            text="Where my story begins to take shape."
             as="p"
             className="font-serif text-base sm:text-lg lg:text-[1.22vw] leading-[1.45] text-[#f2e7db] italic tracking-wide"
             unrevealedOpacity={0.25}
@@ -90,7 +90,7 @@ export const DreamContent: React.FC<DreamContentProps> = ({
           }`}
         >
           <ScrollTextReveal
-            text="The Dream Collection is inspired by the first chapter of every journey — her aspirations, her what-ifs, and the courage to dream it all."
+            text="The Dream Collection is inspired by the first chapter of every journey — my aspirations, my what-ifs, and the courage to dream it all."
             as="p"
             className="font-sans text-xs sm:text-[13px] lg:text-[0.88vw] leading-[1.85] sm:leading-[1.9] lg:leading-[1.95] text-[#c7bcaf] tracking-[0.015em]"
             unrevealedOpacity={0.25}

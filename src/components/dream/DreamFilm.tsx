@@ -23,7 +23,7 @@ const sm = (p: number, a: number, b: number) => {
 };
 
 const TITLE = "DREAM";
-const QUOTE = "Where her story begins to take shape.".split(" ");
+const QUOTE = "Where my story begins to take shape.".split(" ");
 const PILLARS = ["Aspirations", "What-ifs", "Courage"];
 const SCENES = ["I", "II", "III", "IV"];
 const SCENE_STARTS = [0, 0.2, 0.46, 0.72];
@@ -42,7 +42,7 @@ const CARDS = [
   {
     numeral: "II",
     titleLines: ["THE", "AWAKENING"],
-    lines: ["For the girl who", "chose herself."],
+    lines: ["For the day I", "chose myself."],
     src: "/images/awakening.webp",
     alt: "Maison D'Vine The Awakening Noir Silk Gown",
     side: 1,
@@ -371,8 +371,8 @@ export const DreamFilm: React.FC = () => {
             className="mt-6 max-w-[34ch] border-l border-[#e6c98f]/70 pl-4 font-sans text-[13px] leading-[1.85] text-[#f6efe4] [text-shadow:0_1px_3px_rgba(0,0,0,0.95),0_2px_14px_rgba(0,0,0,0.85)] sm:text-[15px] lg:max-w-[40ch] lg:text-[clamp(13px,1vw,16px)]"
             style={{ opacity: 0 }}
           >
-            The Dream Collection is inspired by the first chapter of every journey &mdash; her
-            aspirations, her what-ifs, and the courage to dream it all.
+            The Dream Collection is inspired by the first chapter of every journey &mdash; my
+            aspirations, my what-ifs, and the courage to dream it all.
           </p>
         </div>
 

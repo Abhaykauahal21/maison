@@ -19,9 +19,9 @@ export const echoDetails: EchoItem[] = [
   {
     title: "SOLACE",
     subtitle: "Look 01 · The Solace Gown",
-    descLines: ["For the moments", "she finds herself."],
+    descLines: ["In the moments", "I find myself."],
     fullStory:
-      "Crafted from ethereal hand-printed floral silk organza, Solace embodies the quiet sanctuary of self-discovery. Draped organically in our Parisian atelier, each layer mimics the whisper of morning petals unfolding at dawn.",
+      "Hand-printed floral silk organza, draped in our Parisian atelier. Each layer felt like morning petals unfolding at dawn — the quiet sanctuary where I finally found myself.",
     fabric: "100% Hand-woven Silk Organza & French Gossamer Tulle",
     silhouette: "Asymmetrical Draped Column with Trailing Watteau Pleat",
     imageSrc: "/images/solace.webp",
@@ -30,9 +30,9 @@ export const echoDetails: EchoItem[] = [
   {
     title: "LONGING",
     subtitle: "Look 02 · The Longing Gown",
-    descLines: ["For what lives", "between hearts."],
+    descLines: ["In what lives", "between our hearts."],
     fullStory:
-      "A dramatic exploration of desire and restraint. Constructed from sculpted crimson micro-tulle, Longing features thousands of hand-gathered pleats that cascade into a voluminous, breathless train of raw romance.",
+      "Sculpted crimson micro-tulle with thousands of hand-gathered pleats, cascading into a breathless train. I wore it to say, without a word, everything that desire and restraint had kept inside me.",
     fabric: "Crimson Architectural Tulle with Silk Charmeuse Corsetry",
     silhouette: "Structured Sweetheart Bodice with Architectural Flounce",
     imageSrc: "/images/longing.webp",
@@ -41,9 +41,9 @@ export const echoDetails: EchoItem[] = [
   {
     title: "REVERIE",
     subtitle: "Look 03 · The Reverie Gown",
-    descLines: ["For the dreams", "she doesn't say out loud."],
+    descLines: ["For the dreams", "I don't say out loud."],
     fullStory:
-      "Reverie is woven in midnight noir duchess satin with discreet antique gold corded lacework. An homage to nocturnal introspection, its clean, sovereign lines speak of unyielding inner grace.",
+      "Midnight noir duchess satin with discreet antique gold corded lace. It is my homage to the quiet hours — clean, sovereign lines that speak of the grace I carry within.",
     fabric: "Noir Duchess Silk Satin & Antique Gold Filigree Lace",
     silhouette: "Bias-Cut Noir Column with Open Back & Sculpted Train",
     imageSrc: "/images/reverie.webp",

@@ -36,7 +36,7 @@ const CARDS = [
   {
     numeral: "II",
     titleLines: "The Awakening",
-    lines: ["For the girl who", "chose herself."],
+    lines: ["For the day I", "chose myself."],
     src: "/images/awakening.webp",
     alt: "Maison D'Vine The Awakening Noir Silk Gown",
     drop: 7,
@@ -44,11 +44,12 @@ const CARDS = [
 ];
 
 // Scene timing along the scroll (0..1): [inStart, inEnd, outStart, outEnd]
-const SCENE_A = [0, 0, 0.2, 0.3];
-const SCENE_B = [0.3, 0.4, 0.66, 0.74];
-const SCENE_C = [0.74, 0.84, 2, 3];
-const PILLAR_START = 0.36;
-const PILLAR_END = 0.66;
+// Stage 01 gets a long hold (it is the first thing seen on arrival), so the others start later.
+const SCENE_A = [0, 0, 0.3, 0.4];
+const SCENE_B = [0.4, 0.5, 0.72, 0.8];
+const SCENE_C = [0.8, 0.9, 2, 3];
+const PILLAR_START = 0.46;
+const PILLAR_END = 0.72;
 
 const SHADOW = "0 1px 2px rgba(0,0,0,0.5), 0 3px 28px rgba(0,0,0,0.55)";
 const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
@@ -79,6 +80,34 @@ const Rise: React.FC<{
   </span>
 );
 
+/** "Stage N": gold script + Bodoni numeral (the Chapter-0 look). Rises/leaves through its own mask. */
+const StageTag: React.FC<{ n: string; timed?: { entered: boolean; delay: number } }> = ({ n, timed }) => (
+  <Rise
+    style={{ padding: "0.25em 0.6em 0.3em 0", margin: "-0.25em -0.6em -0.12em 0" }}
+    timed={timed}
+  >
+    <div
+      className="flex items-center gap-[0.8vw] select-none"
+      style={{ filter: "drop-shadow(0 2px 10px rgba(0,0,0,0.55))" }}
+    >
+      <span className="chapter-gold chapter-gold-light chapter-shine font-allura allura-regular font-script font-cursive pr-[0.15em] text-[clamp(38px,3.8vw,78px)] leading-none">
+        Stage
+      </span>
+      <span className="chapter-gold chapter-gold-light chapter-shine font-bodoni text-[clamp(44px,4.4vw,90px)] leading-none font-normal italic">
+        {n}
+      </span>
+      <span
+        className="h-px bg-[#e6c98f]/70"
+        style={{
+          width: timed && !timed.entered ? 0 : "3vw",
+          transition: `width 1.6s ${EASE} 1400ms`,
+        }}
+        aria-hidden="true"
+      />
+    </div>
+  </Rise>
+);
+
 export const DreamDesktop: React.FC = () => {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
@@ -94,7 +123,9 @@ export const DreamDesktop: React.FC = () => {
           io.disconnect();
         }
       },
-      { threshold: 0.1 }
+      // fire when the stage is about to pin (track top within the upper 40% of the viewport),
+      // so Stage 01 writes itself in while it is actually on screen
+      { rootMargin: "0px 0px -60% 0px" }
     );
     io.observe(el);
     return () => io.disconnect();
@@ -121,6 +152,9 @@ export const DreamDesktop: React.FC = () => {
     const cards = q<HTMLElement>(stage, "[data-card]");
     const plates = q<HTMLElement>(stage, "[data-plate]");
     const captions = q<HTMLElement>(stage, "[data-caption]");
+    const frames = q<HTMLElement>(stage, "[data-frame]");
+    const numerals = q<HTMLElement>(stage, "[data-numeral]");
+    const caplines = q<HTMLElement>(stage, "[data-capline]");
     const cta = one("[data-cta]");
     const cue = one("[data-cue]");
     const bar = one("[data-bar]");
@@ -153,7 +187,10 @@ export const DreamDesktop: React.FC = () => {
       const bIn = sm(p, SCENE_B[0] + 0.05, SCENE_B[1] + 0.05);
       const bOut = sm(p, SCENE_B[2], SCENE_B[3]);
       fades.forEach((f) => {
-        f.style.opacity = String(bIn * (1 - bOut));
+        const v = bIn * (1 - bOut);
+        f.style.opacity = String(v);
+        f.style.filter = v < 0.99 ? `blur(${((1 - v) * 7).toFixed(1)}px)` : "none";
+        f.style.transform = `translate3d(0, ${((1 - bIn) * 16 - bOut * 10).toFixed(1)}px, 0)`;
       });
 
       // II: one thread at a time takes the light
@@ -164,18 +201,32 @@ export const DreamDesktop: React.FC = () => {
         const off = i === PILLARS.length - 1 ? 0 : sm(p, s + slice - 0.015, s + slice + 0.015);
         const a = on * (1 - off);
         el.style.opacity = String(0.3 + 0.7 * a);
-        el.style.transform = `translate3d(${(a * 1.6).toFixed(2)}vw, 0, 0)`;
+        el.style.transform = `translate3d(${(a * 1.6).toFixed(2)}vw, 0, 0) scale(${(1 + 0.05 * a).toFixed(4)})`;
+        el.style.filter = a > 0.02 ? `drop-shadow(0 0 ${(a * 16).toFixed(1)}px rgba(230,201,143,${(a * 0.4).toFixed(2)}))` : "none";
+        const num = el.querySelector<HTMLElement>("[data-pnum]");
+        if (num) num.style.opacity = String(0.45 + 0.55 * a);
         const rule = pillarRules[i];
         if (rule) rule.style.transform = `scaleX(${a.toFixed(3)})`;
       });
 
       // III: the looks arrive as plates, and keep drifting at their own pace
       cards.forEach((el, i) => {
-        const a = 0.76 + i * 0.07;
+        const a = 0.82 + i * 0.06;
         const e = sm(p, a, a + 0.14);
         const drift = sm(p, 0.9, 1) * (i ? -1.5 : 1.5);
         el.style.opacity = String(clamp01(e * 5));
-        el.style.transform = `translate3d(0, ${((1 - e) * 14 + CARDS[i].drop + drift).toFixed(2)}vh, 0)`;
+        el.style.transform = `translate3d(0, ${((1 - e) * 14 + CARDS[i].drop + drift).toFixed(2)}vh, 0) rotate(${((1 - e) * (i ? 3.5 : -3.5)).toFixed(2)}deg)`;
+        const fr = frames[i];
+        if (fr) {
+          const f = sm(p, a + 0.06, a + 0.17);
+          fr.style.opacity = String(f);
+          fr.style.transform = `scale(${(1.08 - 0.08 * f).toFixed(4)})`;
+        }
+        const nu = numerals[i];
+        if (nu) {
+          nu.style.opacity = String(sm(p, a + 0.04, a + 0.16));
+          nu.style.transform = `translate3d(0, ${((1 - sm(p, a + 0.04, a + 0.16)) * 3).toFixed(2)}vw, 0)`;
+        }
         el.style.pointerEvents = e > 0.6 ? "auto" : "none";
         const plate = plates[i];
         if (plate) plate.style.clipPath = `inset(0 0 ${((1 - e) * 100).toFixed(2)}% 0)`;
@@ -186,10 +237,12 @@ export const DreamDesktop: React.FC = () => {
           const c = sm(p, a + 0.1, a + 0.18);
           cap.style.opacity = String(c);
           cap.style.transform = `translate3d(0, ${((1 - c) * 10).toFixed(2)}px, 0)`;
+          const cl = caplines[i];
+          if (cl) cl.style.transform = `scaleX(${c.toFixed(3)})`;
         }
       });
       if (cta) {
-        const e = sm(p, 0.88, 0.96);
+        const e = sm(p, 0.9, 0.97);
         cta.style.opacity = String(e);
         cta.style.transform = `translate3d(0, ${((1 - e) * 14).toFixed(2)}px, 0)`;
         cta.style.pointerEvents = e > 0.6 ? "auto" : "none";
@@ -231,10 +284,10 @@ export const DreamDesktop: React.FC = () => {
   }, []);
 
   const eyebrow =
-    "font-serif text-[0.78vw] font-normal uppercase tracking-[0.34em] text-[#e6c98f]";
+    "font-serif text-[clamp(12px,0.98vw,19px)] font-medium uppercase tracking-[0.34em] text-[#f0d9a6]";
 
   return (
-    <div ref={trackRef} className="relative w-full bg-[#0a0908]" style={{ height: "460vh" }}>
+    <div ref={trackRef} className="relative w-full bg-[#0a0908]" style={{ height: "540vh" }}>
       <div ref={stageRef} className="sticky top-0 h-screen w-full overflow-hidden">
         {/* Photograph: fades up from black once, then dollies with the scroll */}
         <div
@@ -275,9 +328,7 @@ export const DreamDesktop: React.FC = () => {
         <div className="absolute top-1/2 left-[7%] z-20 grid w-[38%] -translate-y-1/2 items-center">
           {/* I */}
           <div data-sa className="col-start-1 row-start-1">
-            <Rise className={eyebrow} timed={{ entered, delay: 500 }}>
-              Stage 01
-            </Rise>
+            <StageTag n="1" timed={{ entered, delay: 500 }} />
             <Rise
               className="mt-[0.9vw] font-serif text-[6.2vw] leading-[1.02] font-normal tracking-[0.03em] whitespace-nowrap text-white uppercase"
               style={{ textShadow: SHADOW }}
@@ -293,14 +344,14 @@ export const DreamDesktop: React.FC = () => {
               }}
             />
             <Rise
-              className="mt-[1.3vw] font-serif text-[1.6vw] leading-[1.4] text-[#f1e6d8] italic"
+              className="mt-[1.3vw] font-serif text-[clamp(17px,1.75vw,36px)] leading-[1.4] text-[#fbf3e6] italic"
               style={{ textShadow: SHADOW }}
               timed={{ entered, delay: 1500 }}
             >
-              Where her story begins
+              Where my story begins
             </Rise>
             <Rise
-              className="font-serif text-[1.6vw] leading-[1.4] text-[#f1e6d8] italic"
+              className="font-serif text-[clamp(17px,1.75vw,36px)] leading-[1.4] text-[#fbf3e6] italic"
               style={{ textShadow: SHADOW }}
               timed={{ entered, delay: 1620 }}
             >
@@ -314,10 +365,10 @@ export const DreamDesktop: React.FC = () => {
             <ul className="mt-[1.4vw]">
               {PILLARS.map((pl, i) => (
                 <li key={pl.label} className="border-t border-[#e6c98f]/25 py-[0.9vw]">
-                  <div data-pillar className="will-change-transform" style={{ opacity: 0.3 }}>
+                  <div data-pillar className="origin-left will-change-transform" style={{ opacity: 0.3 }}>
                     <Rise>
                       <span className="flex items-baseline gap-[1.3vw]">
-                        <span className="w-[1.6vw] font-serif text-[0.95vw] text-[#e6c98f]">
+                        <span data-pnum className="w-[1.6vw] font-serif text-[0.95vw] text-[#e6c98f]">
                           0{i + 1}
                         </span>
                         <span
@@ -330,7 +381,7 @@ export const DreamDesktop: React.FC = () => {
                     </Rise>
                     <span
                       data-pillar-rule
-                      className="mt-[0.4vw] ml-[2.9vw] block h-px w-[8vw] origin-left bg-[#e6c98f]"
+                      className="mt-[0.4vw] ml-[2.9vw] block h-px w-[15vw] origin-left bg-gradient-to-r from-[#e6c98f] to-transparent"
                       style={{ transform: "scaleX(0)" }}
                     />
                   </div>
@@ -343,8 +394,8 @@ export const DreamDesktop: React.FC = () => {
               className="mt-[1.6vw] max-w-[28vw] font-serif text-[1vw] leading-[1.8] text-[#eee5d8]"
               style={{ opacity: 0, textShadow: "0 1px 8px rgba(0,0,0,0.6)" }}
             >
-              The Dream Collection is inspired by the first chapter of every journey &mdash; her
-              aspirations, her what-ifs, and the courage to dream it all.
+              The Dream Collection is inspired by the first chapter of every journey &mdash; my
+              aspirations, my what-ifs, and the courage to dream it all.
             </p>
           </div>
 
@@ -369,8 +420,9 @@ export const DreamDesktop: React.FC = () => {
                 onClick={() =>
                   smoothScrollTo(document.getElementById("step-1"))
                 }
-                className="group inline-flex cursor-pointer items-center gap-4 bg-[#fdfbf7] px-[1.9vw] py-[0.85vw] font-serif text-[0.76vw] font-medium tracking-[0.22em] text-[#1c1815] uppercase shadow-[0_8px_30px_rgba(0,0,0,0.5)] transition-colors duration-300 hover:bg-[#e6c98f] active:scale-[0.98]"
+                className="group relative inline-flex cursor-pointer items-center gap-4 overflow-hidden bg-[#fdfbf7] px-[1.9vw] py-[0.85vw] font-serif text-[0.76vw] font-medium tracking-[0.22em] text-[#1c1815] uppercase shadow-[0_8px_30px_rgba(0,0,0,0.5)] transition-colors duration-300 hover:bg-[#e6c98f] active:scale-[0.98]"
               >
+                <span aria-hidden="true" className="dream-shine pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/70 to-transparent" />
                 Explore the Dream
                 <span className="transition-transform duration-300 group-hover:translate-x-1.5">
                   →
@@ -386,12 +438,28 @@ export const DreamDesktop: React.FC = () => {
             <div
               key={c.titleLines}
               data-card
-              className="group flex-1 cursor-pointer will-change-transform"
+              className="group relative flex-1 cursor-pointer will-change-transform"
               style={{ opacity: 0, pointerEvents: "none" }}
             >
+              {/* ghost numeral behind the plate */}
+              <span
+                data-numeral
+                aria-hidden="true"
+                className="pointer-events-none absolute -top-[4.4vw] -left-[0.4vw] font-bodoni text-[8vw] leading-none text-[#e6c98f]/25 italic"
+                style={{ opacity: 0 }}
+              >
+                {c.numeral}
+              </span>
+              {/* hairline gold frame that settles onto the plate */}
+              <span
+                data-frame
+                aria-hidden="true"
+                className="pointer-events-none absolute -inset-[0.55vw] bottom-auto border border-[#e6c98f]/45"
+                style={{ opacity: 0, aspectRatio: "3 / 4.15" }}
+              />
               <div
                 data-plate
-                className="relative overflow-hidden bg-[#12100e] shadow-[0_26px_50px_rgba(0,0,0,0.55)]"
+                className="relative overflow-hidden bg-[#12100e] shadow-[0_26px_50px_rgba(0,0,0,0.55)] transition-[transform,box-shadow] duration-500 group-hover:-translate-y-[0.5vw] group-hover:shadow-[0_34px_60px_rgba(0,0,0,0.65)]"
                 style={{ aspectRatio: "3 / 4", clipPath: "inset(0 0 100% 0)" }}
               >
                 <div data-plate-img className="absolute inset-0 will-change-transform">
@@ -406,7 +474,8 @@ export const DreamDesktop: React.FC = () => {
                   />
                 </div>
               </div>
-              <div data-caption className="mt-[1vw]" style={{ opacity: 0 }}>
+              <div data-caption className="mt-[1.3vw]" style={{ opacity: 0 }}>
+                <span data-capline aria-hidden="true" className="mb-[0.7vw] block h-px w-full origin-left bg-[#e6c98f]/50" style={{ transform: "scaleX(0)" }} />
                 <div className="flex items-baseline gap-[0.7vw]">
                   <span className="font-serif text-[0.8vw] text-[#e6c98f]">{c.numeral}</span>
                   <span className="font-serif text-[1.05vw] tracking-[0.16em] text-white uppercase">

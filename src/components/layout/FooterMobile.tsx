@@ -211,6 +211,8 @@ export const FooterMobile: React.FC<{
             fontSize: "clamp(56px,19.5vw,120px)",
             lineHeight: 0.92,
             textShadow: "0 8px 32px rgba(0,0,0,0.85)",
+            WebkitMaskImage: "linear-gradient(to bottom, #000 0%, #000 35%, rgba(0,0,0,0) 100%)",
+            maskImage: "linear-gradient(to bottom, #000 0%, #000 35%, rgba(0,0,0,0) 100%)",
           }}
         >
           {WORDMARK_LINES.map((line, li) => (
@@ -262,6 +264,9 @@ export const FooterMobile: React.FC<{
             <a href="#privacy">Cookies</a>
           </div>
           <div>&copy; 2026 MAISON D&rsquo;VINE. All rights reserved.</div>
+          <div className="mt-1 text-[8.5px] tracking-[0.3em] text-[#F3DFC1]/70">
+            Designed &amp; crafted by <span className="font-medium text-[#F3DFC1]">Angaar Labs</span>
+          </div>
         </div>
 
         <div data-s="pop" data-at="0.78" className="mt-4" style={{ opacity: 0 }}>

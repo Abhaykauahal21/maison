@@ -6,41 +6,41 @@ import Image from "next/image";
 import { EchoCard } from "@/components/editorial/EchoCard";
 import { EchoParticles } from "@/components/editorial/EchoParticles";
 import { EchoNote } from "@/components/editorial/EchoNote";
-import { EchoModal } from "@/components/editorial/EchoModal";
+import { EchoStory } from "@/components/editorial/EchoStory";
 import { useMatches } from "@/hooks/use-matches";
 
 const lookData = [
   {
     title: "SOLACE",
     tag: "Floral Silk · Dawn",
-    descLines: ["For the moments", "she finds herself."],
+    descLines: ["In the moments", "I find myself."],
     imageSrc: "/images/solace.webp",
     imageAlt: "Maison D'Vine Solace Gown in Floral Silk",
     objectPosition: "50% 15%",
-    quote: "For the moments she finds herself.",
-    desc: "The Solace look captures the quiet stillness of dawn — delicate floral silk draped in effortless grace, for the woman who belongs to herself.",
+    quote: "In the moments I find myself.",
+    desc: "I wore Solace at the quiet edge of dawn — delicate floral silk falling in effortless grace. It was the first morning I belonged entirely to myself.",
     cta: "EXPLORE SOLACE",
   },
   {
     title: "LONGING",
     tag: "Crimson Tulle · Romance",
-    descLines: ["For what lives", "between hearts."],
+    descLines: ["In what lives", "between our hearts."],
     imageSrc: "/images/longing.webp",
     imageAlt: "Maison D'Vine Longing Gown in Crimson Tulle",
     objectPosition: "50% 15%",
-    quote: "For what lives between hearts.",
-    desc: "The Longing look breathes romantic drama — cascading layers of crimson tulle dancing between unvoiced passion and eternal connection.",
+    quote: "In what lives between our hearts.",
+    desc: "I wore Longing the night I stopped hiding what I felt — crimson tulle cascading between the words I never said and the love I could not hold back.",
     cta: "EXPLORE LONGING",
   },
   {
     title: "REVERIE",
     tag: "Noir Satin · Midnight",
-    descLines: ["For the dreams", "she doesn't say out loud."],
+    descLines: ["For the dreams", "I don't say out loud."],
     imageSrc: "/images/reverie.webp",
     imageAlt: "Maison D'Vine Reverie Gown in Noir Satin",
     objectPosition: "50% 15%",
-    quote: "For the dreams she doesn't say out loud.",
-    desc: "The Reverie look commands the quiet midnight — sculpted noir silhouette whispering secrets only the stars were meant to hear.",
+    quote: "For the dreams I don't say out loud.",
+    desc: "Reverie is me at midnight — a sculpted noir silhouette, whispering the secrets only the stars were meant to hear.",
     cta: "EXPLORE REVERIE",
   },
 ];
@@ -55,8 +55,14 @@ export const EditorialSection: React.FC = () => {
     Math.min(1, Math.max(0, (mobileProgress - start) / len));
   const [activeLook, setActiveLook] = useState(0);
   const [isPinned, setIsPinned] = useState(false);
-  const [selectedCardIndex, setSelectedCardIndex] = useState(0);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // Latches once the section scrolls into view, so the "Chapter 0" title plays when it can be seen
+  const [seen, setSeen] = useState(false);
+  // Which look's story is open (its card has been pulled off the board); null = none
+  const [storyIndex, setStoryIndex] = useState<number | null>(null);
+  const storyOpenRef = useRef(false);
+  useEffect(() => {
+    storyOpenRef.current = storyIndex !== null;
+  }, [storyIndex]);
 
   // High-performance mutable synchronization refs
   const isPinnedRef = useRef(false);
@@ -75,6 +81,22 @@ export const EditorialSection: React.FC = () => {
   useEffect(() => {
     activeLookRef.current = activeLook;
   }, [activeLook]);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setSeen(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.25 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   // Never leave the page locked if this section unmounts while pinned
   useEffect(() => {
@@ -111,9 +133,9 @@ export const EditorialSection: React.FC = () => {
     };
   }, [showMobile]);
 
+  // Every "explore" entry point opens the same torn-paper story page
   const openLook = useCallback((index: number) => {
-    setSelectedCardIndex(index);
-    setIsModalOpen(true);
+    setStoryIndex(index);
   }, []);
 
   const setLook = useCallback((idx: number) => {
@@ -217,8 +239,10 @@ export const EditorialSection: React.FC = () => {
       const scrollingDown = currentScrollY >= lastScrollY;
       lastScrollY = currentScrollY;
 
-      // Ideal vertical framing: top ripped edge sits right under navbar (~45px)
-      const targetTop = 45;
+      // Ideal vertical framing: top ripped edge tucks right under the navbar's torn strip.
+      // The artwork has ~14px of transparent margin above its torn edge, so the section top sits
+      // higher than the navbar bottom; at 45px that margin showed the dark page bg as a black band.
+      const targetTop = 30;
 
       if (scrollingDown && activeLookRef.current < 2) {
         // Entering from Hero going down
@@ -257,6 +281,7 @@ export const EditorialSection: React.FC = () => {
     if (!isPinned) return;
     const handleWheel = (e: WheelEvent) => {
       if (!isPinnedRef.current) return;
+      if (storyOpenRef.current) return;
 
       // Prevent native viewport scroll
       e.preventDefault();
@@ -330,6 +355,7 @@ export const EditorialSection: React.FC = () => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isPinnedRef.current) return;
+      if (storyOpenRef.current) return;
 
       if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") {
         e.preventDefault();
@@ -406,12 +432,25 @@ export const EditorialSection: React.FC = () => {
             >
               {/* Top Row: CHAPTER 0 + Realtime Active Look Indicator */}
               <div className="flex items-center justify-between">
-                <div className="font-sans text-[11px] sm:text-xs md:text-[1.1vw] lg:text-[0.82vw] font-medium tracking-[0.25em] text-[#4a3d31] uppercase select-none">
-                  CHAPTER 0
+                <div className="flex items-center gap-[0.6vw] select-none">
+                  <span
+                    className={`chapter-gold font-allura allura-regular font-script font-cursive pr-[0.15em] text-[2.3vw] leading-none xl:text-[2.5vw] ${seen ? "chapter-write" : "opacity-0"}`}
+                  >
+                    Chapter
+                  </span>
+                  <span
+                    className={`chapter-gold font-bodoni text-[2.9vw] leading-none font-normal italic xl:text-[3.1vw] ${seen ? "chapter-pop" : "opacity-0"}`}
+                  >
+                    0
+                  </span>
+                  <span
+                    className={`h-px w-[2.4vw] bg-[#8a6a3b]/60 ${seen ? "chapter-line" : "scale-x-0"}`}
+                    aria-hidden="true"
+                  />
                 </div>
 
                 {/* Clickable Look Progress Dots */}
-                <div className="flex items-center gap-1.5 font-mono text-[9px] sm:text-[10px] tracking-widest text-[#7a6b5d]">
+                <div className="flex items-center gap-1.5 font-mono text-[10px] sm:text-[11px] lg:text-[clamp(11px,0.75vw,14px)] font-medium tracking-widest text-[#4f4132]">
                   <span>LOOK {activeLook + 1}/3</span>
                   <div className="flex items-center gap-1.5 ml-1.5">
                     {[0, 1, 2].map((i) => (
@@ -424,7 +463,7 @@ export const EditorialSection: React.FC = () => {
                             ? "w-4 bg-[#1c1815]"
                             : i < activeLook
                             ? "w-2 bg-[#695a4c]"
-                            : "w-1.5 bg-[#cfc4b5] hover:bg-[#a89c8e]"
+                            : "w-1.5 bg-[#a99c88] hover:bg-[#7d705f]"
                         }`}
                         aria-label={`Go to look ${i + 1}`}
                       />
@@ -444,14 +483,14 @@ export const EditorialSection: React.FC = () => {
               <div key={activeLook} className="animate-slide-left-in flex flex-col">
                 {/* Active Look Subtitle */}
                 <div className="mt-2 md:mt-3 min-h-[2.4em]">
-                  <p className="font-serif italic text-sm sm:text-base md:text-[1.35vw] lg:text-[1.3vw] text-[#2c231b] tracking-wide transition-all duration-300">
+                  <p className="font-serif italic text-sm sm:text-base md:text-[1.35vw] lg:text-[clamp(17px,1.35vw,30px)] text-[#1c1510] tracking-wide transition-all duration-300">
                     &ldquo;{currentContent.quote}&rdquo;
                   </p>
                 </div>
 
                 {/* Active Look Description */}
-                <div className="mt-2 md:mt-3 max-w-[370px] lg:max-w-[22vw] min-h-[4.8em]">
-                  <p className="font-sans text-xs sm:text-[13px] md:text-[1vw] lg:text-[0.9vw] leading-[1.65] text-[#4a3e33] tracking-[0.015em] transition-all duration-300">
+                <div className="mt-2 md:mt-3 max-w-[400px] lg:max-w-[min(26vw,480px)] min-h-[4.8em]">
+                  <p className="font-sans text-xs sm:text-[13px] md:text-[1vw] lg:text-[clamp(14px,1vw,21px)] leading-[1.65] text-[#2e2418] tracking-[0.015em] transition-all duration-300">
                     {currentContent.desc}
                   </p>
                 </div>
@@ -480,8 +519,9 @@ export const EditorialSection: React.FC = () => {
                 const translateX = isRevealed ? 0 : 220;
                 const opacity = isRevealed ? (isCurrentActive ? 1 : 0.85) : 0;
                 const scale = isCurrentActive ? 1.02 : 0.98;
-                // Depth: earlier cards drift up slightly as newer ones arrive
-                const depthShift = isRevealed ? -(activeLook - idx) * 8 : 0;
+                // Pinned-print feel: each card sits at its own slight angle, the active one straightens and lifts
+                const tilt = isCurrentActive ? 0 : [-1.6, 1.2, -0.9][idx];
+                const lift = isCurrentActive ? -6 : 0;
 
                 return (
                   <div
@@ -489,20 +529,14 @@ export const EditorialSection: React.FC = () => {
                     className="flex-1 will-change-transform cursor-pointer"
                     style={{
                       opacity,
-                      transform: `translate3d(${translateX}px, ${depthShift}px, 0) scale(${scale})`,
+                      transform: `translate3d(${translateX}px, ${lift}px, 0) rotate(${tilt}deg) scale(${scale})`,
                       pointerEvents: isRevealed ? "auto" : "none",
                       transition:
                         "opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1)",
                     }}
                     onClick={() => setLook(idx)}
                   >
-                    <div
-                      className={`transition-all duration-300 rounded-[2px] ${
-                        isCurrentActive
-                          ? "shadow-xl"
-                          : "hover:opacity-100"
-                      }`}
-                    >
+                    <div className="transition-all duration-300 hover:opacity-100">
                       <EchoCard
                         title={col.title}
                         descLines={col.descLines as [string, string]}
@@ -511,6 +545,8 @@ export const EditorialSection: React.FC = () => {
                         imageSrc={col.imageSrc}
                         imageAlt={col.imageAlt}
                         objectPosition={col.objectPosition}
+                        fallen={storyIndex === idx}
+                        onPinFall={() => setStoryIndex(idx)}
                         onClick={() => openLook(idx)}
                       />
                     </div>
@@ -546,16 +582,25 @@ export const EditorialSection: React.FC = () => {
           {/* Title block: kept clear of the dried flowers in the top-right corner */}
           <div className="relative z-10 w-full pr-[16%] text-left">
             <div
-              className="flex items-center gap-2.5 font-sans text-[11px] font-medium tracking-[0.25em] text-[#3a3026] uppercase sm:text-xs"
+              className="flex items-center gap-2"
               style={{
                 opacity: seg(0.05, 0.25),
                 transform: `translate3d(0, ${(1 - seg(0.05, 0.25)) * 14}px, 0)`,
                 transition: "opacity 0.25s linear, transform 0.25s linear",
               }}
             >
-              <span>CHAPTER 0</span>
               <span
-                className="h-px bg-[#3a3026]/50 transition-[width] duration-200 ease-out"
+                className={`chapter-gold font-allura allura-regular font-script font-cursive pr-[0.15em] text-[28px] leading-none sm:text-[34px] ${seen ? "chapter-write" : "opacity-0"}`}
+              >
+                Chapter
+              </span>
+              <span
+                className={`chapter-gold font-bodoni text-[34px] leading-none italic sm:text-[42px] ${seen ? "chapter-pop" : "opacity-0"}`}
+              >
+                0
+              </span>
+              <span
+                className="h-px bg-[#8a6a3b]/60 transition-[width] duration-200 ease-out"
                 style={{ width: seg(0.15, 0.3) * 36 }}
               />
             </div>
@@ -579,13 +624,13 @@ export const EditorialSection: React.FC = () => {
               style={{ opacity: seg(0.15, 0.25) }}
             >
               <p
-                className="animate-echo-rise font-serif text-[13px] leading-tight text-[#2c231b] italic sm:text-lg"
+                className="animate-echo-rise font-serif text-[14px] leading-tight text-[#1c1510] italic sm:text-lg"
                 style={{ animationDelay: "0ms" }}
               >
                 &ldquo;{currentContent.quote}&rdquo;
               </p>
               <p
-                className="animate-echo-rise mt-1.5 font-sans text-xs leading-relaxed text-[#4a3e33] sm:mt-2.5 sm:text-[15px] sm:leading-[1.7]"
+                className="animate-echo-rise mt-1.5 font-sans text-[12.5px] leading-relaxed text-[#2e2418] sm:mt-2.5 sm:text-[15px] sm:leading-[1.7]"
                 style={{ animationDelay: "120ms" }}
               >
                 {currentContent.desc}
@@ -664,7 +709,7 @@ export const EditorialSection: React.FC = () => {
                 </span>
               </button>
 
-              <div className="flex items-center gap-2 font-mono text-[9.5px] text-[#7a6b5d] sm:text-[11px]">
+              <div className="flex items-center gap-2 font-mono text-[10.5px] font-medium text-[#4f4132] sm:text-[12px]">
                 <span>
                   {String(activeLook + 1).padStart(2, "0")} / 03
                 </span>
@@ -683,12 +728,8 @@ export const EditorialSection: React.FC = () => {
       </div>
       )}
 
-      {/* Interactive Haute Couture Lookbook Modal */}
-      <EchoModal
-        initialIndex={selectedCardIndex}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
+      {/* Her story, on a torn paper page: opens when a card is pulled off its pin */}
+      <EchoStory index={storyIndex} onClose={() => setStoryIndex(null)} />
     </section>
   );
 };

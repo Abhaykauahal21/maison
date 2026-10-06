@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Alex_Brush, Allura } from "next/font/google";
 import { SiteLoader } from "@/components/common/SiteLoader";
 import { SmoothScroll } from "@/components/common/SmoothScroll";
+import { OffscreenPause } from "@/components/common/OffscreenPause";
 import "./globals.css";
 
 const alexBrush = Alex_Brush({
@@ -57,6 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SmoothScroll />
         <SiteLoader />
         {children}
+        <OffscreenPause />
       </body>
     </html>
   );

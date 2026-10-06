@@ -74,7 +74,7 @@ export const FilmModal: React.FC<FilmModalProps> = ({ isOpen, onClose }) => {
             playsInline
             className="h-full w-full object-cover"
             src="https://assets.mixkit.co/videos/preview/mixkit-fashion-model-in-an-avant-garde-gown-42171-large.mp4"
-            poster="/images/hero.webp"
+            poster="/images/hero-single-girl.webp"
           />
 
           {/* Film Grain & Vignette Overlay */}

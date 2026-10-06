@@ -5,6 +5,7 @@ import Image from "next/image";
 import { StepContent } from "@/components/step/StepContent";
 import { StepPhoto } from "@/components/step/StepPhoto";
 import { StepDetails } from "@/components/step/StepDetails";
+import { StepQuoteCard } from "@/components/step/StepQuoteCard";
 import { StepMotion } from "@/components/step/StepMotion";
 import { SlideIn } from "@/components/common/SlideIn";
 import { useParallax } from "@/hooks/use-parallax";
@@ -119,10 +120,16 @@ export const StepSection: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Bottom Corner: THE BEGINNING, A step towards becoming her., VIEW DETAILS → */}
+          {/* Right: a paper card that covers the quote baked into step-bg.webp and rewrites it in live cursive */}
+          <StepQuoteCard
+            inView={inView}
+            className="absolute top-[14.2%] left-[75%] z-20 h-[38%] w-[20.5%]"
+          />
+
+          {/* Right, below the card: THE BEGINNING, A step towards becoming her., VIEW DETAILS → */}
           <div
             ref={detailsParallaxRef}
-            className="absolute right-[7.5%] bottom-[10.5%] z-20 w-[18%] max-w-[260px]"
+            className="absolute top-[57%] left-[79.5%] z-20 w-[15%]"
           >
             <SlideIn from="right" distance="9vw" delay={250}>
               <StepDetails inView={inView} />

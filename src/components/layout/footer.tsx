@@ -389,6 +389,10 @@ export const Footer: React.FC = () => {
                 className={`w-full max-w-full min-w-0 text-center overflow-hidden transition-all duration-1000 delay-300 ease-out select-none cursor-default py-1 ${
                   inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
                 }`}
+                style={{
+                  WebkitMaskImage: "linear-gradient(to bottom, #000 0%, #000 35%, rgba(0,0,0,0) 100%)",
+                  maskImage: "linear-gradient(to bottom, #000 0%, #000 35%, rgba(0,0,0,0) 100%)",
+                }}
               >
                 <Wordmark
                   inView={inView}
@@ -398,8 +402,8 @@ export const Footer: React.FC = () => {
               </div>
 
               {/* Bottom Copyright & Legal Line */}
-              <div className="w-full mt-1.5 lg:mt-2.5 pt-2.5 lg:pt-3 border-t border-[#F3DFC1]/25 flex items-center justify-between text-[10px] lg:text-[10.5px] tracking-[0.2em] uppercase font-serif text-[#FBF6EE]/80 drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
-                <div>
+              <div className="w-full mt-1.5 lg:mt-2.5 pt-2.5 lg:pt-3 border-t border-[#F3DFC1]/25 grid grid-cols-[1fr_auto_1fr] items-center text-[10px] lg:text-[10.5px] tracking-[0.2em] uppercase font-serif text-[#FBF6EE]/80 drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
+                <div className="justify-self-start">
                   &copy; 2026 MAISON D’VINE
                 </div>
 
@@ -417,10 +421,19 @@ export const Footer: React.FC = () => {
                   </a>
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center justify-self-end gap-4">
                   <span>All rights reserved.</span>
                   <BackToTop />
                 </div>
+              </div>
+
+              {/* Studio credit */}
+              <div className="mt-3 lg:mt-4 flex items-center justify-center gap-3 font-serif text-[9px] lg:text-[10px] tracking-[0.34em] uppercase text-[#F3DFC1]/70 drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
+                <span aria-hidden="true" className="h-px w-8 bg-gradient-to-r from-transparent to-[#F3DFC1]/50" />
+                <span>
+                  Designed &amp; crafted by <span className="font-medium text-[#F3DFC1]">Angaar Labs</span>
+                </span>
+                <span aria-hidden="true" className="h-px w-8 bg-gradient-to-l from-transparent to-[#F3DFC1]/50" />
               </div>
 
             </div>

@@ -1065,6 +1065,1025 @@ html:not([data-site-ready]) .nav-ink {
   }
 }
 
+/* Navbar menu: gown sketch draws in, fills, gets stitched, hangs and sways; pearls drift down */
+@keyframes menuDraw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes menuBloom {
+  from {
+    opacity: 0;
+    transform: scale(0) rotate(-40deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.12) rotate(4deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+@keyframes menuSway {
+  from {
+    transform: rotate(-1.6deg);
+  }
+  to {
+    transform: rotate(1.6deg);
+  }
+}
+@keyframes menuPetal {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  10% {
+    opacity: 0.85;
+  }
+  50% {
+    transform: translate3d(26px, 55vh, 0) rotate(160deg);
+  }
+  90% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(-18px, 110vh, 0) rotate(330deg);
+  }
+}
+@keyframes menuFill {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: var(--to, 0.55);
+  }
+}
+@keyframes menuStitch {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+@keyframes menuNeedle {
+  from {
+    transform: translate(172px, 296px) rotate(-28deg);
+  }
+  to {
+    transform: translate(158px, 304px) rotate(-18deg);
+  }
+}
+.menu-fill {
+  opacity: 0;
+  animation: menuFill 1.6s ease-out 3s forwards;
+}
+.menu-stitch {
+  opacity: 0;
+  animation:
+    menuFill 0.6s ease-out 3.4s forwards,
+    menuStitch 1.4s linear 3.4s infinite;
+}
+.menu-needle {
+  opacity: 0;
+  animation:
+    menuFill 0.6s ease-out 3.2s forwards,
+    menuNeedle 2.2s ease-in-out 3.6s infinite alternate;
+}
+.menu-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: menuDraw 1.4s cubic-bezier(0.45, 0, 0.2, 1) 0.8s forwards;
+}
+.menu-bloom {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation: menuBloom 0.9s cubic-bezier(0.34, 1.4, 0.5, 1) both;
+}
+.menu-sway {
+  transform-origin: 50% 0;
+  animation: menuSway 5.5s ease-in-out 3s infinite alternate;
+}
+.menu-petal {
+  opacity: 0;
+  animation: menuPetal 12s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .menu-draw {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+  .menu-bloom {
+    animation: none;
+    opacity: 1;
+  }
+  .menu-sway,
+  .menu-petal,
+  .menu-stitch,
+  .menu-needle,
+  .menu-fill {
+    animation: none;
+    opacity: 1;
+  }
+  .menu-fill {
+    opacity: var(--to, 0.55);
+  }
+  .menu-petal {
+    display: none;
+  }
+}
+
+/* Echo cards: pull the pin and the card swings loose and drops, then is pinned back up */
+@keyframes echoFall {
+  0% {
+    transform: rotate(0deg);
+    opacity: 1;
+  }
+  14% {
+    transform: rotate(calc(var(--dir, 1) * 9deg));
+  }
+  28% {
+    transform: rotate(calc(var(--dir, 1) * -6deg));
+  }
+  40% {
+    transform: rotate(calc(var(--dir, 1) * 4deg)) translateY(2px);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(calc(var(--dir, 1) * 6vw), 85vh, 0) rotate(calc(var(--dir, 1) * 34deg));
+    opacity: 0;
+  }
+}
+@keyframes echoRehang {
+  0% {
+    transform: translate3d(0, -36px, 0) rotate(calc(var(--dir, 1) * -8deg));
+    opacity: 0;
+  }
+  55% {
+    transform: translate3d(0, 4px, 0) rotate(calc(var(--dir, 1) * 3deg));
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 1;
+  }
+}
+@keyframes echoPinOut {
+  0% {
+    transform: translateY(0) rotate(0);
+    opacity: 1;
+  }
+  35% {
+    transform: translateY(-26px) rotate(-22deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-70px) rotate(-38deg);
+    opacity: 0;
+  }
+}
+@keyframes echoPinIn {
+  0% {
+    transform: translateY(-60px) rotate(-30deg);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(4px) rotate(3deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) rotate(0);
+    opacity: 1;
+  }
+}
+@keyframes echoStoryIn {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -40px, 0) rotateX(-82deg);
+    filter: drop-shadow(0 0 0 rgba(30, 20, 10, 0));
+  }
+  14% {
+    opacity: 1;
+  }
+  46% {
+    transform: translate3d(0, 0, 0) rotateX(13deg);
+  }
+  64% {
+    transform: translate3d(0, 0, 0) rotateX(-6deg);
+  }
+  80% {
+    transform: translate3d(0, 0, 0) rotateX(2.5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotateX(0);
+    filter: drop-shadow(0 12px 22px rgba(30, 20, 10, 0.38));
+  }
+}
+@keyframes echoStorySway {
+  from {
+    rotate: -0.45deg;
+  }
+  to {
+    rotate: 0.45deg;
+  }
+}
+@keyframes echoStoryOut {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0);
+  }
+  22% {
+    transform: translate3d(0, -6px, 0) rotate(2.5deg);
+  }
+  40% {
+    transform: translate3d(0, 0, 0) rotate(-3.2deg);
+  }
+  56% {
+    transform: translate3d(0, 6px, 0) rotate(4deg);
+    animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.45);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(9vw, 112vh, 0) rotate(26deg);
+  }
+}
+@keyframes echoStoryPinIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-46px) rotate(-14deg);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(5px) rotate(2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(0);
+  }
+}
+@keyframes echoStoryPinOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotate(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-70px) rotate(-30deg);
+  }
+}
+@keyframes echoStoryShine {
+  from {
+    transform: translateX(0) skewX(-18deg);
+  }
+  to {
+    transform: translateX(520%) skewX(-18deg);
+  }
+}
+@keyframes echoWord {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+@keyframes echoStoryPrint {
+  0% {
+    opacity: 0;
+    transform: translateY(-40px) scale(1.3) rotate(8deg);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(0) scale(0.97) rotate(-2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0);
+  }
+}
+@keyframes echoStoryTitle {
+  from {
+    transform: translateY(105%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes echoStoryUnroll {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+.echo-fall {
+  animation: echoFall 1.5s cubic-bezier(0.55, 0, 0.9, 0.5) 0.1s forwards;
+}
+.echo-rehang {
+  animation: echoRehang 0.9s cubic-bezier(0.34, 1.3, 0.5, 1) both;
+}
+.echo-pin-out {
+  animation: echoPinOut 0.7s ease-out forwards;
+}
+.echo-pin-in {
+  animation: echoPinIn 0.7s cubic-bezier(0.34, 1.3, 0.5, 1) 0.5s both;
+}
+.echo-story-in {
+  transform-origin: 50% 0;
+  animation:
+    echoStoryIn 1.5s cubic-bezier(0.3, 0.6, 0.4, 1) both,
+    echoStorySway 6s ease-in-out 2s infinite alternate;
+}
+.echo-story-out {
+  transform-origin: 50% 0;
+  animation: echoStoryOut 1s cubic-bezier(0.45, 0, 0.5, 1) 0.25s forwards;
+}
+.echo-story-pin {
+  opacity: 0;
+  animation: echoStoryPinIn 0.6s cubic-bezier(0.34, 1.3, 0.5, 1) 1.1s forwards;
+}
+.echo-story-pin-out {
+  animation: echoStoryPinOut 0.45s ease-in forwards;
+}
+.echo-story-shine {
+  transform: translateX(-100%);
+  opacity: 0;
+  animation: echoStoryShine 1.6s ease-in-out 1.5s 1 both;
+}
+.echo-story-ink {
+  animation: echoInkWrite 1.3s cubic-bezier(0.4, 0, 0.2, 1) 1.25s both;
+}
+.echo-word {
+  opacity: 0;
+  animation: echoWord 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.echo-story-print {
+  animation: echoStoryPrint 0.9s cubic-bezier(0.34, 1.3, 0.5, 1) 0.95s both;
+}
+.echo-story-title {
+  animation: echoStoryTitle 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.05s both;
+}
+.echo-story-unroll {
+  animation: echoStoryUnroll 1.1s cubic-bezier(0.6, 0, 0.2, 1) 0.25s both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .echo-fall,
+  .echo-rehang,
+  .echo-pin-out,
+  .echo-pin-in,
+  .echo-story-in,
+  .echo-story-out,
+  .echo-story-pin,
+  .echo-story-pin-out,
+  .echo-story-shine,
+  .echo-story-ink,
+  .echo-word,
+  .echo-story-print,
+  .echo-story-title,
+  .echo-story-unroll {
+    animation: none;
+  }
+}
+
+/* "Chapter 0" title: ink-written script, popping numeral, drawn rule, slow gold shimmer */
+@keyframes chapterPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.2) rotate(-30deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.15) rotate(3deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+@keyframes chapterLine {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes chapterShine {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -150% 0;
+  }
+}
+.chapter-gold {
+  color: #8a6a3b;
+  background-image: linear-gradient(100deg, #8a6a3b 0 42%, #e3c58a 50%, #8a6a3b 58% 100%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+/* variant for dark backgrounds */
+.chapter-gold-light {
+  color: #e6c98f;
+  background-image: linear-gradient(100deg, #e6c98f 0 42%, #fff4d6 50%, #e6c98f 58% 100%);
+}
+@keyframes dreamShine {
+  0%,
+  60% {
+    transform: translateX(0) skewX(-18deg);
+  }
+  100% {
+    transform: translateX(520%) skewX(-18deg);
+  }
+}
+.dream-shine {
+  animation: dreamShine 4.5s ease-in-out 1.5s infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dream-shine {
+    animation: none;
+    display: none;
+  }
+}
+.chapter-shine {
+  animation: chapterShine 6s linear 2.4s infinite;
+}
+.chapter-write {
+  animation:
+    echoInkWrite 1.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both,
+    chapterShine 6s linear 2.4s infinite;
+}
+.chapter-pop {
+  display: inline-block;
+  animation:
+    chapterPop 0.9s cubic-bezier(0.34, 1.4, 0.5, 1) 1.1s both,
+    chapterShine 6s linear 2.4s infinite;
+}
+.chapter-line {
+  transform-origin: left;
+  animation: chapterLine 0.9s ease-out 1.4s both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .chapter-write,
+  .chapter-pop,
+  .chapter-shine,
+  .chapter-line {
+    animation: none;
+  }
+}
+
+/* Story gate: the locked padlock + registration popup */
+@keyframes gateRattle {
+  0%,
+  78%,
+  100% {
+    transform: rotate(0);
+  }
+  82% {
+    transform: rotate(-4deg);
+  }
+  86% {
+    transform: rotate(3.5deg);
+  }
+  90% {
+    transform: rotate(-2.5deg);
+  }
+  94% {
+    transform: rotate(1.5deg);
+  }
+}
+@keyframes gateGlow {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+@keyframes gateBurst {
+  0% {
+    opacity: 1;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(3.2);
+  }
+}
+@keyframes gateTwinkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes gateDropIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-60px) rotate(-8deg) scale(0.8);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(6px) rotate(2deg) scale(1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(0) scale(1);
+  }
+}
+@keyframes gateFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes gateShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-8px);
+  }
+  40% {
+    transform: translateX(7px);
+  }
+  60% {
+    transform: translateX(-5px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+@keyframes gateSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.gate-lock .gate-all {
+  transform-box: view-box;
+  transform-origin: 80px 110px;
+}
+.gate-lock.is-locked .gate-all {
+  animation: gateRattle 5s ease-in-out 1.5s infinite;
+}
+.gate-lock.is-key .gate-all {
+  animation: gateJiggle 0.32s ease-in-out infinite;
+}
+.gate-lock .gate-key {
+  transform-box: view-box;
+  transform-origin: 80px 142px;
+  opacity: 0;
+}
+.gate-lock.is-key .gate-key {
+  animation: gateKeyIn 0.8s cubic-bezier(0.34, 1.4, 0.5, 1) forwards;
+}
+.gate-lock.is-open .gate-key {
+  animation: gateKeyTurn 1.1s ease-in-out forwards;
+}
+.gate-lock.is-open .gate-shackle {
+  transition-delay: 0.55s;
+}
+.gate-lock .gate-burst-dot {
+  opacity: 0;
+}
+.gate-lock.is-open .gate-burst-dot {
+  animation: gateBurstDot 1.2s ease-out 0.6s forwards;
+}
+.gate-lock .gate-shackle {
+  transform-box: view-box;
+  transform-origin: 112px 106px;
+  transition: transform 1s cubic-bezier(0.34, 1.5, 0.5, 1);
+}
+.gate-lock.is-open .gate-shackle {
+  transform: translateY(-20px) rotate(-26deg);
+}
+.gate-lock .gate-glow {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: gateGlow 2.8s ease-in-out infinite;
+}
+.gate-lock.is-open .gate-glow {
+  animation: gateBurst 1.3s ease-out 0.15s forwards;
+}
+.gate-lock .gate-spark {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation: gateTwinkle 2.4s ease-in-out infinite;
+}
+@keyframes gateJiggle {
+  0%,
+  100% {
+    transform: rotate(-1.4deg);
+  }
+  50% {
+    transform: rotate(1.4deg);
+  }
+}
+@keyframes gateKeyIn {
+  from {
+    opacity: 0;
+    transform: translate(46px, 46px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+}
+@keyframes gateKeyTurn {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0);
+  }
+  55%,
+  80% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(-82deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(0, -8px) rotate(-82deg);
+  }
+}
+@keyframes gateBurstDot {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) scale(0.3);
+  }
+}
+
+/* Locked scene: chains slide in and tighten, the padlock slams shut, rays turn, dust drifts up */
+@keyframes gateChainInA {
+  from {
+    opacity: 1;
+    transform: translateX(-125%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes gateChainInB {
+  from {
+    opacity: 1;
+    transform: translateX(125%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes gateChainJolt {
+  0% {
+    transform: scaleY(1.28) translateY(-2px);
+  }
+  100% {
+    transform: scaleY(1) translateY(0);
+  }
+}
+@keyframes gateChainSway {
+  from {
+    transform: translateY(-3px) rotate(-0.18deg);
+  }
+  to {
+    transform: translateY(3px) rotate(0.18deg);
+  }
+}
+@keyframes gateSnapL {
+  0% {
+    transform: rotate(0);
+  }
+  12% {
+    transform: rotate(-5deg);
+  }
+  100% {
+    transform: translate3d(0, 105vh, 0) rotate(82deg);
+  }
+}
+@keyframes gateSnapR {
+  0% {
+    transform: rotate(0);
+  }
+  12% {
+    transform: rotate(5deg);
+  }
+  100% {
+    transform: translate3d(0, 105vh, 0) rotate(-82deg);
+  }
+}
+@keyframes gateSnapFlash {
+  from {
+    opacity: 0.9;
+    transform: translate(-50%, -45%) scale(0.2);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -45%) scale(1.6);
+  }
+}
+@keyframes gateShard {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(0);
+  }
+  to {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy) + 150px)) rotate(var(--rot));
+  }
+}
+@keyframes gateLockSlam {
+  0% {
+    opacity: 0;
+    transform: translateY(-62vh) rotate(-14deg) scale(1.1);
+    animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.5);
+  }
+  4% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(0) rotate(2deg) scale(1);
+    animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+  80% {
+    transform: translateY(-16px) rotate(-1.5deg);
+    animation-timing-function: ease-in;
+  }
+  88% {
+    transform: translateY(0) rotate(0.8deg);
+    animation-timing-function: ease-out;
+  }
+  94% {
+    transform: translateY(-4px) rotate(0);
+    animation-timing-function: ease-in;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(0);
+  }
+}
+@keyframes gateRing {
+  from {
+    opacity: 0.9;
+    transform: translate(-50%, -52%) scale(0.3);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -52%) scale(2.8);
+  }
+}
+@keyframes gateClankSpark {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy) + 46px)) scale(0.3);
+  }
+}
+@keyframes gateRaysSpin {
+  from {
+    rotate: 0deg;
+  }
+  to {
+    rotate: 360deg;
+  }
+}
+@keyframes gateMote {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0);
+  }
+  15% {
+    opacity: 0.85;
+  }
+  85% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(24px, -70vh, 0);
+  }
+}
+.gate-veil {
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+.gate-scene.is-in .gate-veil {
+  opacity: 1;
+}
+.gate-rays {
+  background: repeating-conic-gradient(from 0deg, rgba(255, 214, 130, 0.22) 0 3deg, transparent 3deg 17deg);
+  -webkit-mask-image: radial-gradient(closest-side, #000 0%, transparent 62%);
+  mask-image: radial-gradient(closest-side, #000 0%, transparent 62%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: gateRaysSpin 90s linear infinite;
+  transition: opacity 1.6s ease 1.5s;
+}
+.gate-scene.is-in .gate-rays {
+  opacity: 0.85;
+}
+.gate-chain-a,
+.gate-chain-b {
+  opacity: 0;
+}
+.gate-scene.is-in .gate-chain-a {
+  animation: gateChainInA 1.3s cubic-bezier(0.2, 0.9, 0.3, 1.1) 0.25s both;
+}
+.gate-scene.is-in .gate-chain-b {
+  animation: gateChainInB 1.3s cubic-bezier(0.2, 0.9, 0.3, 1.1) 0.45s both;
+}
+.gate-scene.is-in .gate-chain-svg {
+  animation: gateChainJolt 0.55s cubic-bezier(0.2, 0.8, 0.3, 1) 1.55s both;
+  transform-origin: 50% 50%;
+}
+.gate-chain-sway {
+  animation: gateChainSway 6s ease-in-out 2.4s infinite alternate;
+}
+.gate-half {
+  will-change: transform;
+}
+.gate-half-l {
+  transform-origin: 0 50%;
+}
+.gate-half-r {
+  transform-origin: 100% 50%;
+}
+.gate-scene.is-live .gate-half-l {
+  animation: gateSnapL 1.7s cubic-bezier(0.5, 0, 0.9, 0.5) 0.5s forwards;
+}
+.gate-scene.is-live .gate-half-r {
+  animation: gateSnapR 1.7s cubic-bezier(0.5, 0, 0.9, 0.5) 0.5s forwards;
+}
+.gate-snap-flash {
+  opacity: 0;
+  background: radial-gradient(closest-side, rgba(255, 226, 150, 0.95), rgba(255, 190, 90, 0.35) 55%, transparent 100%);
+  transform: translate(-50%, -45%) scale(0.2);
+}
+.gate-scene.is-live .gate-snap-flash {
+  animation: gateSnapFlash 0.9s ease-out 0.5s both;
+}
+.gate-shard {
+  opacity: 0;
+}
+.gate-scene.is-live .gate-shard {
+  animation: gateShard 1.4s ease-out 0.5s both;
+}
+.gate-scene.is-in.is-live .gate-ring {
+  animation: gateRing 1.1s ease-out 0.5s both;
+}
+.gate-scene.is-in.is-live .gate-ring-2 {
+  animation-delay: 0.65s;
+}
+.gate-scene.is-in.is-live .gate-chain-svg {
+  animation: none;
+}
+.gate-scene.is-gone .gate-chain-a,
+.gate-scene.is-gone .gate-chain-b {
+  display: none;
+}
+.gate-no-key .gate-key {
+  display: none;
+}
+.gate-lock-drop {
+  opacity: 0;
+}
+.gate-scene.is-in .gate-lock-drop {
+  animation: gateLockSlam 1.15s linear 0.8s both;
+}
+.gate-ring {
+  opacity: 0;
+  transform: translate(-50%, -52%) scale(0.3);
+}
+.gate-scene.is-in .gate-ring {
+  animation: gateRing 1.1s ease-out 1.55s both;
+}
+.gate-scene.is-in .gate-ring-2 {
+  animation-delay: 1.7s;
+}
+.gate-clank-spark {
+  opacity: 0;
+}
+.gate-scene.is-in .gate-clank-spark {
+  animation: gateClankSpark 0.95s ease-out 1.55s both;
+}
+.gate-mote {
+  opacity: 0;
+  animation: gateMote linear infinite;
+}
+.gate-caption {
+  opacity: 0;
+}
+.gate-scene.is-in .gate-caption {
+  opacity: 1;
+  animation: echoInkWrite 1.4s cubic-bezier(0.4, 0, 0.2, 1) 2s both;
+}
+.gate-scene.is-freed .gate-caption {
+  animation-delay: 1.6s;
+}
+.gate-cta {
+  opacity: 0;
+}
+.gate-scene.is-in .gate-cta {
+  opacity: 1;
+  animation: gateFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 2.5s both;
+}
+.gate-drop-in {
+  animation: gateDropIn 1s cubic-bezier(0.34, 1.3, 0.5, 1) both;
+}
+.gate-fade-up {
+  animation: gateFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.gate-shake {
+  animation: gateShake 0.5s ease-in-out;
+}
+.gate-spin {
+  animation: gateSpin 0.8s linear infinite;
+}
+.gate-pop-lock {
+  animation: gateDropIn 1.1s cubic-bezier(0.34, 1.3, 0.5, 1) 1.2s both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gate-chain-a,
+  .gate-chain-b,
+  .gate-lock-drop,
+  .gate-caption,
+  .gate-cta {
+    opacity: 1;
+  }
+  .gate-rays,
+  .gate-veil {
+    opacity: 0.7;
+  }
+  .gate-mote,
+  .gate-ring,
+  .gate-shard,
+  .gate-snap-flash,
+  .gate-clank-spark {
+    display: none;
+  }
+  .gate-scene.is-live .gate-half-l,
+  .gate-scene.is-live .gate-half-r {
+    animation: none;
+    opacity: 0;
+  }
+  .gate-scene.is-in .gate-chain-a,
+  .gate-scene.is-in .gate-chain-b,
+  .gate-scene.is-in .gate-chain-svg,
+  .gate-chain-sway,
+  .gate-scene.is-in .gate-lock-drop,
+  .gate-scene.is-in .gate-caption,
+  .gate-scene.is-in .gate-cta,
+  .gate-rays {
+    animation: none;
+  }
+  .gate-lock .gate-all,
+  .gate-lock .gate-glow,
+  .gate-lock .gate-spark,
+  .gate-drop-in,
+  .gate-fade-up,
+  .gate-shake,
+  .gate-spin,
+  .gate-pop-lock {
+    animation: none;
+  }
+  .gate-lock .gate-spark {
+    opacity: 0.8;
+  }
+}
+
 /* Echo note (desktop): slip drops in, line is handwritten, sprig draws, blooms, then sways */
 @keyframes echoNoteDrop {
   from {
@@ -1372,3 +2391,11 @@ html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
 .lenis.lenis-stopped { overflow: clip; }
 .lenis.lenis-smooth iframe { pointer-events: none; }
+
+/* Off-screen blocks (flagged by OffscreenPause) stop their endless decorative animations. */
+[data-offscreen],
+[data-offscreen] *,
+[data-offscreen] *::before,
+[data-offscreen] *::after {
+  animation-play-state: paused !important;
+}

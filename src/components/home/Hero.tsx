@@ -81,7 +81,7 @@ export const Hero: React.FC = () => {
           Matches Reference Composition (1024 x 585 / 16:9.2 Aspect):
           - Proportional dimensions matching reference image
           - Left editorial text positioned with buttons
-          - Right handwritten script: Different Stories Same Sisterhood
+          - Right handwritten script: My Story, Told In My Own Words
           - Bottom edge designed to be overlapped by parchment page below
           ======================================================== */}
         {wide !== false && (
@@ -93,7 +93,7 @@ export const Hero: React.FC = () => {
           >
             <div className="animate-hero-image-settle absolute inset-0 h-full w-full will-change-transform">
               <Image
-                src="/images/hero.webp"
+                src="/images/hero-single-girl.webp"
                 alt="Maison D'Vine Haute Couture Collection"
                 fill
                 priority
@@ -141,7 +141,7 @@ export const Hero: React.FC = () => {
               <HeroContent onOpenFilm={() => setIsFilmOpen(true)} />
             </div>
 
-            {/* Right Script Accent: Different Stories Same Sisterhood */}
+            {/* Right Script Accent: My Story, Told In My Own Words */}
             <div className="animate-hero-from-right pointer-events-none absolute top-[21%] right-[5.5vw] z-20 lg:top-[22%] lg:right-[6.2vw]">
               <EditorialText />
             </div>
@@ -162,12 +162,12 @@ export const Hero: React.FC = () => {
         <div className="relative block h-[100dvh] max-h-[1100px] min-h-[600px] w-full overflow-hidden md:landscape:hidden">
           <div className="animate-hero-image-settle absolute inset-0 z-0">
             <Image
-              src="/images/hero.webp"
+              src="/images/hero-single-girl.webp"
               alt="Maison D'Vine Haute Couture Collection"
               fill
               priority
               unoptimized
-              className="pointer-events-none object-cover object-[52%_28%] select-none"
+              className="pointer-events-none object-cover object-[56%_30%] select-none"
             />
           </div>
 

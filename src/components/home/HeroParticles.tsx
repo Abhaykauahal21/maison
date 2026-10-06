@@ -68,8 +68,11 @@ export const HeroParticles: React.FC<{ className?: string }> = ({ className = ""
     );
     observer.observe(canvas);
 
+    // the pinned hero is hidden (visibility) once the next sections fully cover it: skip drawing then
+    const host = canvas.closest<HTMLElement>("section");
+
     const render = () => {
-      if (!isVisible) {
+      if (!isVisible || document.hidden || host?.style.visibility === "hidden") {
         animationFrameId = requestAnimationFrame(render);
         return;
       }

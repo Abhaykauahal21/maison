@@ -10,6 +10,7 @@ import { FaqSection } from "@/components/faq/FaqSection";
 import { BlogSection } from "@/components/blog/BlogSection";
 import { CloserChapterSection } from "@/components/closer/CloserChapterSection";
 import { Footer } from "@/components/layout/footer";
+import { StoryGate, STORY_GATE_ENABLED } from "@/components/gate/StoryGate";
 
 export default function HomePage() {
   return (
@@ -20,14 +21,33 @@ export default function HomePage() {
       <Hero />
       <EditorialSection />
       <DreamSection />
-      <StepSection />
-      <GardenSection />
-      <IndiaSection />
-      <OurStorySection />
-      <FaqSection />
-      <BlogSection />
-      <CloserChapterSection />
-      <Footer />
+      {STORY_GATE_ENABLED ? (
+        // Step 1 is shown only as a small blurred, locked peek; everything after it stays fully visible.
+        // (flip STORY_GATE_ENABLED to false to release Step 1 as well)
+        <>
+          <StoryGate>
+            <StepSection />
+          </StoryGate>
+          <GardenSection />
+          <IndiaSection />
+          <OurStorySection />
+          <FaqSection />
+          <BlogSection />
+          <CloserChapterSection />
+          <Footer />
+        </>
+      ) : (
+        <>
+          <StepSection />
+          <GardenSection />
+          <IndiaSection />
+          <OurStorySection />
+          <FaqSection />
+          <BlogSection />
+          <CloserChapterSection />
+          <Footer />
+        </>
+      )}
     </main>
   );
 }
