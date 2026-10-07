@@ -207,7 +207,6 @@ export const StoryGate: React.FC<StoryGateProps> = ({
           seen={seen}
           registered={registered}
           maskVeil={maskVeil}
-          onOpen={() => window.dispatchEvent(new Event(GATE_OPEN_EVENT))}
         />
       </div>
 
