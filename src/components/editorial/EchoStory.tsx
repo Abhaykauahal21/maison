@@ -34,7 +34,7 @@ const STORIES: { quote: string; paragraphs: string[]; sign: string }[] = [
 ];
 
 /** Hand-torn outline on all four edges, as a % polygon so it scales with the page. */
-const tornPage = (() => {
+export const tornPage = (() => {
   const wob = (t: number, seed: number) =>
     (Math.sin(t * 0.9 + seed) * 0.5 + Math.sin(t * 2.3 + seed * 2) * 0.3 + Math.sin(t * 5.1 + seed * 3) * 0.2 + 1) / 2;
   const pts: string[] = [];
@@ -45,8 +45,8 @@ const tornPage = (() => {
   return `polygon(${pts.join(", ")})`;
 })();
 
-const PAPER = "radial-gradient(120% 90% at 0% 0%, #fbf5e9 0%, #f3ead9 55%, #ebdfc9 100%)";
-const GRAIN =
+export const PAPER = "radial-gradient(120% 90% at 0% 0%, #fbf5e9 0%, #f3ead9 55%, #ebdfc9 100%)";
+export const GRAIN =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .27 0 0 0 0 .18 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.3'/%3E%3C/svg%3E\")";
 
 interface EchoStoryProps {

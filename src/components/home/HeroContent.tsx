@@ -1,8 +1,8 @@
 "use client";
 
-import { smoothScrollTo } from "@/lib/smooth-scroll";
-import React from "react";
+import React, { useState } from "react";
 import { FilmCTA } from "@/components/home/FilmCTA";
+import { HeroStory } from "@/components/home/HeroStory";
 
 export interface HeroContentProps {
   className?: string;
@@ -17,6 +17,7 @@ export const HeroContent: React.FC<HeroContentProps> = ({
   layout = "editorial",
 }) => {
   const stacked = layout === "stacked";
+  const [storyOpen, setStoryOpen] = useState(false);
   return (
     <div
       className={`flex flex-col text-left text-white ${
@@ -52,10 +53,7 @@ export const HeroContent: React.FC<HeroContentProps> = ({
       <div className="animate-hero-cta mt-4 sm:mt-5">
         <button
           type="button"
-          onClick={() => {
-            const el = document.getElementById("story");
-            smoothScrollTo(el);
-          }}
+          onClick={() => setStoryOpen(true)}
           className="group relative inline-flex cursor-pointer items-center space-x-3.5 overflow-hidden rounded-none bg-[#f2e7db] px-7 py-3 text-xs font-sans font-medium tracking-[0.15em] text-[#141210] uppercase shadow-[0_4px_20px_rgba(0,0,0,0.25)] transition-all duration-300 hover:bg-white hover:shadow-[0_8px_30px_rgba(242,231,219,0.25)] hover:scale-[1.02] active:scale-[0.98] sm:text-[13px]"
         >
           {/* Subtle diagonal light sheen passing over button */}
@@ -75,6 +73,8 @@ export const HeroContent: React.FC<HeroContentProps> = ({
       <div className="animate-hero-film mt-4 sm:mt-5">
         <FilmCTA onClick={onOpenFilm} />
       </div>
+
+      <HeroStory open={storyOpen} onClose={() => setStoryOpen(false)} />
     </div>
   );
 };
