@@ -2527,3 +2527,19 @@ html.lenis, html.lenis body { height: auto; }
 @media (prefers-reduced-motion: reduce) {
   .ab-sway, .ab-twinkle { animation: none; }
 }
+
+/* About: steam rising off the iron */
+.ab-steam {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation: abSteam 2.4s ease-out infinite;
+}
+@keyframes abSteam {
+  0% { opacity: 0; transform: translate(0, 6px) scale(0.4); }
+  20% { opacity: 0.9; }
+  100% { opacity: 0; transform: translate(14px, -70px) scale(2.6); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ab-steam { animation: none; }
+}

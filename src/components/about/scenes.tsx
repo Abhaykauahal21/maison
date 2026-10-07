@@ -206,7 +206,7 @@ export const HeroDepth: React.FC = () => (
 /*  THE MAKING: one continuous scene, one gown that is the whole story  */
 /*                                                                      */
 /*  sketched on paper → cut from cloth → stitched → hung under nine     */
-/*  moons → its own shape opens like a window onto the woman wearing it */
+/*  pressed and fitted on a form → its own shape opens like a window onto the woman wearing it */
 /* ------------------------------------------------------------------ */
 const sm = (t: number) => {
   const c = clamp01(t);
@@ -242,36 +242,46 @@ const T = {
   lift: [0.41, 0.45],
   place: [0.47, 0.51],
   stitch: [0.52, 0.64],
-  night: [0.66, 0.72],
-  moon0: 0.7,
+  press: [0.64, 0.7],
+  room: [0.68, 0.74],
+  fit: [0.69, 0.73],
+  tape: [0.74, 0.81],
   hole: [0.855, 0.875],
   zoom: [0.875, 0.985],
 } as const;
 
-const R_STARS = [0, 1, 2].map((k) => dust(k === 0 ? 26 : 16, 11 + k * 7));
+const MOTES = dust(16, 11);
+
+/** Creases in the cloth after sewing: short, scattered, a little bowed. The iron smooths them away. */
+const CREASES = Array.from({ length: 24 }, (_, i) => {
+  const y = 64 + ((i * 97) % 430);
+  const spread = 30 + y * 0.18;
+  const cx = 150 + ((((i * 53) % 100) - 50) / 50) * spread;
+  const len = 30 + ((i * 29) % 44);
+  const ang = ((((i * 37) % 9) - 4) * 7 * Math.PI) / 180;
+  const dx = (Math.cos(ang) * len) / 2;
+  const dy = (Math.sin(ang) * len) / 2;
+  const bow = (i % 2 ? 1 : -1) * (3 + (i % 3) * 2);
+  const q = (v: number) => Math.round(v);
+  return `M${q(cx - dx)} ${q(y - dy)} Q${q(cx - (dy / (len / 2)) * bow)} ${q(y + (dx / (len / 2)) * bow)} ${q(cx + dx)} ${q(y + dy)}`;
+});
 const SPOOL = { x: 560, y: 640 };
 
 const pieceAt = (p: number) => {
   const lift = sm((p - T.lift[0]) / (T.lift[1] - T.lift[0]));
   const place = sm((p - T.place[0]) / (T.place[1] - T.place[0]));
-  const night = sm((p - T.night[0] + 0.02) / 0.08);
+  const fit = sm((p - T.fit[0]) / (T.fit[1] - T.fit[0]));
   return {
     x: HOME.x,
-    y: 410 - 34 * lift + 44 * place + 50 * night,
-    s: 1.15 + 0.1 * place - 0.39 * night,
-    r: Math.sin(p * 55) * 1.2 * night,
+    y: 410 - 34 * lift + 44 * place,
+    s: 1.15 + 0.1 * place - 0.3 * fit,
+    r: 0,
   };
 };
 
 export const StoryScene: React.FC = () => {
   const wide = useMatches("(min-aspect-ratio: 5/4)") !== false;
   const vb = wide ? { x: 0, y: 0, w: 1200, h: 800 } : { x: 420, y: -30, w: 760, h: 900 };
-  const mr = wide ? 30 : 24;
-  const moons = Array.from({ length: 9 }, (_, i) => ({
-    x: Math.round(vb.x + 60 + i * ((vb.w - 120) / 8)),
-    y: Math.round(vb.y + (wide ? 190 : 160) - Math.sin((Math.PI * i) / 8) * (wide ? 90 : 60)),
-    a: T.moon0 + i * 0.016,
-  }));
 
   const svg = useRef<SVGSVGElement | null>(null);
   const outline = useRef<SVGPathElement | null>(null);
@@ -286,6 +296,8 @@ export const StoryScene: React.FC = () => {
   const thread = useRef<SVGPathElement | null>(null);
   const spokes = useRef<SVGGElement | null>(null);
   const hole = useRef<SVGPathElement | null>(null);
+  const iron = useRef<SVGGElement | null>(null);
+  const pressRect = useRef<SVGRectElement | null>(null);
 
   const onFrame = (p: number) => {
     // pencil: follows the outline as it is drawn
@@ -314,12 +326,37 @@ export const StoryScene: React.FC = () => {
       sc.style.opacity = prog > 0.002 && prog < 0.998 ? "1" : "0";
     }
 
-    // the cut-out piece: lifts, is laid down for stitching, then hangs under the moons
+    // the cut-out piece: lifts, is laid down for stitching, then is fitted on a dress form
     const T2 = pieceAt(p);
     piece.current?.setAttribute(
       "transform",
       `translate(${T2.x.toFixed(1)} ${T2.y.toFixed(1)}) rotate(${T2.r.toFixed(2)}) scale(${T2.s.toFixed(4)}) translate(-150 -260)`
     );
+
+    // the iron presses the piece in slow passes, top to bottom, leaning into each stroke
+    const ir = iron.current;
+    if (ir) {
+      const pr = clamp01((p - T.press[0]) / (T.press[1] - T.press[0]));
+      const passes = 5;
+      const u = pr * passes;
+      const k = Math.min(passes - 1, Math.floor(u));
+      const f = u - k;
+      const e = sm(f);
+      const dir = k % 2 === 0 ? 1 : -1;
+      const ix = HOME.x + dir * (-1 + 2 * e) * 98;
+      const iy = lerp(215, 640, (k + f) / passes) + (1 - Math.sin(Math.PI * f)) * -10;
+      const tilt = dir * Math.sin(Math.PI * f) * 3.5;
+      ir.setAttribute("transform", `translate(${ix.toFixed(1)} ${iy.toFixed(1)}) rotate(${tilt.toFixed(2)}) scale(${dir * 1.12} 1.12)`);
+      // creases vanish from the top down, following the iron
+      const pr2 = pressRect.current;
+      if (pr2) {
+        const Tp = pieceAt(p);
+        const ly = (iy - Tp.y) / Tp.s + 260;
+        const y0 = p >= T.press[1] ? 520 : p <= T.press[0] ? 0 : clamp01((ly - 18) / 520) * 520;
+        pr2.setAttribute("y", y0.toFixed(1));
+        pr2.setAttribute("height", Math.max(0, 520 - y0).toFixed(1));
+      }
+    }
 
     // needle + thread + spool while the seams are sewn, one after another
     const nd = needle.current;
@@ -402,10 +439,6 @@ export const StoryScene: React.FC = () => {
             <stop offset="0.45" stopColor="#fff" stopOpacity="0" />
             <stop offset="1" stopColor="#000" stopOpacity="0.3" />
           </linearGradient>
-          <radialGradient id="st-glow">
-            <stop offset="0" stopColor="#f6dfaa" stopOpacity="0.5" />
-            <stop offset="1" stopColor="#f6dfaa" stopOpacity="0" />
-          </radialGradient>
           <radialGradient id="st-paper" cx="0.35" cy="0.25" r="0.9">
             <stop offset="0" stopColor="#f6ecd8" />
             <stop offset="0.6" stopColor="#e8dabe" />
@@ -416,11 +449,56 @@ export const StoryScene: React.FC = () => {
             <stop offset="0.6" stopColor="#170e0b" />
             <stop offset="1" stopColor="#0c0605" />
           </radialGradient>
-          <radialGradient id="st-night" cx="0.5" cy="1" r="1.1">
-            <stop offset="0" stopColor="#23203a" />
-            <stop offset="0.55" stopColor="#0f1020" />
-            <stop offset="1" stopColor="#07070f" />
+          <linearGradient id="st-wall" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#4a2a36" />
+            <stop offset="1" stopColor="#2b1820" />
+          </linearGradient>
+          <linearGradient id="st-floor" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#8c6340" />
+            <stop offset="1" stopColor="#4d3220" />
+          </linearGradient>
+          <linearGradient id="st-shaft" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stopColor="#ffe9b8" stopOpacity="0" />
+            <stop offset="0.5" stopColor="#ffe9b8" stopOpacity="0.5" />
+            <stop offset="1" stopColor="#ffe9b8" stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id="st-beam" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stopColor="#fff" stopOpacity="0" />
+            <stop offset="0.5" stopColor="#fff" stopOpacity="0.6" />
+            <stop offset="1" stopColor="#fff" stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id="st-metal" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#f6f8fa" />
+            <stop offset="0.45" stopColor="#bfc5cb" />
+            <stop offset="1" stopColor="#7b828a" />
+          </linearGradient>
+          <linearGradient id="st-iron-body" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#5b5b69" />
+            <stop offset="0.5" stopColor="#2c2c36" />
+            <stop offset="1" stopColor="#17171d" />
+          </linearGradient>
+          <linearGradient id="st-brass" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#f6dd96" />
+            <stop offset="0.55" stopColor="#c9922f" />
+            <stop offset="1" stopColor="#8a5f18" />
+          </linearGradient>
+          <linearGradient id="st-wood" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#c58a4e" />
+            <stop offset="1" stopColor="#6b3f1c" />
+          </linearGradient>
+          <radialGradient id="st-heat">
+            <stop offset="0" stopColor="#ffb26b" stopOpacity="0.75" />
+            <stop offset="0.6" stopColor="#ff7a4a" stopOpacity="0.22" />
+            <stop offset="1" stopColor="#ff7a4a" stopOpacity="0" />
           </radialGradient>
+          <radialGradient id="st-steam">
+            <stop offset="0" stopColor="#fff" stopOpacity="0.85" />
+            <stop offset="0.6" stopColor="#fff" stopOpacity="0.3" />
+            <stop offset="1" stopColor="#fff" stopOpacity="0" />
+          </radialGradient>
+          <mask id="st-press" maskUnits="userSpaceOnUse" x="0" y="-10" width="300" height="540">
+            <rect ref={pressRect} x="0" y="0" width="300" height="520" fill="white" />
+          </mask>
           <clipPath id="st-clip">
             <path d={GOWN} />
           </clipPath>
@@ -446,16 +524,19 @@ export const StoryScene: React.FC = () => {
               </mask>
             );
           })}
-          {moons.map((m, i) => (
-            <mask key={i} id={`st-moon-${i}`} maskUnits="userSpaceOnUse" x={-mr - 4} y={-mr - 4} width={mr * 2 + 8} height={mr * 2 + 8}>
-              <circle r={mr} fill="white" />
-              <circle r={mr} fill="black" style={{ transform: `translateX(calc(${ramp(m.a, m.a + 0.028)} * ${mr * 2.1}px))` }} />
+          {/* the measuring tape is wound on, in the piece's own coordinates */}
+          {[
+            ["M110 176 Q150 194 190 176 Q204 182 198 216", T.tape[0], T.tape[0] + 0.035],
+            ["M114 104 Q150 120 186 104 Q198 110 192 142", T.tape[0] + 0.035, T.tape[1]],
+          ].map(([d, a0, b0], i) => (
+            <mask key={i} id={`st-tape-${i}`} maskUnits="userSpaceOnUse" x="60" y="60" width="180" height="180">
+              <path d={d as string} stroke="white" strokeWidth="14" pathLength={1} style={{ strokeDasharray: 1, strokeDashoffset: `calc(1 - ${ramp(a0 as number, b0 as number)})` }} />
             </mask>
           ))}
         </defs>
 
         <g mask="url(#st-window)">
-          {/* ===== the rooms: paper desk → dark table → night ===== */}
+          {/* ===== the rooms: paper desk → dark table → the fitting room ===== */}
           {/* the rooms stack on an opaque base, so the photograph below never shows through a crossfade */}
           <rect x={BIG.x} y={BIG.y} width={BIG.w} height={BIG.h} fill="url(#st-paper)" />
           <g style={{ opacity: `calc(1 - ${ramp(T.paperOut[0], T.paperOut[1])})`, transform: "translate3d(calc(var(--p) * -80px), calc(var(--p) * -50px), 0)" }} stroke="#8a6a3b" strokeOpacity="0.22" strokeWidth="1.2">
@@ -477,44 +558,49 @@ export const StoryScene: React.FC = () => {
             </g>
           </g>
 
-          <g style={{ opacity: ramp(T.night[0] - 0.02, T.night[1]) }}>
-            <rect x={BIG.x} y={BIG.y} width={BIG.w} height={BIG.h} fill="url(#st-night)" />
-            {R_STARS.map((layer, k) => (
-              <g key={k} style={{ transform: `translate3d(calc(var(--p) * ${-60 * (k + 1)}px), calc(var(--p) * ${-20 * (k + 1)}px), 0)` }}>
-                {layer.map((s, i) => (
-                  <circle
-                    key={i}
-                    className="ab-twinkle"
-                    cx={vb.x - 200 + s.x * ((vb.w + 400) / 100)}
-                    cy={vb.y - 100 + s.y * ((vb.h + 200) / 100) * 0.62}
-                    r={s.s * (0.45 + k * 0.4)}
-                    fill="#f6ead0"
-                    style={{ opacity: s.o * (0.5 + k * 0.25), animationDelay: `-${s.d}s` }}
-                  />
-                ))}
-              </g>
-            ))}
-            {/* nine moons, filling one by one */}
-            <path
-              d={moons.map((m, i) => `${i ? "L" : "M"}${m.x} ${m.y}`).join(" ")}
-              stroke="#e6c98f"
-              strokeOpacity="0.4"
-              strokeWidth="1.2"
-              pathLength={1}
-              style={{ strokeDasharray: 1, strokeDashoffset: `calc(1 - ${ramp(T.moon0, 0.84)})` }}
-            />
-            {moons.map((m, i) => (
-              <g key={i} transform={`translate(${m.x} ${m.y})`}>
-                <circle r={mr * 2.6} fill="url(#st-glow)" style={{ opacity: `calc(${ramp(m.a + 0.01, m.a + 0.04)} * 0.9)` }} />
-                <circle r={mr} fill="#14152a" stroke="#e6c98f" strokeOpacity="0.35" strokeWidth="1" />
-                <g mask={`url(#st-moon-${i})`}>
-                  <circle r={mr} fill="#f6e3b0" />
-                  <circle cx={-mr * 0.26} cy={-mr * 0.24} r={mr * 0.18} fill="#d9c28c" opacity="0.55" />
-                  <circle cx={mr * 0.3} cy={mr * 0.26} r={mr * 0.24} fill="#d9c28c" opacity="0.4" />
-                  <circle cx={mr * 0.18} cy={-mr * 0.42} r={mr * 0.1} fill="#d9c28c" opacity="0.5" />
+          {/* the fitting room: plum walls, a wooden floor, warm light falling through a window */}
+          <g style={{ opacity: ramp(T.room[0], T.room[1]) }}>
+            <rect x={BIG.x} y={BIG.y} width={BIG.w} height={BIG.h} fill="url(#st-wall)" />
+            {/* framed sketches on the wall, a little behind everything */}
+            <g style={{ transform: "translate3d(calc(var(--p) * -50px), 0, 0)" }}>
+              {[
+                [vb.x + vb.w - 190, 130, 0.5],
+                [vb.x + vb.w - 120, 380, 0.4],
+                [vb.x + 60, 90, 0.4],
+              ].map(([fx, fy, fs], i) => (
+                <g key={i} transform={`translate(${fx} ${fy})`}>
+                  <rect width={150 * (fs as number) * 2} height={190 * (fs as number) * 2} fill="#6b4a2c" />
+                  <rect x="6" y="6" width={150 * (fs as number) * 2 - 12} height={190 * (fs as number) * 2 - 12} fill="#efe3c8" />
+                  <g transform={`translate(${(150 * (fs as number) * 2) / 2 - 150 * (fs as number) * 0.5 * 0.6} 14) scale(${(fs as number) * 0.6})`}>
+                    <path d={GOWN} stroke="#6a5a45" strokeWidth="3" strokeLinejoin="round" />
+                  </g>
                 </g>
-              </g>
-            ))}
+              ))}
+            </g>
+            {/* floor and skirting */}
+            <rect x={BIG.x} y="700" width={BIG.w} height={BIG.h} fill="url(#st-floor)" />
+            <rect x={BIG.x} y="690" width={BIG.w} height="12" fill="#c7ad8a" />
+            <path d={Array.from({ length: 40 }, (_, i) => `M${-600 + i * 90} 702 L${-900 + i * 140} 1000`).join(" ")} stroke="#2c1b10" strokeOpacity="0.35" strokeWidth="2" />
+            {/* light shafts from the window, sliding slowly as you scroll */}
+            <g style={{ mixBlendMode: "screen", transform: "translate3d(calc(var(--p) * -160px), 0, 0)" }}>
+              <polygon points="120,-200 260,-200 760,900 560,900" fill="url(#st-shaft)" opacity="0.7" />
+              <polygon points="360,-200 440,-200 900,900 800,900" fill="url(#st-shaft)" opacity="0.5" />
+              <polygon points="-60,-200 40,-200 420,900 300,900" fill="url(#st-shaft)" opacity="0.4" />
+            </g>
+            {/* dust turning in the light */}
+            <g style={{ transform: "translate3d(calc(var(--p) * -90px), calc(var(--p) * -40px), 0)" }}>
+              {MOTES.map((m, i) => (
+                <circle
+                  key={i}
+                  className="ab-twinkle"
+                  cx={vb.x + (m.x / 100) * vb.w}
+                  cy={vb.y + (m.y / 100) * vb.h * 0.9}
+                  r={m.s * 0.9}
+                  fill="#ffefc8"
+                  style={{ opacity: m.o, animationDelay: `-${m.d}s` }}
+                />
+              ))}
+            </g>
           </g>
 
           {/* ===== the desk: sheet of paper, the sketch ===== */}
@@ -561,7 +647,7 @@ export const StoryScene: React.FC = () => {
           </g>
 
           {/* ===== the table: the cloth, the chalk line, the scissors ===== */}
-          <g style={{ opacity: `calc(${ramp(T.paperOut[0] + 0.01, T.paperOut[1])} * (1 - ${ramp(T.night[0], T.night[1] + 0.02)}))` }}>
+          <g style={{ opacity: `calc(${ramp(T.paperOut[0] + 0.01, T.paperOut[1])} * (1 - ${ramp(T.room[0], T.room[1] + 0.02)}))` }}>
             <g style={{ filter: "drop-shadow(0 18px 24px rgba(0,0,0,0.6))" }}>
               <rect x="540" y="70" width="520" height="680" rx="4" fill="url(#st-weave)" mask="url(#st-cloth-hole)" />
               <rect x="540" y="70" width="520" height="680" rx="4" fill="url(#st-sheen)" mask="url(#st-cloth-hole)" />
@@ -595,12 +681,37 @@ export const StoryScene: React.FC = () => {
             </g>
           </g>
 
-          {/* ===== the piece: cut, laid down, stitched, hung ===== */}
+          {/* ===== the piece: cut, laid down, stitched, pressed, fitted ===== */}
           <g ref={piece} style={{ opacity: ramp(T.paperOut[0] + 0.02, T.paperOut[1]) }}>
-            <path d={GOWN} fill="#000" style={{ filter: "blur(5px)", opacity: `calc(${ramp(T.lift[0], T.lift[1])} * 0.5)`, transform: "translate(8px, 22px)" }} />
+            {/* the dress form it ends up on */}
+            <g style={{ opacity: ramp(T.fit[0] - 0.01, T.fit[1]) }}>
+              <ellipse cx="150" cy="612" rx="92" ry="13" fill="#000" opacity="0.4" style={{ filter: "blur(6px)" }} />
+              <path d="M150 504 V604" stroke="#6b5036" strokeWidth="7" strokeLinecap="round" />
+              <path d="M150 504 V604" stroke="#b9996b" strokeWidth="2" strokeLinecap="round" />
+              <ellipse cx="150" cy="606" rx="62" ry="10" fill="#5a4129" />
+              <ellipse cx="150" cy="603" rx="62" ry="10" fill="#7b5b3b" />
+              <path d="M142 34 V-4 Q150 -12 158 -4 V34" fill="#c9b48e" stroke="#a8946f" strokeWidth="1" />
+              <circle cx="150" cy="-16" r="5.5" fill="#9a7a45" />
+              <path d="M102 46 Q150 28 198 46 Q208 82 194 112 Q178 142 176 178 L124 178 Q122 142 106 112 Q92 82 102 46 Z" fill="#d9c7a6" stroke="#a8946f" strokeWidth="1.2" />
+            </g>
+
+            <path d={GOWN} fill="#000" style={{ filter: "blur(5px)", opacity: `calc(${ramp(T.lift[0], T.lift[1])} * 0.5 * (1 - ${ramp(T.fit[0], T.fit[1])}))`, transform: "translate(8px, 22px)" }} />
             <g clipPath="url(#st-clip)">
               <rect x="40" y="0" width="220" height="530" fill="url(#st-weave)" />
               <rect x="40" y="0" width="220" height="530" fill="url(#st-sheen)" />
+              {/* creases from the sewing; the iron smooths them away */}
+              <g mask="url(#st-press)" style={{ opacity: `calc(${ramp(0.575, 0.625)} * (1 - ${ramp(T.fit[0], T.fit[1])}))` }}>
+                {CREASES.map((d, i) => (
+                  <g key={i}>
+                    <path d={d} stroke="#2a0610" strokeOpacity="0.3" strokeWidth="2.2" strokeLinecap="round" transform="translate(1.2 1.8)" />
+                    <path d={d} stroke="#ffb3c0" strokeOpacity="0.26" strokeWidth="1.2" strokeLinecap="round" />
+                  </g>
+                ))}
+              </g>
+              {/* held up to the light: a beam crosses the cloth */}
+              <g style={{ opacity: win(0.74, 0.86, 0.02) }}>
+                <rect x="-70" y="-30" width="90" height="580" fill="url(#st-beam)" style={{ transform: `translate3d(calc(${ramp(0.74, 0.86)} * 400px), 0, 0) skewX(-18deg)` }} />
+              </g>
             </g>
             <path d={GOWN} stroke="#f1b9b9" strokeOpacity="0.5" strokeWidth="0.8" />
             {SEAMS.map((d, i) => (
@@ -609,10 +720,81 @@ export const StoryScene: React.FC = () => {
                 <path d={d} stroke="#fff3cf" strokeOpacity="0.7" strokeWidth="0.8" strokeLinecap="round" strokeDasharray="7 6" />
               </g>
             ))}
-            {/* a hanger, once the dress is finished and left to wait */}
-            <g style={{ opacity: ramp(T.stitch[1] + 0.01, T.night[1]) }} stroke="#d1ab5a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M150 9 C150 -9 170 -16 170 -32 C170 -48 146 -50 142 -36" />
-              <path d="M88 60 L150 11 L212 60" />
+
+            {/* fitting: chalk marks, the tape round the waist and bust, pins, a label */}
+            <g stroke="#efe3c8" strokeWidth="1.4" strokeLinecap="round" strokeDasharray="3 4" style={{ opacity: ramp(0.8, 0.83) }}>
+              <path d="M118 190 L150 198 L182 190" />
+              <path d="M122 120 L150 126 L178 120" />
+            </g>
+            {["M110 176 Q150 194 190 176 Q204 182 198 216", "M114 104 Q150 120 186 104 Q198 110 192 142"].map((d, i) => (
+              <g key={i} mask={`url(#st-tape-${i})`}>
+                <path d={d} stroke="#f3ead2" strokeWidth="7" strokeLinecap="butt" />
+                <path d={d} stroke="#2a1d10" strokeOpacity="0.75" strokeWidth="7" strokeDasharray="0.8 4.4" />
+                <path d={d} stroke="#c9922f" strokeWidth="1" transform="translate(0 -2.4)" />
+              </g>
+            ))}
+            {[
+              [118, 128, -1, "#e9a3a0"],
+              [182, 130, 1, "#e6c98f"],
+              [124, 160, -1, "#9cc0e6"],
+              [176, 162, 1, "#e9a3a0"],
+              [133, 200, -1, "#e6c98f"],
+              [167, 202, 1, "#9cc0e6"],
+            ].map(([x, y, dir, c], i) => {
+              const a = 0.79 + i * 0.007;
+              return (
+                <g
+                  key={i}
+                  style={{ opacity: ramp(a, a + 0.008), transform: `translateY(calc((1 - ${ramp(a, a + 0.008)}) * -16px))` }}
+                >
+                  <path d={`M${x} ${y} l${(dir as number) * 15} -7`} stroke="#d7dbe0" strokeWidth="1.6" strokeLinecap="round" />
+                  <circle cx={(x as number) + (dir as number) * 16.5} cy={(y as number) - 7.7} r="3.2" fill={c as string} stroke="#00000033" strokeWidth="0.5" />
+                </g>
+              );
+            })}
+            <g style={{ opacity: ramp(0.83, 0.86) }}>
+              <path d="M150 22 Q160 30 156 44" stroke="#d1ab5a" strokeWidth="1.3" strokeLinecap="round" />
+              <g transform="rotate(8 156 52)">
+                <rect x="143" y="44" width="28" height="18" rx="3" fill="#f6ecd8" stroke="#8a6a3b" strokeWidth="1" />
+                <text x="157" y="57.5" textAnchor="middle" fill="#8a6a3b" fontSize="12" className="font-allura">M·D</text>
+              </g>
+            </g>
+          </g>
+
+          {/* ===== the iron: a heavy brass-and-steel one, pressing the cloth before it is fitted ===== */}
+          <g style={{ opacity: win(T.press[0] - 0.005, T.press[1] + 0.005, 0.01) }}>
+            <g ref={iron}>
+              {/* heat under the soleplate, and its contact shadow */}
+              <ellipse cx="4" cy="14" rx="92" ry="26" fill="url(#st-heat)" style={{ mixBlendMode: "screen" }} />
+              <ellipse cx="8" cy="24" rx="78" ry="11" fill="#000" opacity="0.5" style={{ filter: "blur(5px)" }} />
+              {/* the cord trailing behind */}
+              <path d="M-56 -20 q-34 14 -58 -4 t-70 10" stroke="#16161c" strokeWidth="4.5" strokeLinecap="round" fill="none" />
+              <path d="M-56 -21 q-34 14 -58 -4 t-70 10" stroke="#5a5a66" strokeWidth="1" strokeLinecap="round" fill="none" />
+              {/* soleplate */}
+              <path d="M-64 17 L52 17 Q86 17 72 2 L46 -14 L-64 -14 Z" fill="url(#st-metal)" stroke="#5f666d" strokeWidth="1.4" strokeLinejoin="round" />
+              <path d="M-60 11 L50 11 Q72 11 64 3" stroke="#fff" strokeOpacity="0.75" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+              {[-40, -22, -4, 14, 32].map((vx) => (
+                <ellipse key={vx} cx={vx} cy="3" rx="3.4" ry="1.5" fill="#3d444b" opacity="0.55" />
+              ))}
+              {/* body */}
+              <path d="M-56 -14 Q-60 -50 -16 -56 L30 -50 Q54 -43 48 -14 Z" fill="url(#st-iron-body)" stroke="#0e0e12" strokeWidth="1.2" strokeLinejoin="round" />
+              <path d="M-44 -36 Q-14 -52 28 -44" stroke="#9a9aae" strokeOpacity="0.65" strokeWidth="2" fill="none" strokeLinecap="round" />
+              <path d="M-52 -18 Q-52 -30 -44 -36" stroke="#9a9aae" strokeOpacity="0.4" strokeWidth="1.4" fill="none" strokeLinecap="round" />
+              {/* temperature dial and water cap in brass */}
+              <circle cx="16" cy="-36" r="8.5" fill="url(#st-brass)" stroke="#7a5412" strokeWidth="1" />
+              <circle cx="16" cy="-36" r="3.2" fill="#6b4a14" />
+              <path d="M16 -43 V-37" stroke="#2c1b05" strokeWidth="1.4" strokeLinecap="round" />
+              <circle cx="-32" cy="-32" r="5" fill="url(#st-brass)" stroke="#7a5412" strokeWidth="0.8" />
+              {/* the handle: turned wood on brass posts */}
+              <path d="M-40 -48 Q-10 -106 32 -52" stroke="#3a2210" strokeWidth="12" strokeLinecap="round" fill="none" />
+              <path d="M-40 -48 Q-10 -106 32 -52" stroke="url(#st-wood)" strokeWidth="9" strokeLinecap="round" fill="none" />
+              <path d="M-34 -58 Q-10 -98 22 -62" stroke="#f1c28a" strokeOpacity="0.55" strokeWidth="2" strokeLinecap="round" fill="none" />
+              <circle cx="-40" cy="-47" r="4.2" fill="url(#st-brass)" />
+              <circle cx="32" cy="-51" r="4.2" fill="url(#st-brass)" />
+              {/* steam leaving the front vents */}
+              {[[58, -10, 0, 16], [46, -22, 0.6, 20], [66, -26, 1.2, 14], [52, -34, 1.8, 18]].map(([sx, sy, d, r], i) => (
+                <circle key={i} className="ab-steam" cx={sx} cy={sy} r={r} fill="url(#st-steam)" style={{ animationDelay: `-${d}s` }} />
+              ))}
             </g>
           </g>
 
@@ -647,8 +829,9 @@ export const StoryScene: React.FC = () => {
           <Beat tone="light" a={0.26} b={0.35} script="Then comes the cloth." text="Crimson silk, laid out on the table like a held breath." />
           <Beat tone="light" a={0.34} b={0.45} script="The first cut is the quietest." text="A chalk line, a steady hand, and no one watching the clock." />
           <Beat tone="light" a={0.5} b={0.64} script="Stitch by stitch." text="By hand, by lamplight, and never by the clock. Every seam a small promise." />
-          <Beat tone="light" a={0.65} b={0.75} script="Nine moons." text="From the first sketch to the very last stitch." />
-          <Beat tone="light" a={0.73} b={0.86} script="Not because we are slow." text="Because she deserves to be waited for." />
+          <Beat tone="light" a={0.65} b={0.72} script="Pressed, never rushed." text="Steam, a warm iron, and the patience to let the cloth settle." />
+          <Beat tone="light" a={0.72} b={0.79} script="Measured twice." text="On the form, the tape goes round again, until the dress fits her, not the pattern." />
+          <Beat tone="light" a={0.79} b={0.865} script="Tested, then tested again." text="Pinned, pulled, held up to the light, and sent back to the table if it asks for more." />
         </div>
       </div>
 
@@ -665,7 +848,7 @@ export const StoryScene: React.FC = () => {
           ["Sketch", 0.02, 0.2],
           ["Cut", 0.24, 0.45],
           ["Stitch", 0.47, 0.65],
-          ["Wait", 0.66, 0.86],
+          ["Fit", 0.66, 0.86],
           ["Wear", 0.87, 1.02],
         ].map(([label, a, b]) => (
           <div key={label as string} className="flex items-center gap-3" style={{ opacity: `calc(0.3 + 0.7 * ${win(a as number, b as number, 0.02)})` }}>
