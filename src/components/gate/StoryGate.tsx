@@ -198,7 +198,8 @@ export const StoryGate: React.FC<StoryGateProps> = ({
       >
         {/* the locked page: visible, but not usable. Its own negative top margin is cancelled so the clip keeps its torn top */}
         <div inert aria-hidden="true" className="pointer-events-none h-full overflow-hidden select-none [&>section]:mt-0!">
-          {children}
+          {/* soft focus: slight scale keeps the blurred edges from fading to transparent inside the clip */}
+          <div className="h-full origin-top scale-[1.04] blur-[5px]">{children}</div>
         </div>
 
         {/* the sealed scene: chains, padlock, light, dust, caption + action */}

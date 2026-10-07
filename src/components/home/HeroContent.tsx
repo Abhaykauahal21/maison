@@ -64,7 +64,7 @@ export const HeroContent: React.FC<HeroContentProps> = ({
             aria-hidden="true"
           />
 
-          <span className="relative z-10">READ OUR STORY</span>
+          <span className="relative z-10">READ MY STORY</span>
           <span className="relative z-10 text-sm transition-transform duration-300 group-hover:translate-x-1.5">
             →
           </span>
