@@ -21,7 +21,9 @@ export const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({
   const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
+    let raf = 0;
     const handleScroll = () => {
+      raf = 0;
       const el = containerRef.current;
       if (!el) return;
 
@@ -37,10 +39,17 @@ export const ScrollTextReveal: React.FC<ScrollTextRevealProps> = ({
       setScrollProgress(progress);
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    // one read + one state update per frame, not per scroll event
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(handleScroll);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
     handleScroll();
 
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+    };
   }, []);
 
   const words = text.split(" ");

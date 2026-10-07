@@ -2,7 +2,6 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Hero } from "@/components/home/Hero";
 import { EditorialSection } from "@/components/editorial/EditorialSection";
 import { DreamSection } from "@/components/dream/DreamSection";
-import { StepSection } from "@/components/step/StepSection";
 import { GardenSection } from "@/components/garden/GardenSection";
 import { IndiaSection } from "@/components/india/IndiaSection";
 import { OurStorySection } from "@/components/story/OurStorySection";
@@ -20,13 +19,17 @@ export default function HomePage() {
 
       <Hero />
       <EditorialSection />
-      <DreamSection />
       {STORY_GATE_ENABLED ? (
-        // Step 1 is shown only as a small blurred, locked peek; everything after it stays fully visible.
-        // (flip STORY_GATE_ENABLED to false to release Step 1 as well)
+        // The Dream is shown only as a small dimmed, locked peek (Step 1 stays hidden); everything after it is fully visible.
+        // (flip STORY_GATE_ENABLED to false to release the Dream)
         <>
-          <StoryGate>
-            <StepSection />
+          <StoryGate
+            className="-mt-1.5 sm:-mt-2 md:-mt-3.5 lg:-mt-5 xl:-mt-6"
+            height="clamp(340px,26vw,520px)"
+            tornTop={false}
+            maskVeil={false}
+          >
+            <DreamSection />
           </StoryGate>
           <GardenSection />
           <IndiaSection />
@@ -38,7 +41,7 @@ export default function HomePage() {
         </>
       ) : (
         <>
-          <StepSection />
+          <DreamSection />
           <GardenSection />
           <IndiaSection />
           <OurStorySection />

@@ -3,52 +3,58 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { GardenParticles } from "@/components/garden/GardenParticles";
-import { smoothScrollTo } from "@/lib/smooth-scroll";
 import { makeTops, nearViewport } from "@/lib/scrub";
 
 export interface TestimonialItem {
   id: string;
-  quote: string;
-  body: string;
+  /** e.g. "Whisper #001" */
+  whisper: string;
+  /** What the visitor wrote to us. */
+  message: string;
+  /** Maison D'vine's reply. */
+  response: string;
   author: string;
   location: string;
-  rating: number;
   leftNoteLines: string[];
   rightNoteLines: string[];
 }
 
 export const initialTestimonials: TestimonialItem[] = [
   {
-    id: "ritika",
-    quote:
-      "It felt like the dress understood a part of me I had never been able to put into words.”",
-    body: "Not just a piece of clothing, but a feeling I carry with me. Maison D'Vine doesn't just create dresses, they create moments.",
-    author: "RITIKA M.",
-    location: "Noida",
-    rating: 5,
-    leftNoteLines: ["Confidence", "feels different", "now."],
-    rightNoteLines: ["A story", "I'll always", "wear."],
-  },
-  {
-    id: "ananya",
-    quote:
-      "When I wore it, I wasn't just walking into a room — I was walking into who I truly am.”",
-    body: "The delicate drape and silent elegance made me stand taller. It felt like poetry tailored purely for me.",
-    author: "ANANYA S.",
-    location: "Mumbai",
-    rating: 5,
-    leftNoteLines: ["Grace in", "every fold.", "Always."],
-    rightNoteLines: ["Quiet", "dreams in", "motion."],
-  },
-  {
-    id: "meera",
-    quote: "There is an unspoken grace in every seam. I have never felt so completely myself.”",
-    body: "From the fabric to the silhouette, everything breathed quiet luxury. A memory woven forever.",
-    author: "MEERA K.",
+    id: "whisper-001",
+    whisper: "Whisper #001",
+    message:
+      "I really like the concept, it feels fresh. But honestly the prices look high for a brand that just started.",
+    response:
+      "A completely fair observation. Trust is earned, not demanded. Our pricing simply reflects the uncompromised cost of a slow, conscious, nine-month creation cycle. We appreciate you saying .",
+    author: "Anonymous",
     location: "Delhi",
-    rating: 5,
-    leftNoteLines: ["A feeling", "you always", "remember."],
-    rightNoteLines: ["Pure", "timeless", "art."],
+    leftNoteLines: ["Trust is", "earned,", "not demanded."],
+    rightNoteLines: ["Slow,", "conscious,", "nine months."],
+  },
+  {
+    id: "whisper-002",
+    whisper: "Whisper #002",
+    message:
+      "Love the idea but I don't think I can spend 15k on a dress from a new brand right now.",
+    response:
+      "We deeply respect that boundary. Investing in a new vision requires certainty. You don't need to own a piece to be part of our dialogue, stay in the courtyard as long as you like.",
+    author: "Anonymous",
+    location: "Anonymous",
+    leftNoteLines: ["We respect", "that", "boundary."],
+    rightNoteLines: ["Stay in", "the courtyard."],
+  },
+  {
+    id: "whisper-003",
+    whisper: "Whisper #003",
+    message:
+      "I'm not the typical slow-fashion customer. I usually shop on impulse, but your story caught my attention. Curious to see where it leads.",
+    response:
+      "That's exactly the kind of honesty we want here. You don't have to fit the idea perfectly to be curious about it.",
+    author: "Shreya Rao",
+    location: "Mumbai, India",
+    leftNoteLines: ["Honesty", "is welcome", "here."],
+    rightNoteLines: ["Curious", "is enough."],
   },
 ];
 
@@ -92,13 +98,6 @@ const sm = (p: number, a: number, b: number) => {
   const t = clamp01((p - a) / (b - a));
   return t * t * (3 - 2 * t);
 };
-
-/** Which testimonial is showing at pinned-scroll progress p (first one gets a longer hold). */
-const pickIndex = (p: number, n: number) =>
-  n < 2 ? 0 : p < 0.4 ? 0 : Math.min(n - 1, 1 + Math.floor((p - 0.4) / (0.6 / (n - 1))));
-/** Scroll progress that centres testimonial i. */
-const centreOf = (i: number, n: number) =>
-  i === 0 || n < 2 ? 0.2 : 0.4 + (i - 0.5) * (0.6 / (n - 1));
 
 /** Mobile line that rises out of its own mask (driven by scroll). */
 const SLine: React.FC<{ lag?: number; children: React.ReactNode }> = ({ lag = 0, children }) => (
@@ -164,8 +163,9 @@ const STYLES = `
 .gw-star { display: inline-block; animation: gw-star .7s cubic-bezier(.34,1.56,.64,1) var(--d, 0s) both; }
 @keyframes gw-star { from { opacity: 0; transform: scale(0) rotate(-90deg); } to { opacity: 1; transform: none; } }
 
-.gw-scrub-cue { transition: opacity .5s ease; }
-.gw-progress { transform-origin: left; animation: gw-progress 7s linear both; }
+.gw-progress { transform-origin: left; animation: gw-progress 9s linear both; }
+.gw-word { opacity: 0; animation: gw-word .7s cubic-bezier(.16,1,.3,1) both; }
+@keyframes gw-word { from { opacity: 0; transform: translateY(7px); filter: blur(3px); } to { opacity: 1; transform: none; filter: none; } }
 @keyframes gw-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
 .gw-parallax { transition: transform .9s cubic-bezier(.16,1,.3,1); will-change: transform; }
@@ -226,21 +226,20 @@ const Line: React.FC<{ d: number; children: React.ReactNode }> = ({ d, children 
   </span>
 );
 
-const Stars: React.FC<{ count: number; size: string }> = ({ count, size }) => (
-  <div
-    className="mt-2 flex items-center gap-[0.25em] leading-none text-[#df9b2d]"
-    style={{ fontSize: size }}
-  >
-    {Array.from({ length: count }).map((_, i) => (
+/** Words that surface one by one (blur to sharp), starting `start` seconds in. */
+const Words: React.FC<{ text: string; start: number; step?: number }> = ({ text, start, step = 0.03 }) => (
+  <>
+    {text.split(" ").map((w, i) => (
       <span
         key={i}
-        className="gw-star select-none"
-        style={{ ["--d" as string]: `${0.25 + i * 0.09}s` }}
+        className="gw-word inline-block"
+        style={{ animationDelay: `${(start + i * step).toFixed(2)}s` }}
       >
-        ★
+        {w}
+        {"\u00a0"}
       </span>
     ))}
-  </div>
+  </>
 );
 
 interface TestimonialViewProps {
@@ -249,70 +248,72 @@ interface TestimonialViewProps {
   size: "lg" | "sm";
 }
 
-/** Quote + reflection + author, sized either in card units (lg) or viewport units (sm). */
+/** Whisper label, what she wrote, Maison D'vine's reply and who wrote it: sized in card units (lg) or viewport units (sm). */
 const TestimonialView: React.FC<TestimonialViewProps> = ({ item, swapClass, size }) => {
   const lg = size === "lg";
+  const msgWords = item.message.split(" ").length;
+  const msgStart = 0.25;
+  const respStart = msgStart + msgWords * 0.03 + 0.35;
+  const respWords = item.response.split(" ").length;
+  const signStart = respStart + respWords * 0.022 + 0.3;
+  const showLocation = item.location.trim().toLowerCase() !== item.author.trim().toLowerCase();
   return (
     <div className={`flex flex-col transition-all duration-200 ease-out ${swapClass}`}>
-      <div className="flex items-start" style={{ gap: lg ? "1.1cqw" : "8px" }}>
+      <span
+        className="gw-word font-serif font-bold tracking-[0.04em] text-[#16120e]"
+        style={{ fontSize: lg ? "max(11px, 1.3cqw)" : "13px", animationDelay: "0s", paddingLeft: lg ? "3cqw" : 0 }}
+      >
+        {item.whisper}
+      </span>
+      <p
+        className="font-serif leading-[1.38] text-[#16120e]"
+        style={{
+          fontSize: lg ? "max(12px, 1.62cqw)" : "clamp(14px,4vw,18px)",
+          marginTop: lg ? "0.9cqw" : "10px",
+          paddingLeft: lg ? "3cqw" : 0,
+        }}
+      >
+        <Words text={item.message} start={msgStart} />
+      </p>
+      <div style={{ marginTop: lg ? "1.2cqw" : "12px", paddingLeft: lg ? "7.5cqw" : 0 }}>
         <span
-          className="shrink-0 font-serif leading-none font-bold text-[#16120e] select-none"
-          style={{
-            fontSize: lg ? "max(26px, 3cqw)" : "32px",
-            marginTop: lg ? "-0.4cqw" : "-4px",
-          }}
+          className="gw-word font-serif font-bold text-[#16120e]"
+          style={{ fontSize: lg ? "max(11px, 1.2cqw)" : "12.5px", animationDelay: `${respStart - 0.1}s` }}
         >
-          “
+          Maison D&apos;vine Response:
         </span>
-        <div className="flex flex-col">
-          <h3
-            className="font-serif leading-[1.32] font-normal text-[#16120e]"
-            style={{ fontSize: lg ? "max(14px, 1.6cqw)" : "clamp(14px,4.2vw,20px)" }}
+        <p
+          className="font-serif leading-[1.5] text-[#46392e] italic"
+          style={{ fontSize: lg ? "max(11px, 1.24cqw)" : "clamp(12px,3.3vw,14.5px)", marginTop: "0.25em" }}
+        >
+          <Words text={item.response} start={respStart} step={0.022} />
+        </p>
+      </div>
+      <div
+        className="gw-word flex flex-col"
+        style={{ marginTop: lg ? "1.2cqw" : "14px", paddingLeft: lg ? "7.5cqw" : 0, animationDelay: `${signStart}s` }}
+      >
+        <span
+          className="font-serif font-medium tracking-[0.02em] text-[#1c1815]"
+          style={{ fontSize: lg ? "max(13px, 1.7cqw)" : "17px" }}
+        >
+          {item.author}
+        </span>
+        {showLocation && (
+          <span
+            className="font-serif tracking-wider text-[#635344]"
+            style={{ fontSize: lg ? "max(11px, 1.1cqw)" : "12px", marginTop: "2px" }}
           >
-            {item.quote}
-          </h3>
-          <p
-            className="font-serif leading-[1.5] text-[#46392e] italic"
-            style={{
-              fontSize: lg ? "max(11.5px, 1.08cqw)" : "clamp(12px,3.3vw,15px)",
-              marginTop: lg ? "1cqw" : "10px",
-            }}
-          >
-            {item.body}
-          </p>
-          <div
-            className="flex flex-col"
-            style={{
-              marginTop: lg ? "1.3cqw" : "14px",
-              paddingLeft: lg ? "1.4cqw" : "14px",
-            }}
-          >
-            <div
-              className="flex items-baseline gap-1.5 font-serif font-medium tracking-[0.16em] text-[#1c1815] uppercase"
-              style={{ fontSize: lg ? "max(11px, 1cqw)" : "12px" }}
-            >
-              <span className="font-normal text-[#3a3027]">—</span>
-              <span>{item.author}</span>
-            </div>
-            <div
-              className="font-serif tracking-wider text-[#635344]"
-              style={{
-                fontSize: lg ? "max(10px, 0.85cqw)" : "11px",
-                paddingLeft: lg ? "1.2cqw" : "14px",
-                marginTop: "2px",
-              }}
-            >
-              {item.location}
-            </div>
-            <div style={{ paddingLeft: lg ? "1.2cqw" : "14px" }}>
-              <Stars count={item.rating} size={lg ? "max(13px, 1.25cqw)" : "14px"} />
-            </div>
-          </div>
-        </div>
+            {item.location}
+          </span>
+        )}
       </div>
     </div>
   );
 };
+
+/** How long each whisper stays before the next one (matches the .gw-progress animation). */
+const AUTO_MS = 9000;
 
 const navBtnClass =
   "group flex items-center justify-center rounded-full border border-white/50 bg-black/35 text-white backdrop-blur-sm transition-all duration-300 hover:border-[#e9c98c] hover:bg-[#e9c98c]/20 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-xl";
@@ -328,7 +329,6 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
   const stageRef = useRef<HTMLDivElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
   const mobRef = useRef<HTMLDivElement | null>(null);
-  const scrubIdxRef = useRef(0);
   const [inView, setInView] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<"next" | "prev">("next");
@@ -381,7 +381,6 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
     const stage = stageRef.current;
     const mob = mobRef.current;
     if (!track || !stage || !mob) return;
-    const n = testimonials.length;
 
     const one = (root: HTMLElement, sel: string) => root.querySelector<HTMLElement>(sel);
     const all = (root: HTMLElement, sel: string) =>
@@ -392,8 +391,6 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
     const dLeft = one(stage, "[data-gw='left']");
     const dRight = one(stage, "[data-gw='right']");
     const dFlower = one(stage, "[data-gw='flower']");
-    const dBar = one(stage, "[data-gbar]");
-    const dCue = one(stage, "[data-gcue]");
 
     const mBg = one(mob, "[data-gw='bg']");
     const mPaper = one(mob, "[data-gw='paper']");
@@ -417,8 +414,8 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
       const r = track.getBoundingClientRect();
       if (!nearViewport(r, vh, 0.5)) return;
       const enter = clamp01((vh - r.top) / (vh * 0.95));
-      const span = Math.max(1, r.height - vh);
-      const p = clamp01(-r.top / span);
+      // 0 → 1 as the section scrolls up past the top: only a gentle drift of the scrapbook pieces
+      const p = clamp01(-r.top / vh);
 
       if (dBg) {
         dBg.style.opacity = String(sm(enter, 0, 0.5).toFixed(3));
@@ -430,8 +427,7 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
       const eLeft = sm(enter, 0.38, 0.78);
       const eRight = sm(enter, 0.48, 0.88);
       const eFlower = sm(enter, 0.62, 1);
-      const phase = (p * n) % 1;
-      const lift = Math.sin(Math.PI * phase) * 1.6; // the page lifts as each story turns
+      const lift = 0;
 
       if (dPaper) {
         dPaper.style.opacity = String(clamp01(ePaper * 2).toFixed(3));
@@ -449,15 +445,6 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
         dFlower.style.opacity = String(clamp01(eFlower * 2).toFixed(3));
         dFlower.style.transform = `translate3d(0, ${((1 - eFlower) * 8 - p * 3).toFixed(2)}%, 0) scale(${(0.9 + 0.1 * eFlower).toFixed(4)}) rotate(${(p * -4).toFixed(2)}deg)`;
         dFlower.style.transformOrigin = "50% 100%";
-      }
-      if (dBar) dBar.style.transform = `scaleX(${p.toFixed(4)})`;
-      if (dCue) dCue.style.opacity = String((1 - sm(p, 0.02, 0.1)).toFixed(3));
-
-      const idx = pickIndex(p, n);
-      if (idx !== scrubIdxRef.current) {
-        setDirection(idx > scrubIdxRef.current ? "next" : "prev");
-        scrubIdxRef.current = idx;
-        setCurrentIndex(idx);
       }
     };
 
@@ -524,24 +511,13 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
     };
-  }, [testimonials.length]);
+  }, []);
 
-  // Desktop arrows scroll to the neighbouring story (the scroll is what turns the page)
-  const scrollToStory = (dir: 1 | -1) => {
-    const track = trackRef.current;
-    if (!track) return;
-    const n = testimonials.length;
-    const i = Math.max(0, Math.min(n - 1, scrubIdxRef.current + dir));
-    const span = track.offsetHeight - window.innerHeight;
-    const top = track.getBoundingClientRect().top + window.scrollY;
-    smoothScrollTo(top + centreOf(i, n) * span);
-  };
-
-  // Gentle auto-advance on phones only (desktop is scroll-driven); restarts when the story changes.
+  // The stories turn by themselves: every few seconds the next whisper writes itself onto the page.
+  // (Scrolling no longer changes the story; the arrows still do, and restart the timer.)
   useEffect(() => {
     if (!inView || testimonials.length < 2) return;
-    if (window.matchMedia("(min-width: 768px)").matches) return;
-    const t = setTimeout(() => changeTestimonial("next"), 7000);
+    const t = setTimeout(() => changeTestimonial("next"), AUTO_MS);
     return () => clearTimeout(t);
   }, [inView, currentIndex, changeTestimonial, testimonials.length]);
 
@@ -567,11 +543,11 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
       ? "animate-testimonial-next"
       : "animate-testimonial-prev";
 
-  const navButtons = (sizeClass: string, scrub = false) => (
+  const navButtons = (sizeClass: string) => (
     <div className="flex items-center gap-4">
       <button
         type="button"
-        onClick={scrub ? () => scrollToStory(-1) : prevTestimonial}
+        onClick={prevTestimonial}
         disabled={isTransitioning}
         className={`${navBtnClass} ${sizeClass}`}
         aria-label="Previous testimonial"
@@ -582,7 +558,7 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
       </button>
       <button
         type="button"
-        onClick={scrub ? () => scrollToStory(1) : nextTestimonial}
+        onClick={nextTestimonial}
         disabled={isTransitioning}
         className={`${navBtnClass} ${sizeClass}`}
         aria-label="Next testimonial"
@@ -594,29 +570,13 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
     </div>
   );
 
-  const counterEl = (scrub: boolean) => (
+  const counterEl = () => (
     <div className="flex items-center gap-3 font-sans text-[11px] tracking-[0.25em] text-[#e8dfd4]/80">
       <span>{String(currentIndex + 1).padStart(2, "0")}</span>
       <span className="relative block h-px w-14 overflow-hidden bg-white/25">
-        {scrub ? (
-          <span
-            data-gbar
-            className="absolute inset-0 origin-left bg-[#e9c98c]"
-            style={{ transform: "scaleX(0)" }}
-          />
-        ) : (
-          <span key={currentIndex} className="gw-progress absolute inset-0 bg-[#e9c98c]" />
-        )}
+        <span key={currentIndex} className="gw-progress absolute inset-0 bg-[#e9c98c]" />
       </span>
       <span>{String(testimonials.length).padStart(2, "0")}</span>
-      {scrub && (
-        <span
-          data-gcue
-          className="gw-scrub-cue ml-2 inline-flex items-center gap-1 text-[#e9c98c] uppercase"
-        >
-          Scroll <span aria-hidden="true">&darr;</span>
-        </span>
-      )}
     </div>
   );
 
@@ -633,7 +593,7 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
       <div
         ref={trackRef}
         className="relative hidden w-full md:block"
-        style={{ height: `${100 + (testimonials.length - 1) * 85}vh` }}
+        style={{ height: "100vh" }}
       >
         <div
           ref={stageRef}
@@ -716,11 +676,8 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
               className="gw-fadeup mt-8 flex flex-col gap-5"
               style={{ ["--d" as string]: "1.4s" }}
             >
-              {navButtons(
-                "h-11 w-11 md:h-[3.2vw] md:w-[3.2vw] md:min-h-11 md:min-w-11 max-h-14 max-w-14",
-                true
-              )}
-              {counterEl(true)}
+              {navButtons("h-11 w-11 md:h-[3.2vw] md:w-[3.2vw] md:min-h-11 md:min-w-11 max-h-14 max-w-14")}
+              {counterEl()}
             </div>
           </div>
 
@@ -764,9 +721,9 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
                 className="gw-fadeup absolute z-10 flex items-center"
                 style={{
                   left: "34.2%",
-                  top: "27.5%",
-                  width: "36.4%",
-                  height: "47%",
+                  top: "26%",
+                  width: "37.6%",
+                  height: "50%",
                   ["--d" as string]: "1.1s",
                 }}
               >
@@ -942,7 +899,7 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
 
             <div className="mt-6 flex items-center justify-between px-[2vw]">
               {navButtons("h-11 w-11")}
-              {counterEl(false)}
+              {counterEl()}
             </div>
           </div>
         </div>

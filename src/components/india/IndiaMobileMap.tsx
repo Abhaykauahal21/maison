@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { makeTops, nearViewport } from "@/lib/scrub";
+import { INDIA_PIN_NAMES, IndiaPinTag, useDismissPinTag } from "@/components/india/IndiaPinTag";
 
 /**
  * Mobile composition for "Our Stories Across India": one torn parchment sheet (copy on the
@@ -232,6 +233,11 @@ export const IndiaMobileMap: React.FC = () => {
     return () => clearInterval(iv);
   }, [live]);
 
+  // pin whose name tag is open (tap on a pin)
+  const [picked, setPicked] = useState<number | null>(null);
+  const closeTag = useCallback(() => setPicked(null), []);
+  useDismissPinTag(picked, closeTag, 4500);
+
   const activeIdx = step >= 0 ? TOUR[step] : -1;
   const active = activeIdx >= 0 ? POS[activeIdx] : null;
   const ink = "#2a1f16";
@@ -380,6 +386,38 @@ export const IndiaMobileMap: React.FC = () => {
                   />
                 ))}
               </g>
+            )}
+
+            {/* Tap a pin to see its name */}
+            {POS.map((p, i) => (
+              <g
+                key={`hit${i}`}
+                data-pinhit
+                role="button"
+                tabIndex={0}
+                aria-label={`Show ${INDIA_PIN_NAMES[i].name}`}
+                style={{ pointerEvents: "auto", cursor: "pointer", outline: "none" }}
+                onClick={() => setPicked((cur) => (cur === i ? null : i))}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setPicked((cur) => (cur === i ? null : i));
+                  }
+                }}
+              >
+                <circle cx={p.x} cy={p.y} r="36" fill="transparent" />
+              </g>
+            ))}
+
+            {picked !== null && (
+              <IndiaPinTag
+                key={picked}
+                x={POS[picked].x}
+                y={POS[picked].y}
+                name={INDIA_PIN_NAMES[picked].name}
+                sub={INDIA_PIN_NAMES[picked].sub}
+                u={1.36}
+              />
             )}
 
             {/* Spotlight: a ping on the current city's pin */}

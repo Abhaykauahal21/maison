@@ -124,8 +124,9 @@ export const DreamDesktop: React.FC = () => {
         }
       },
       // fire when the stage is about to pin (track top within the upper 40% of the viewport),
-      // so Stage 01 writes itself in while it is actually on screen
-      { rootMargin: "0px 0px -60% 0px" }
+      // so Stage 01 writes itself in while it is actually on screen.
+      // Inside the locked peek (inert) there is no pinning: show the photo as soon as any of it is visible.
+      { rootMargin: el.closest("[inert]") ? "0px" : "0px 0px -60% 0px" }
     );
     io.observe(el);
     return () => io.disconnect();
@@ -268,7 +269,8 @@ export const DreamDesktop: React.FC = () => {
 
     const onScroll = () => {
       measure();
-      if (!raf) raf = requestAnimationFrame(tick);
+      // off-screen the target sits at 0 or 1 and has already been reached: nothing to redraw
+      if (!raf && target !== cur) raf = requestAnimationFrame(tick);
     };
 
     measure();

@@ -13,7 +13,7 @@ export const STORY_GATE_ENABLED = true;
 const AUTO_POPUP = false;
 
 /** Hand-torn top and bottom edges for the peek (deterministic jitter, so server and client markup match). */
-const tornBottom = (() => {
+const buildTorn = (tornTop: boolean) => {
   const pts: string[] = [];
   const steps = 56;
   let seed = 7;
@@ -25,7 +25,7 @@ const tornBottom = (() => {
     const x = (i / steps) * 100;
     const wave = Math.sin(i * 0.7 + 1) * 4;
     const depth = 10 + wave + rnd() * 14;
-    pts.push(`${x.toFixed(2)}% ${depth.toFixed(1)}px`);
+    pts.push(`${x.toFixed(2)}% ${tornTop ? depth.toFixed(1) : 0}px`);
   }
   for (let i = steps; i >= 0; i--) {
     const x = (i / steps) * 100;
@@ -34,7 +34,9 @@ const tornBottom = (() => {
     pts.push(`${x.toFixed(2)}% calc(100% - ${depth.toFixed(1)}px)`);
   }
   return `polygon(${pts.join(", ")})`;
-})();
+};
+const tornBoth = buildTorn(true);
+const tornBottomOnly = buildTorn(false);
 const STORAGE_KEY = "maison-story-registered";
 export const GATE_OPEN_EVENT = "story-gate:open";
 
@@ -43,7 +45,25 @@ export const GATE_OPEN_EVENT = "story-gate:open";
  * behind a small brass padlock (which stays shut), and the page ends there. Reaching the end (or pushing further down)
  * opens the registration popup; the page cannot scroll past it.
  */
-export const StoryGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface StoryGateProps {
+  children: React.ReactNode;
+  /** Classes for the peek's margin (how far it tucks under the section above). */
+  className?: string;
+  /** CSS height of the visible peek. */
+  height?: string;
+  /** Torn top edge too (default), or a straight top that sits flush under the section above. */
+  tornTop?: boolean;
+  /** Restrict the dim veil to the step-1 artwork shape (only right for the Step page). */
+  maskVeil?: boolean;
+}
+
+export const StoryGate: React.FC<StoryGateProps> = ({
+  children,
+  className = "-mt-[7vw] md:-mt-[4.5vw]",
+  height = "clamp(300px,23vw,450px)",
+  tornTop = true,
+  maskVeil = true,
+}) => {
   const [open, setOpen] = useState(false);
   const [registered, setRegistered] = useState(false);
   const [seen, setSeen] = useState(false);
@@ -173,11 +193,11 @@ export const StoryGate: React.FC<{ children: React.ReactNode }> = ({ children })
     <>
       <div
         ref={peekRef}
-        className="relative z-20 -mt-[7vw] h-[clamp(300px,23vw,450px)] w-full md:-mt-[4.5vw]"
-        style={{ clipPath: tornBottom }}
+        className={`relative z-20 w-full ${className}`}
+        style={{ height, clipPath: tornTop ? tornBoth : tornBottomOnly }}
       >
         {/* the locked page: visible, but not usable. Its own negative top margin is cancelled so the clip keeps its torn top */}
-        <div inert aria-hidden="true" className="pointer-events-none select-none [&>section]:mt-0!">
+        <div inert aria-hidden="true" className="pointer-events-none h-full overflow-hidden select-none [&>section]:mt-0!">
           {children}
         </div>
 
@@ -185,6 +205,7 @@ export const StoryGate: React.FC<{ children: React.ReactNode }> = ({ children })
         <LockedScene
           seen={seen}
           registered={registered}
+          maskVeil={maskVeil}
           onOpen={() => window.dispatchEvent(new Event(GATE_OPEN_EVENT))}
         />
       </div>

@@ -193,7 +193,8 @@ export const CloserChapterDesktop: React.FC = () => {
     };
     const onScroll = () => {
       measure();
-      if (!raf) raf = requestAnimationFrame(tick);
+      // off-screen the target sits at 0 or 1 and has already been reached: nothing to redraw
+      if (!raf && target !== cur) raf = requestAnimationFrame(tick);
     };
 
     measure();

@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { INDIA_PIN_NAMES, IndiaPinTag, useDismissPinTag } from "@/components/india/IndiaPinTag";
 
 // Pin positions in the 1853 x 849 coordinate space of /images/India-web.webp
 // (centre of each map-pin head). If the artwork changes, update these.
@@ -62,6 +63,8 @@ const FIRST_EDGE = PINS.map((_, i) => Math.max(0, EDGES.findIndex(([a, b]) => a 
 
 export interface IndiaRoutesProps {
   className?: string;
+  /** Called with the pin index whenever a pin is clicked / tapped (so the story beside the map can follow). */
+  onSelect?: (index: number) => void;
 }
 
 /**
@@ -72,9 +75,13 @@ export interface IndiaRoutesProps {
  *  - once the whole map is connected, couriers start running and the pins pulse
  * One rAF per scroll event, only while the map is near the viewport.
  */
-export const IndiaRoutes: React.FC<IndiaRoutesProps> = ({ className = "" }) => {
+export const IndiaRoutes: React.FC<IndiaRoutesProps> = ({ className = "", onSelect }) => {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [live, setLive] = useState(false);
+  // pin whose name tag is open (click / tap / Enter on a pin)
+  const [picked, setPicked] = useState<number | null>(null);
+  const closeTag = useCallback(() => setPicked(null), []);
+  useDismissPinTag(picked, closeTag);
 
   useEffect(() => {
     const svg = svgRef.current;
@@ -167,7 +174,8 @@ export const IndiaRoutes: React.FC<IndiaRoutesProps> = ({ className = "" }) => {
       ref={svgRef}
       viewBox="0 0 1853 849"
       className={`pointer-events-none absolute inset-0 z-10 h-full w-full ${className}`}
-      aria-hidden="true"
+      role="group"
+      aria-label="Map of the cities our stories reach"
     >
       <defs>
         {EDGES.map(([from, to], i) => (
@@ -287,6 +295,33 @@ export const IndiaRoutes: React.FC<IndiaRoutesProps> = ({ className = "" }) => {
         </g>
       )}
 
+      {/* Click / tap a pin to see its name */}
+      {PINS.map((p, i) => (
+        <g
+          key={`hit-${i}`}
+          data-pinhit
+          className="india-hit"
+          role="button"
+          tabIndex={0}
+          aria-label={`Show ${INDIA_PIN_NAMES[i].name}`}
+          style={{ pointerEvents: "auto", cursor: "pointer", outline: "none" }}
+          onClick={() => {
+            setPicked((cur) => (cur === i ? null : i));
+            onSelect?.(i);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setPicked((cur) => (cur === i ? null : i));
+              onSelect?.(i);
+            }
+          }}
+        >
+          <circle cx={p.x} cy={p.y} r="30" fill="transparent" />
+          <circle className="india-hit-ring" cx={p.x} cy={p.y} r="18" fill="none" stroke="#b8862d" strokeWidth="2" />
+        </g>
+      ))}
+
       {/* Hub label */}
       <text
         data-label
@@ -300,6 +335,17 @@ export const IndiaRoutes: React.FC<IndiaRoutesProps> = ({ className = "" }) => {
       >
         NCR
       </text>
+
+      {/* The name tag of the pin that was clicked */}
+      {picked !== null && (
+        <IndiaPinTag
+          key={picked}
+          x={PINS[picked].x}
+          y={PINS[picked].y}
+          name={INDIA_PIN_NAMES[picked].name}
+          sub={INDIA_PIN_NAMES[picked].sub}
+        />
+      )}
     </svg>
   );
 };

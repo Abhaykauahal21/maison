@@ -332,7 +332,8 @@ export const OurStoryDesktop: React.FC = () => {
     };
     const onScroll = () => {
       measure();
-      if (!raf) raf = requestAnimationFrame(tick);
+      // off-screen the target sits at 0 or 1 and has already been reached: nothing to redraw
+      if (!raf && target !== cur) raf = requestAnimationFrame(tick);
     };
     const onResize = () => {
       stageAR = stage.clientWidth / Math.max(1, stage.clientHeight);

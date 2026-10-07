@@ -68,7 +68,8 @@ export const DreamFilm: React.FC = () => {
           io.disconnect();
         }
       },
-      { threshold: 0.1 }
+      // the locked peek (inert) only shows the top of this tall track, so any visibility counts there
+      { threshold: el.closest("[inert]") ? 0 : 0.1 }
     );
     io.observe(el);
     return () => io.disconnect();
@@ -213,7 +214,8 @@ export const DreamFilm: React.FC = () => {
 
     const onScroll = () => {
       measure();
-      if (!raf) raf = requestAnimationFrame(tick);
+      // off-screen the target sits at 0 or 1 and has already been reached: nothing to redraw
+      if (!raf && target !== cur) raf = requestAnimationFrame(tick);
     };
 
     measure();

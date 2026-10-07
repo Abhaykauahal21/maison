@@ -17,7 +17,7 @@ export const siteConfig: SiteConfig = {
   description:
     "A production-grade, scalable Next.js frontend architecture with modern design system tokens, strict TypeScript, and API-ready service contracts.",
   url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-  ogImage: "/og.png",
+  ogImage: "/images/hero-single-girl.webp",
   links: {
     github: "https://github.com",
     docs: "/docs",

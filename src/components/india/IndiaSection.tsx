@@ -4,12 +4,15 @@ import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import { IndiaRoutes, IndiaCompass } from "@/components/india/IndiaRoutes";
 import { IndiaMobileMap } from "@/components/india/IndiaMobileMap";
+import { IndiaStoryCard } from "@/components/india/IndiaStoryCard";
 import { useParallax } from "@/hooks/use-parallax";
 import { SlideIn } from "@/components/common/SlideIn";
 
 export const IndiaSection: React.FC = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const [inView, setInView] = useState(false);
+  // pin whose story is shown on the right; null = the original collage
+  const [story, setStory] = useState<number | null>(null);
   const textParallaxRef = useParallax<HTMLDivElement>(0.03, 16);
   const collageParallaxRef = useParallax<HTMLDivElement>(0.06, 30);
 
@@ -65,7 +68,7 @@ export const IndiaSection: React.FC = () => {
         />
 
         {/* Animated connectivity between the pins on the map */}
-        <IndiaRoutes />
+        <IndiaRoutes onSelect={setStory} />
 
         {/* Slow warm light drifting across the map */}
         {inView && (
@@ -85,10 +88,10 @@ export const IndiaSection: React.FC = () => {
         )}
 
         {/* Content Overlay Layer: Left Text Column */}
-        <div className="pointer-events-auto absolute inset-0 z-20">
+        <div className="pointer-events-none absolute inset-0 z-20">
           <div
             ref={textParallaxRef}
-            className="absolute top-[18%] bottom-[12%] left-[6.8%] z-20 w-[28%] max-w-[420px] text-left"
+            className="pointer-events-auto absolute top-[18%] bottom-[12%] left-[6.8%] z-20 w-[28%] max-w-[420px] text-left"
           >
             <SlideIn from="left" distance="9vw" className="flex h-full flex-col justify-between">
             {/* Top Text Group: Eyebrow + Heading + Paragraph */}
@@ -165,22 +168,28 @@ export const IndiaSection: React.FC = () => {
           {/* Right Collage Layer: IndiaPage-right-collage.webp */}
           <div
             ref={collageParallaxRef}
-            className="absolute top-[10.5%] right-[5.2%] z-20 w-[25.2%]"
+            className="pointer-events-auto absolute top-[10.5%] right-[5.2%] z-20 w-[25.2%]"
           >
             {/* lands like a photo dropped on the map, then floats gently */}
             <div className={inView ? "animate-india-collage" : "opacity-0"}>
               <div className="animate-india-float">
-                <div className="relative w-full h-auto drop-shadow-[0_10px_24px_rgba(0,0,0,0.22)] transition-transform duration-500 hover:scale-[1.015]">
-                  <Image
-                    src="/images/IndiaPage-right-collage.webp"
-                    alt="Mehak S. - Choreographer Story across India"
-                    width={1047}
-                    height={1503}
-                    quality={100}
-                    unoptimized
-                    className="pointer-events-none block h-auto w-full select-none"
-                  />
-                </div>
+                {story === null ? (
+                  <div className="relative w-full h-auto drop-shadow-[0_10px_24px_rgba(0,0,0,0.22)] transition-transform duration-500 hover:scale-[1.015]">
+                    <Image
+                      src="/images/IndiaPage-right-collage.webp"
+                      alt="Mehak S. - Choreographer Story across India"
+                      width={1047}
+                      height={1503}
+                      quality={100}
+                      unoptimized
+                      className="pointer-events-none block h-auto w-full select-none"
+                    />
+                  </div>
+                ) : (
+                  <div className="drop-shadow-[0_10px_24px_rgba(0,0,0,0.22)]">
+                    <IndiaStoryCard key={story} index={story} onClose={() => setStory(null)} />
+                  </div>
+                )}
               </div>
             </div>
           </div>

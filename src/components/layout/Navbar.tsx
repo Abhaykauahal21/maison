@@ -1,17 +1,17 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
 import { Search, ShoppingBag } from "lucide-react";
 import { IconButton } from "@/components/ui/IconButton";
 import { MobileMenu } from "@/components/layout/MobileMenu";
 
 /** Chapters of the page, in scroll order. `id` is the section's DOM id. */
-const NAV_CHAPTERS = [
+const NAV_CHAPTERS: { label: string; id: string; route?: string }[] = [
   { label: "The Echo", id: "story" },
   { label: "The Dream", id: "dream" },
   { label: "Stories", id: "whispers" },
   { label: "Journey", id: "journey" },
   { label: "Journal", id: "blog" },
+  { label: "About", id: "about", route: "/about" },
 ];
 
 /** Ragged torn-paper edge (viewBox 1200 x 24), same idea as the intro loader's cover. */
@@ -34,9 +34,11 @@ const TEAR_FRONT = tearPath(5.6, 2, 10);
 const TAPE_CLIP =
   "polygon(0 8%, 4% 0, 8% 10%, 12% 0, 92% 0, 96% 10%, 100% 0, 100% 92%, 96% 100%, 92% 90%, 88% 100%, 8% 100%, 4% 92%, 0 100%)";
 
-export const Navbar: React.FC = () => {
+export const Navbar: React.FC<{ /** Start with the paper strip already lowered (pages with a light top, not the dark hero). */ solid?: boolean }> = ({
+  solid = false,
+}) => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [scrolled, setScrolled] = useState(solid);
   const [active, setActive] = useState<string | null>(null);
 
   // Transparent over the hero; once the hero is scrolled past, a paper strip is lowered in
@@ -44,7 +46,7 @@ export const Navbar: React.FC = () => {
     let raf = 0;
     const update = () => {
       raf = 0;
-      setScrolled(window.scrollY > window.innerHeight * 0.8);
+      setScrolled(solid || window.scrollY > window.innerHeight * 0.8);
     };
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(update);
@@ -55,7 +57,7 @@ export const Navbar: React.FC = () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("scroll", onScroll);
     };
-  }, []);
+  }, [solid]);
 
   // Which chapter is on screen (shown in the menu)
   useEffect(() => {
@@ -134,14 +136,16 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* CENTER: wordmark, written in by hand once the intro loader lifts */}
-          <Link
+          {/* A plain anchor on purpose: clicking the wordmark does a full page load, so the intro loader plays again */}
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+          <a
             href="/"
             aria-label="Maison D'Vine, home"
             className={`nav-ink font-allura allura-regular font-script font-cursive block px-2 text-[26px] leading-[1.1] whitespace-nowrap select-none transition-colors duration-500 sm:text-[30px] lg:text-[34px] ${ink}`}
             style={{ textShadow: scrolled ? "none" : "0 1px 14px rgba(0,0,0,0.5)" }}
           >
             Maison D&rsquo;Vine
-          </Link>
+          </a>
 
           {/* RIGHT: search + bag */}
           <div className={`flex items-center justify-end gap-1 sm:gap-3 ${ink} transition-colors duration-500`}>
@@ -165,7 +169,7 @@ export const Navbar: React.FC = () => {
       <MobileMenu
         isOpen={menuOpen}
         onClose={() => setMenuOpen(false)}
-        links={NAV_CHAPTERS.map((c) => ({ label: c.label, href: `#${c.id}`, id: c.id }))}
+        links={NAV_CHAPTERS.map((c) => ({ label: c.label, href: c.route ?? `#${c.id}`, id: c.id, route: c.route }))}
         active={active}
       />
     </>

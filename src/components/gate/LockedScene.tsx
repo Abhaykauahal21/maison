@@ -6,6 +6,7 @@ import { StoryLock } from "@/components/gate/StoryLock";
 interface Props {
   seen: boolean;
   registered: boolean;
+  maskVeil?: boolean;
   onOpen: () => void;
 }
 
@@ -14,10 +15,10 @@ interface Props {
  * that drops in and settles, with a single line of script and one button underneath.
  * The lock never opens; once the visitor has registered the caption just says they will be kept posted.
  */
-export const LockedScene: React.FC<Props> = ({ seen, registered, onOpen }) => (
+export const LockedScene: React.FC<Props> = ({ seen, registered, maskVeil = true, onOpen }) => (
   <div className={`gate-scene absolute inset-0 z-30 overflow-hidden ${seen ? "is-in" : ""} ${registered ? "is-freed" : ""}`}>
     {/* even dim over the page, a touch darker toward the bottom where it fades into the footer */}
-    <div aria-hidden="true" className="gate-veil pointer-events-none absolute inset-0 bg-[#0e0d0c]/10 backdrop-blur-[2.5px] [mask-image:url(/images/step-bg-mobile.webp)] [mask-position:top] [mask-repeat:no-repeat] [mask-size:100%_auto] md:[mask-image:url(/images/step-bg.webp)] [-webkit-mask-image:url(/images/step-bg-mobile.webp)] md:[-webkit-mask-image:url(/images/step-bg.webp)] [-webkit-mask-position:top] [-webkit-mask-repeat:no-repeat] [-webkit-mask-size:100%_auto]" />
+    <div aria-hidden="true" className={`gate-veil pointer-events-none absolute inset-0 bg-[#0e0d0c]/45 ${maskVeil ? "[mask-image:url(/images/step-bg-mobile.webp)] [mask-position:top] [mask-repeat:no-repeat] [mask-size:100%_auto] md:[mask-image:url(/images/step-bg.webp)] [-webkit-mask-image:url(/images/step-bg-mobile.webp)] md:[-webkit-mask-image:url(/images/step-bg.webp)] [-webkit-mask-position:top] [-webkit-mask-repeat:no-repeat] [-webkit-mask-size:100%_auto]" : ""}`} />
 
     <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 px-6 pt-[3%] text-center">
       <div className="gate-lock-drop">

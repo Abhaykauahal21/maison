@@ -8,7 +8,7 @@ import { getLenis, smoothScrollTo } from "@/lib/smooth-scroll";
 export interface MobileMenuProps {
   isOpen: boolean;
   onClose: () => void;
-  links: { label: string; href: string; id: string }[];
+  links: { label: string; href: string; id: string; /** a separate page instead of a section of the home page */ route?: string }[];
   active?: string | null;
 }
 
@@ -166,9 +166,15 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, links, 
 
   if (!mounted) return null;
 
-  const go = (e: React.MouseEvent, id: string) => {
+  const go = (e: React.MouseEvent, id: string, route?: string) => {
     e.preventDefault();
     onClose();
+    if (route) {
+      window.setTimeout(() => {
+        if (window.location.pathname !== route) router.push(route);
+      }, 60);
+      return;
+    }
     // let the page unfreeze first, then glide
     window.setTimeout(() => {
       const el = document.getElementById(id);
@@ -252,7 +258,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, links, 
                   <a
                     key={link.id}
                     href={link.href}
-                    onClick={(e) => go(e, link.id)}
+                    onClick={(e) => go(e, link.id, link.route)}
                     className="nav-link-rise group relative flex items-baseline gap-5 border-b border-[#1c1815]/12 py-4 sm:py-5"
                     style={{ animationDelay: `${0.35 + i * 0.08}s` }}
                   >
