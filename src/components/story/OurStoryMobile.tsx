@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { makeTops, nearViewport } from "@/lib/scrub";
 
 /**
@@ -60,8 +61,8 @@ const MOTES = Array.from({ length: 16 }, (_, i) => ({
 }));
 
 const PARAS = [
-  "Maison D'Vine was born from a simple belief — that every woman carries a story, and what she wears should feel like a part of it.",
-  "What started as a personal journey has now become a space for stories, emotions and beautifully crafted dresses.",
+  "That our greatest chapters are still being written.",
+  "And perhaps the most beautiful part is that they never truly end.",
 ];
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
@@ -338,7 +339,7 @@ export const OurStoryMobile: React.FC<{ play: boolean }> = ({ play }) => {
           >
             <Rise from="left">From a Feeling</Rise>
             <Rise from="right" lag={22}>
-              to a <em className="italic text-[#ecd09a]">Maison.</em>
+              To <em className="italic text-[#ecd09a]">Eternity.</em>
             </Rise>
           </h2>
         </div>
@@ -377,30 +378,34 @@ export const OurStoryMobile: React.FC<{ play: boolean }> = ({ play }) => {
           className="mt-7 flex items-end justify-between gap-4"
           style={{ opacity: 0 }}
         >
-          <button
-            type="button"
-            className="om-btn group inline-flex cursor-pointer items-center gap-3 bg-[#fdfcfb] px-6 py-3 font-sans text-[11px] font-medium tracking-[0.2em] text-[#191512] uppercase shadow-[0_6px_20px_rgba(0,0,0,0.45)] transition-transform duration-300 active:scale-[0.97]"
-          >
-            <span>Read Further</span>
-            <span className="transition-transform duration-300 group-hover:translate-x-1.5">&rarr;</span>
-          </button>
-
-          <p
-            className="origin-bottom-right -rotate-[5deg] text-right font-allura allura-regular font-script font-cursive leading-[1.05] tracking-wide text-[#d9cdb9]"
-            style={{ fontSize: "clamp(22px,7vw,34px)" }}
-          >
-            {["Built on stories.", "for her."].map((l, i) => (
-              <span
-                key={l}
-                data-s="ink"
-                data-lag={40 + i * 28}
-                className="block"
-                style={{ clipPath: "inset(0 104% 0 0)" }}
-              >
-                {l}
-              </span>
-            ))}
-          </p>
+          <div className="w-full">
+            <p
+              className="origin-left -rotate-[3deg] font-allura allura-regular font-script font-cursive leading-[1.1] tracking-wide text-[#f6ead6]"
+              style={{ fontSize: "clamp(25px,7.6vw,38px)", textShadow: "0 2px 14px rgba(0,0,0,0.7)" }}
+            >
+              {["Sometimes we think no one is watching —", "but our dresses do."].map((l, i) => (
+                <span
+                  key={l}
+                  data-s="ink"
+                  data-lag={30 + i * 28}
+                  className="block"
+                  style={{ clipPath: "inset(0 104% 0 0)" }}
+                >
+                  {l}
+                </span>
+              ))}
+            </p>
+            <p className="mt-3 font-sans text-[10px] font-medium tracking-[0.24em] text-[#d9cdb9] uppercase">
+              &mdash; Virender Rawat, Founder
+            </p>
+            <Link
+              href="/founder"
+              className="om-btn group mt-6 inline-flex cursor-pointer items-center gap-3 bg-[#fdfcfb] px-6 py-3 font-sans text-[11px] font-medium tracking-[0.2em] text-[#191512] uppercase shadow-[0_6px_20px_rgba(0,0,0,0.45)] transition-transform duration-300 active:scale-[0.97]"
+            >
+              <span>Read Further</span>
+              <span className="transition-transform duration-300 group-hover:translate-x-1.5">&rarr;</span>
+            </Link>
+          </div>
         </div>
       </div>
     </div>

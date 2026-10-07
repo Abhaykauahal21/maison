@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 /**
  * OUR STORY: desktop / tablet (md+).
@@ -607,7 +608,7 @@ export const OurStoryDesktop: React.FC = () => {
           <Words
             className="mt-[1.5vw] max-w-[430px] font-sans leading-[1.75] text-[#f3ece1]"
             style={{ fontSize: "max(13px, 1vw)", textShadow: "0 1px 8px rgba(0,0,0,0.75)" }}
-            text="Maison D'Vine was born from a simple belief — that every woman carries a story, and what she wears should feel like a part of it."
+            text="That our greatest chapters are still being written."
           />
         </div>
 
@@ -630,9 +631,9 @@ export const OurStoryDesktop: React.FC = () => {
             className="mt-[1.1vw] font-serif leading-[1.04] font-normal text-white"
             style={{ fontSize: "min(4.6vw, 76px)", textShadow: shadow }}
           >
-            <Mask>to a</Mask>
+            <Mask>To</Mask>
             <Mask>
-              <em className="text-[#ecd09a] italic">Maison.</em>
+              <em className="text-[#ecd09a] italic">Eternity.</em>
             </Mask>
           </h2>
           <span
@@ -642,7 +643,7 @@ export const OurStoryDesktop: React.FC = () => {
           <Words
             className="mt-[1.5vw] max-w-[430px] font-sans leading-[1.75] text-[#f3ece1]"
             style={{ fontSize: "max(13px, 1vw)", textShadow: "0 1px 8px rgba(0,0,0,0.75)" }}
-            text="What started as a personal journey has now become a space for stories, emotions and beautifully crafted dresses."
+            text="And perhaps the most beautiful part is that they never truly end."
           />
         </div>
 
@@ -662,32 +663,31 @@ export const OurStoryDesktop: React.FC = () => {
             </p>
           </div>
           <p
-            className="font-allura allura-regular font-script font-cursive mt-[0.6vw] -rotate-[4deg] leading-[1.05] tracking-wide text-[#f6ead6]"
-            style={{ fontSize: "min(5.6vw, 92px)", textShadow: shadow }}
+            className="font-allura allura-regular font-script font-cursive mt-[0.6vw] -rotate-[3deg] leading-[1.1] tracking-wide text-[#f6ead6]"
+            style={{ fontSize: "min(3.9vw, 64px)", textShadow: shadow }}
           >
             <span data-r="fade" className="block">
-              More than a brand.
+              Sometimes we think no one is watching &mdash;
             </span>
             <span data-r="fade" className="block pl-[1.2em]">
-              a journey.
+              but our dresses do.
             </span>
           </p>
-          <div data-r="fade" className="mt-[2.4vw] flex items-center gap-[2vw]">
-            <button
-              type="button"
+          <p
+            data-r="fade"
+            className="mt-[1.2vw] font-sans font-medium tracking-[0.24em] text-[#d9cdb9] uppercase"
+            style={{ fontSize: "max(10px, 0.72vw)" }}
+          >
+            &mdash; Virender Rawat, Founder
+          </p>
+          <div data-r="fade" className="mt-[2vw] flex items-center">
+            <Link
+              href="/founder"
               className="osd-btn group inline-flex cursor-pointer items-center gap-3 bg-[#fdfcfb] px-7 py-3 font-sans text-[11px] font-medium tracking-[0.2em] text-[#191512] uppercase shadow-[0_6px_20px_rgba(0,0,0,0.45)] transition-transform duration-300 active:scale-[0.98]"
             >
               <span>Read Further</span>
               <span className="transition-transform duration-300 group-hover:translate-x-1.5">&rarr;</span>
-            </button>
-            <p
-              className="font-allura allura-regular font-script font-cursive -rotate-[4deg] leading-[1.05] tracking-wide text-[#d9cdb9]"
-              style={{ fontSize: "min(2.3vw, 38px)" }}
-            >
-              Built on stories.
-              <br />
-              for her.
-            </p>
+            </Link>
           </div>
         </div>
 
