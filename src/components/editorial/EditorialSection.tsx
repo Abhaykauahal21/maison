@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { getLenis, smoothScrollBy } from "@/lib/smooth-scroll";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { EchoParticles } from "@/components/editorial/EchoParticles";
 import { EchoNote } from "@/components/editorial/EchoNote";
 import { useMatches } from "@/hooks/use-matches";
@@ -223,6 +224,68 @@ const DressProgress: React.FC<{ active: number; onPick: (i: number) => void }> =
     </div>
   </div>
 );
+
+/** "See My Story": a dark ink-stamp button that fills with gold on hover, arrow in a ring */
+const StoryButton: React.FC = () => {
+  const router = useRouter();
+
+  // Page transition: a parchment curtain wipes up over the page, the route changes underneath it,
+  // then the curtain lifts away to reveal the story page.
+  const go = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    e.preventDefault();
+    const veil = document.createElement("div");
+    veil.setAttribute("aria-hidden", "true");
+    Object.assign(veil.style, {
+      position: "fixed",
+      inset: "0",
+      zIndex: "9999",
+      background: "radial-gradient(ellipse at 50% 40%, #f3e6cb 0%, #e6d2ac 70%, #d8c19a 100%)",
+      clipPath: "inset(100% 0 0 0)",
+      transition: "clip-path 0.7s cubic-bezier(0.76, 0, 0.24, 1), opacity 0.8s ease",
+      pointerEvents: "all",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      color: "#3a3026",
+      fontFamily: "var(--font-allura), cursive",
+      fontSize: "clamp(28px, 4vw, 52px)",
+    });
+    veil.textContent = "The story begins…";
+    document.body.appendChild(veil);
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => (veil.style.clipPath = "inset(0 0 0 0)"))
+    );
+    window.setTimeout(() => {
+      router.push("/story");
+      window.setTimeout(() => {
+        veil.style.opacity = "0";
+        window.setTimeout(() => veil.remove(), 850);
+      }, 600);
+    }, 750);
+  };
+
+  return (
+    <Link
+      href="/story"
+      onClick={go}
+      className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full bg-[#1c1815] py-1.5 pr-1.5 pl-5 font-sans text-[10px] font-medium tracking-[0.22em] text-[#f6ecd9] uppercase shadow-[0_6px_16px_rgba(40,26,12,0.28)] ring-1 ring-[#8a6a3b]/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_22px_rgba(40,26,12,0.35)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8a6a3b] md:text-[11px]"
+    >
+      <span
+        aria-hidden="true"
+        className="absolute inset-0 -translate-x-full bg-[#8a6a3b] transition-transform duration-500 ease-out group-hover:translate-x-0"
+      />
+      <span className="relative">See My Story</span>
+      <span
+        aria-hidden="true"
+        className="relative flex h-7 w-7 items-center justify-center rounded-full bg-[#f6ecd9] text-[13px] leading-none text-[#1c1815] transition-transform duration-300 group-hover:translate-x-0.5"
+      >
+        &rarr;
+      </span>
+    </Link>
+  );
+};
 
 export const EditorialSection: React.FC = () => {
   const containerRef = useRef<HTMLElement | null>(null);
@@ -662,18 +725,7 @@ export const EditorialSection: React.FC = () => {
                 ))}
                 <div className="absolute bottom-0 left-0 flex items-center gap-5">
                   <DressProgress active={activeLook} onPick={setLook} />
-                  <Link
-                    href="/story"
-                    className="group inline-flex items-center gap-2 border-b border-[#8a6a3b]/70 pb-1 font-sans text-[10px] font-medium tracking-[0.2em] text-[#2e2418] uppercase transition-colors hover:text-[#8a6a3b] md:text-[11px]"
-                  >
-                    See My Story
-                    <span
-                      aria-hidden="true"
-                      className="transition-transform duration-300 group-hover:translate-x-1"
-                    >
-                      &rarr;
-                    </span>
-                  </Link>
+                  <StoryButton />
                 </div>
               </div>
 
@@ -775,18 +827,7 @@ export const EditorialSection: React.FC = () => {
               </div>
 
               <div className="flex justify-end">
-                <Link
-                  href="/story"
-                  className="group inline-flex items-center gap-2 border-b border-[#8a6a3b]/70 pb-1 font-sans text-[10px] font-medium tracking-[0.2em] text-[#2e2418] uppercase transition-colors hover:text-[#8a6a3b] sm:text-[11px]"
-                >
-                  See My Story
-                  <span
-                    aria-hidden="true"
-                    className="transition-transform duration-300 group-hover:translate-x-1"
-                  >
-                    &rarr;
-                  </span>
-                </Link>
+                <StoryButton />
               </div>
 
               <div className="flex w-full items-center justify-between gap-4">
