@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { getLenis, smoothScrollBy } from "@/lib/smooth-scroll";
 import Image from "next/image";
+import Link from "next/link";
 import { EchoParticles } from "@/components/editorial/EchoParticles";
 import { EchoNote } from "@/components/editorial/EchoNote";
 import { useMatches } from "@/hooks/use-matches";
@@ -659,8 +660,20 @@ export const EditorialSection: React.FC = () => {
                     bodyClass="mt-4 max-w-[min(26vw,440px)] font-serif text-[clamp(14px,1.08vw,22px)] leading-[1.7] text-[#2e2418] italic"
                   />
                 ))}
-                <div className="absolute bottom-0 left-0">
+                <div className="absolute bottom-0 left-0 flex items-center gap-5">
                   <DressProgress active={activeLook} onPick={setLook} />
+                  <Link
+                    href="/story"
+                    className="group inline-flex items-center gap-2 border-b border-[#8a6a3b]/70 pb-1 font-sans text-[10px] font-medium tracking-[0.2em] text-[#2e2418] uppercase transition-colors hover:text-[#8a6a3b] md:text-[11px]"
+                  >
+                    See My Story
+                    <span
+                      aria-hidden="true"
+                      className="transition-transform duration-300 group-hover:translate-x-1"
+                    >
+                      &rarr;
+                    </span>
+                  </Link>
                 </div>
               </div>
 
@@ -759,6 +772,21 @@ export const EditorialSection: React.FC = () => {
                     />
                   </div>
                 ))}
+              </div>
+
+              <div className="flex justify-end">
+                <Link
+                  href="/story"
+                  className="group inline-flex items-center gap-2 border-b border-[#8a6a3b]/70 pb-1 font-sans text-[10px] font-medium tracking-[0.2em] text-[#2e2418] uppercase transition-colors hover:text-[#8a6a3b] sm:text-[11px]"
+                >
+                  See My Story
+                  <span
+                    aria-hidden="true"
+                    className="transition-transform duration-300 group-hover:translate-x-1"
+                  >
+                    &rarr;
+                  </span>
+                </Link>
               </div>
 
               <div className="flex w-full items-center justify-between gap-4">
