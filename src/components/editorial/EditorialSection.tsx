@@ -258,7 +258,7 @@ const StoryButton: React.FC = () => {
       requestAnimationFrame(() => (veil.style.clipPath = "inset(0 0 0 0)"))
     );
     window.setTimeout(() => {
-      router.push("/story");
+      router.push("/echo");
       window.setTimeout(() => {
         veil.style.opacity = "0";
         window.setTimeout(() => veil.remove(), 850);
@@ -268,7 +268,7 @@ const StoryButton: React.FC = () => {
 
   return (
     <Link
-      href="/story"
+      href="/echo"
       onClick={go}
       className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full bg-[#1c1815] py-1.5 pr-1.5 pl-5 font-sans text-[10px] font-medium tracking-[0.22em] text-[#f6ecd9] uppercase shadow-[0_6px_16px_rgba(40,26,12,0.28)] ring-1 ring-[#8a6a3b]/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_22px_rgba(40,26,12,0.35)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8a6a3b] md:text-[11px]"
     >
@@ -395,7 +395,10 @@ export const EditorialSection: React.FC = () => {
 
   const runLoop = useCallback(() => {
     if (progRafRef.current) return;
-    const tick = () => {
+    let last = performance.now();
+    const tick = (now: number) => {
+      const dt = Math.min(50, now - last);
+      last = now;
       const diff = progTargetRef.current - progCurRef.current;
       if (Math.abs(diff) < 0.0008) {
         progCurRef.current = progTargetRef.current;
@@ -403,7 +406,8 @@ export const EditorialSection: React.FC = () => {
         progRafRef.current = 0;
         return;
       }
-      progCurRef.current += diff * 0.1;
+      // frame-rate independent easing, a little snappier so it never feels like it lags behind the wheel
+      progCurRef.current += diff * (1 - Math.exp(-dt / 90));
       applyProgress(progCurRef.current);
       progRafRef.current = requestAnimationFrame(tick);
     };
@@ -485,7 +489,7 @@ export const EditorialSection: React.FC = () => {
     runLoop();
 
     // Natural momentum continuation downwards
-    smoothScrollBy(90);
+    smoothScrollBy(240);
   }, [runLoop]);
 
   const unpinUp = useCallback(() => {
@@ -499,7 +503,7 @@ export const EditorialSection: React.FC = () => {
     runLoop();
 
     // Natural momentum continuation upwards
-    smoothScrollBy(-90);
+    smoothScrollBy(-240);
   }, [runLoop]);
 
   // Keyboard / dot navigation: one whole chapter at a time
@@ -531,21 +535,25 @@ export const EditorialSection: React.FC = () => {
       const hi = Math.min(baseRef.current + 1, 2.3);
       progTargetRef.current = Math.min(hi, Math.max(lo, progTargetRef.current + delta));
       if (Math.abs(delta) > 0.0005) dirRef.current = delta > 0 ? 1 : -1;
+      // once the scrub passes the halfway point, the next chapter becomes the new base, so scrolling
+      // keeps flowing instead of hitting a wall until the previous dress has fully landed
+      const nearest = Math.min(2, Math.max(0, Math.round(progTargetRef.current)));
+      if (nearest !== baseRef.current) baseRef.current = nearest;
       runLoop();
 
       // pushing past the last / first chapter hands the page back (ignored right after a chapter change,
       // so the tail of a trackpad swipe can't throw you out of the section)
-      const settled = Date.now() - lastChangeRef.current > 700;
-      if (settled && baseRef.current === 2 && progTargetRef.current >= 2.14) {
+      const settled = Date.now() - lastChangeRef.current > 350;
+      if (settled && baseRef.current === 2 && progTargetRef.current >= 2.06) {
         unpinDown();
         return;
       }
-      if (settled && baseRef.current === 0 && progTargetRef.current <= -0.14) {
+      if (settled && baseRef.current === 0 && progTargetRef.current <= -0.06) {
         unpinUp();
         return;
       }
       window.clearTimeout(settleTimerRef.current);
-      settleTimerRef.current = window.setTimeout(settle, 170);
+      settleTimerRef.current = window.setTimeout(settle, 110);
     },
     [runLoop, settle, unpinDown, unpinUp]
   );
@@ -713,6 +721,10 @@ export const EditorialSection: React.FC = () => {
             <div className="pointer-events-auto absolute inset-0 z-20">
               {/* Left: the chapter's words, tilting in from depth and out again as you scroll */}
               <div className="absolute top-[15%] left-[15.2%] z-20 h-[62%] w-[28%] max-w-[430px] [perspective:1200px]">
+                {/* Section heading, sits right above the chapter title */}
+                <span className="font-bodoni pointer-events-none absolute bottom-full left-0 mb-[-0.45vw] text-[clamp(34px,3.6vw,68px)] leading-none font-normal tracking-[0.02em] whitespace-nowrap text-[#8a6a3b] italic [text-shadow:0_1px_0_rgba(255,246,225,0.8)]">
+                  The Echo
+                </span>
                 {dresses.map((_, idx) => (
                   <DressText
                     key={idx}

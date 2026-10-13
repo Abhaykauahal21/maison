@@ -65,10 +65,11 @@ const splitText = (el: HTMLElement, mode: "words" | "chars" | "scrub") => {
  *  - a gold progress hairline, letterbox intro bars and soft film grain sit over the page
  * Renders only the overlay chrome; everything else is wired to existing markup by data attributes.
  */
-export function StoryFX() {
+export function StoryFX({ intro = true }: { intro?: boolean }) {
   useEffect(() => {
     const root = document.querySelector<HTMLElement>(".story-fx");
     if (!root) return;
+    root.classList.toggle("fx-no-intro", !intro);
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     root.querySelectorAll<HTMLElement>('[data-fx="words"]').forEach((el) => splitText(el, "words"));
@@ -287,15 +288,19 @@ export function StoryFX() {
       window.removeEventListener("resize", kick);
       window.removeEventListener("pointermove", onMove);
     };
-  }, []);
+  }, [intro]);
 
   return (
     <>
       <div className="fx-progress" aria-hidden="true">
         <span data-fx-progress />
       </div>
-      <div className="fx-letterbox fx-letterbox-top" aria-hidden="true" />
-      <div className="fx-letterbox fx-letterbox-bottom" aria-hidden="true" />
+      {intro && (
+        <>
+          <div className="fx-letterbox fx-letterbox-top" aria-hidden="true" />
+          <div className="fx-letterbox fx-letterbox-bottom" aria-hidden="true" />
+        </>
+      )}
       <nav className="fx-rail" aria-label="Story chapters">
         {RAIL.map((label, i) => (
           <button

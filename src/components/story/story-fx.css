@@ -328,3 +328,18 @@
 [data-hero-copy] {
   will-change: transform, opacity;
 }
+
+/* Chapter swap (no fresh intro): the new hero fades up instead of the dark push-in + letterbox */
+.fx-no-intro [data-hero-bg] {
+  animation: fxHeroFadeIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes fxHeroFadeIn {
+  from {
+    opacity: 0.25;
+    transform: scale(1.06);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

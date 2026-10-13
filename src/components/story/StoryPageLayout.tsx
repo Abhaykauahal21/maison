@@ -1,94 +1,81 @@
-import type { Metadata } from "next";
+"use client";
+
+import { Fragment } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/footer";
 import { StoryFX } from "@/components/story/StoryFX";
+import type { ImageContent, OriginContent, TextLines } from "@/data/origin-content";
+import { tornBottomPaperClip, tornPaperClip } from "@/lib/torn-paper";
 
-const tornPaperClip = (() => {
-  const points: string[] = [];
-  const steps = 120;
-  for (let i = 0; i <= steps; i++) {
-    const x = (i / steps) * 100;
-    const n =
-      (Math.sin(i * 0.91 + 1.2) * 0.5 +
-        Math.sin(i * 2.37 + 0.4) * 0.3 +
-        Math.sin(i * 5.13 + 2.1) * 0.2 +
-        1) /
-      2;
-    points.push(`${x.toFixed(2)}% ${(2 + n * 11).toFixed(1)}px`);
-  }
-  for (let i = steps; i >= 0; i--) {
-    const x = (i / steps) * 100;
-    const n =
-      (Math.sin(i * 1.07 + 0.7) * 0.5 +
-        Math.sin(i * 2.61 + 1.8) * 0.3 +
-        Math.sin(i * 4.73 + 0.3) * 0.2 +
-        1) /
-      2;
-    points.push(`${x.toFixed(2)}% calc(100% - ${(2 + n * 12).toFixed(1)}px)`);
-  }
-  return `polygon(${points.join(", ")})`;
-})();
-
-const tornBottomPaperClip = (() => {
-  const points = ["0 0", "100% 0"];
-  const steps = 120;
-  for (let i = steps; i >= 0; i--) {
-    const x = (i / steps) * 100;
-    const n =
-      (Math.sin(i * 1.07 + 0.7) * 0.5 +
-        Math.sin(i * 2.61 + 1.8) * 0.3 +
-        Math.sin(i * 4.73 + 0.3) * 0.2 +
-        1) /
-      2;
-    points.push(`${x.toFixed(2)}% calc(100% - ${(2 + n * 12).toFixed(1)}px)`);
-  }
-  return `polygon(${points.join(", ")})`;
-})();
-
-const echoChapters = [
-  {
-    number: "01",
-    title: "The Echo",
-    image: "/images/story/Golden%20Window%20Reverie.webp",
-    alt: "A woman beside a sunlit window",
-    id: "chapter-1",
-  },
-  {
-    number: "02",
-    title: "The Search",
-    image: "/images/story/CrimsonGownAmongSunlitRuins.webp",
-    alt: "A woman in a crimson gown among old stone ruins",
-    id: "chapter-2",
-  },
-  {
-    number: "03",
-    title: "The In Between",
-    image: "/images/story/Golden%20HourReadingNookOverlookingFlorence.webp",
-    alt: "A woman reading in a sunlit room overlooking Florence",
-    id: "chapter-3",
-  },
-  {
-    number: "04",
-    title: "The Realization",
-    image: "/images/story/storyHero.webp",
-    alt: "A woman looking out over the city at sunset",
-    id: "chapter-4",
-  },
-];
-
-export const metadata: Metadata = {
-  title: "Our Story — Maison D'Vine",
-  description:
-    "Discover the story behind Maison D'Vine: a belief in thoughtful dresses, honest craft, and the stories every woman carries.",
+/** Renders authored text: a string, or an array of lines that break exactly as authored. */
+const Lines: React.FC<{ value: TextLines }> = ({ value }) => {
+  const lines = Array.isArray(value) ? value : [value];
+  return (
+    <>
+      {lines.map((line, i) => (
+        <Fragment key={i}>
+          {line}
+          {i < lines.length - 1 && <br />}
+        </Fragment>
+      ))}
+    </>
+  );
 };
 
-export default function StoryRoute() {
+export interface ChapterCard {
+  id: string;
+  number: string;
+  title: string;
+  image: ImageContent;
+}
+
+/** Interactive chapter controls. When present, nav renders as buttons instead of links. */
+export interface StoryNav {
+  onPrev?: () => void;
+  onNext?: () => void;
+  /** Switch to a chapter by index (used by the "More from" cards). */
+  onSelectChapter?: (index: number) => void;
+}
+
+interface StoryPageLayoutProps {
+  content: OriginContent;
+  /** Optional "More from" chapter cards rendered at the very end. */
+  chapterCards?: ChapterCard[];
+  /** Callout for the chapter-cards grid (one entry per line). */
+  moreFromKicker?: string[];
+  /** Changing this remounts the animated story layer so reveals replay on chapter change. */
+  chapterKey?: string | number;
+  /** Play the one-time cinematic intro (letterbox + dark hero push-in). Off on chapter swaps. */
+  intro?: boolean;
+  nav?: StoryNav;
+  /** Index of the chapter currently shown (highlights the matching card). */
+  activeChapterIndex?: number;
+}
+
+/**
+ * The full editorial story layout used by /origin and /echo. Renders exclusively from `content`,
+ * so the two pages share one design and differ only by their content (and optional chapter cards).
+ * In chaptered mode (nav present) the story layer is keyed by `chapterKey` so it remounts — the
+ * design stays identical, only the content (and its entrance animation) changes.
+ */
+export const StoryPageLayout: React.FC<StoryPageLayoutProps> = ({
+  content,
+  chapterCards,
+  moreFromKicker,
+  chapterKey,
+  intro,
+  nav,
+  activeChapterIndex,
+}) => {
+  const { hero, beginning, unanswered, echo, nextChapter } = content;
+
   return (
     <main className="story-fx relative min-h-screen w-full max-w-full min-w-0 overflow-x-clip bg-[#0e0d0c]">
       <Navbar />
-      <StoryFX />
+      <Fragment key={chapterKey ?? "story"}>
+      <StoryFX intro={intro} />
       <section
         id="story"
         aria-labelledby="story-title"
@@ -96,8 +83,8 @@ export default function StoryRoute() {
       >
         <div data-hero-bg className="pointer-events-none absolute inset-0 -z-20">
           <Image
-            src="/images/story/storyHero.webp"
-            alt="A woman in a floral dress watching the sunset over the city"
+            src={hero.bg.src}
+            alt={hero.bg.alt}
             fill
             priority
             sizes="100vw"
@@ -123,14 +110,14 @@ export default function StoryRoute() {
               data-delay="1.4"
               className="font-sans text-[10px] font-semibold tracking-[0.34em] text-[#f1d5a4] uppercase sm:text-[12px]"
             >
-              The Story
+              {hero.eyebrow}
             </p>
             <p
               data-fx="rise"
               data-delay="1.6"
               className="mt-5 font-sans text-[10px] font-medium tracking-[0.3em] text-white/80 uppercase sm:mt-7 sm:text-[12px]"
             >
-              Stage 01
+              {hero.stageLabel}
             </p>
             <h1
               id="story-title"
@@ -138,12 +125,12 @@ export default function StoryRoute() {
               data-delay="1.7"
               className="font-bodoni mt-3 text-[clamp(52px,9.6vw,132px)] leading-[0.9] font-normal tracking-[0.015em] text-[#fffaf1] uppercase"
             >
-              The Echo
+              {hero.title}
             </h1>
 
             <div data-fx="rise" data-delay="2.3" className="mt-7 flex items-center gap-5 sm:mt-9">
               <span className="font-allura text-[25px] text-[#f1d5a4] sm:text-[32px]">
-                Chapter 1
+                {hero.chapterLabel}
               </span>
               <span
                 aria-hidden="true"
@@ -158,8 +145,7 @@ export default function StoryRoute() {
               data-delay="2.5"
               className="mt-7 max-w-[530px] font-serif text-[clamp(19px,2.3vw,30px)] leading-[1.45] text-white/95 sm:mt-9"
             >
-              Before I knew what I wanted,
-              <br className="hidden sm:block" /> I wore what I knew.
+              <Lines value={hero.subtitle} />
             </p>
           </div>
         </div>
@@ -170,18 +156,16 @@ export default function StoryRoute() {
           data-delay="2.8"
           className="font-allura pointer-events-none absolute top-[25%] right-[8%] hidden -rotate-6 text-right text-[clamp(25px,3.4vw,46px)] leading-[1.25] text-[#3b3028]/90 lg:block"
         >
-          A whispered
-          <br />
-          beginning,
-          <br />
-          every creation.
+          <Lines value={hero.sideNote} />
         </p>
 
         <div
           aria-hidden="true"
           className="pointer-events-none absolute right-[5.5%] bottom-8 hidden flex-col items-center gap-3 text-white/80 sm:flex"
         >
-          <span className="font-sans text-[9px] tracking-[0.24em] uppercase">Scroll</span>
+          <span className="font-sans text-[9px] tracking-[0.24em] uppercase">
+            {hero.scrollLabel}
+          </span>
           <span className="h-14 w-px bg-white/65" />
         </div>
       </section>
@@ -208,10 +192,10 @@ export default function StoryRoute() {
           <div data-slide="left" className="relative z-20 max-w-[560px] self-start md:self-center">
             <div data-fx="rise" className="flex items-center gap-4">
               <span className="flex h-[22px] w-[22px] items-center justify-center border border-[#3a3026]/45 [font-family:Arial,Helvetica,sans-serif] text-[8px] tracking-[0.04em] text-[#302820] sm:h-6 sm:w-6 sm:text-[9px]">
-                01
+                {beginning.number}
               </span>
               <span className="[font-family:Arial,Helvetica,sans-serif] text-[8px] font-semibold tracking-[0.23em] text-[#51463c] uppercase sm:text-[10px]">
-                The Beginning
+                {beginning.kicker}
               </span>
             </div>
 
@@ -220,12 +204,7 @@ export default function StoryRoute() {
               data-fx="words"
               className="mt-3 max-w-[590px] font-serif text-[clamp(29px,3.55vw,52px)] leading-[1.06] font-normal tracking-[-0.035em] text-[#201b17] sm:mt-4"
             >
-              Before the dream,
-              <br className="hidden md:block" /> there was simply me —
-              <br />
-              trying to find a place
-              <br />
-              for myself in the world.
+              <Lines value={beginning.heading} />
             </h2>
 
             <span
@@ -239,14 +218,9 @@ export default function StoryRoute() {
               data-delay="0.35"
               className="mt-3 max-w-[530px] space-y-3 [font-family:Arial,Helvetica,sans-serif] text-[13px] leading-[1.35] text-[#51483f] sm:mt-4 sm:space-y-4 sm:text-[15px] md:text-[clamp(13px,1.55vw,18px)]"
             >
-              <p>
-                I wore what was already mine, what I could borrow, and what I believed might finally
-                make me feel like the woman I wanted to be.
-              </p>
-              <p>
-                There were days I dressed to fit in, days I dressed to feel braver, and days I
-                dressed just to feel like me — even if just for a moment.
-              </p>
+              {beginning.paragraphs.map((paragraph, i) => (
+                <p key={i}>{paragraph}</p>
+              ))}
             </div>
             <span
               aria-hidden="true"
@@ -271,15 +245,15 @@ export default function StoryRoute() {
                 }}
               >
                 <Image
-                  src="/images/story/Golden%20Window%20Reverie.webp"
-                  alt="A woman in a floral dress standing by a sunlit window"
+                  src={beginning.portrait.src}
+                  alt={beginning.portrait.alt}
                   fill
                   sizes="(max-width: 767px) 100vw, 55vw"
                   className="object-cover object-center"
                 />
               </div>
               <Image
-                src="/images/story/photoframe.webp"
+                src={beginning.frame}
                 alt=""
                 aria-hidden="true"
                 fill
@@ -295,11 +269,7 @@ export default function StoryRoute() {
             data-delay="0.3"
             className="font-allura pointer-events-none absolute right-[7%] bottom-[29%] z-20 hidden -rotate-6 text-right text-[clamp(22px,2vw,34px)] leading-[1.25] text-[#55483a]/80 lg:block"
           >
-            Different outfits,
-            <br />
-            same girl
-            <br />
-            searching for more.
+            <Lines value={beginning.sideNote} />
           </p>
         </div>
       </section>
@@ -311,7 +281,7 @@ export default function StoryRoute() {
       >
         <div data-scrub-img className="absolute inset-0 hidden overflow-hidden md:block">
           <Image
-            src="/images/story/GoldenRuinsandRoseParchment.webp"
+            src={unanswered.desktopBg}
             alt=""
             aria-hidden="true"
             fill
@@ -321,8 +291,8 @@ export default function StoryRoute() {
         </div>
         <div className="absolute inset-x-0 top-0 h-[46%] md:hidden">
           <Image
-            src="/images/story/CrimsonGownAmongSunlitRuins.webp"
-            alt="A woman in a flowing crimson gown among sunlit stone ruins and flowers"
+            src={unanswered.mobileTop.src}
+            alt={unanswered.mobileTop.alt}
             fill
             sizes="100vw"
             className="object-cover object-[34%_center]"
@@ -330,7 +300,7 @@ export default function StoryRoute() {
         </div>
         <div className="absolute inset-x-0 bottom-0 h-[56%] md:hidden">
           <Image
-            src="/images/story/VintageCathedralScrapbookCollage.webp"
+            src={unanswered.mobileBottom}
             alt=""
             aria-hidden="true"
             fill
@@ -343,10 +313,10 @@ export default function StoryRoute() {
           <div data-slide="right" data-dist="220" className="w-full max-w-[520px]">
             <div data-fx="rise" className="flex items-center gap-4">
               <span className="flex h-[22px] w-[22px] items-center justify-center border border-[#3a3026]/45 [font-family:Arial,Helvetica,sans-serif] text-[8px] tracking-[0.04em] text-[#302820] sm:h-6 sm:w-6 sm:text-[9px]">
-                02
+                {unanswered.number}
               </span>
               <span className="[font-family:Arial,Helvetica,sans-serif] text-[8px] font-semibold tracking-[0.23em] text-[#51463c] uppercase sm:text-[10px]">
-                The Unanswered
+                {unanswered.kicker}
               </span>
             </div>
 
@@ -355,11 +325,7 @@ export default function StoryRoute() {
               data-fx="words"
               className="mt-4 max-w-[480px] font-serif text-[clamp(33px,3.5vw,52px)] leading-[1.08] font-normal tracking-[-0.035em] text-[#201b17] sm:mt-5"
             >
-              But with each one,
-              <br />
-              something stayed
-              <br />
-              unanswered.
+              <Lines value={unanswered.heading} />
             </h2>
 
             <p
@@ -367,8 +333,7 @@ export default function StoryRoute() {
               data-delay="0.35"
               className="mt-5 max-w-[490px] [font-family:Arial,Helvetica,sans-serif] text-[14px] leading-[1.55] text-[#716b61] sm:mt-6 sm:text-[17px] md:text-[clamp(13px,1.55vw,19px)]"
             >
-              They dressed me, but they never quite reached me. There was always a part of me
-              waiting — untouched, unspoken.
+              {unanswered.paragraph}
             </p>
 
             <span
@@ -382,13 +347,7 @@ export default function StoryRoute() {
               data-delay="0.5"
               className="font-allura mt-5 max-w-[260px] -rotate-6 text-[clamp(25px,2.3vw,38px)] leading-[1.18] text-[#55483a]/80 sm:mt-6"
             >
-              Beautiful
-              <br />
-              outfits.
-              <br />
-              Unanswered
-              <br />
-              questions.
+              <Lines value={unanswered.note} />
             </p>
           </div>
         </div>
@@ -406,10 +365,10 @@ export default function StoryRoute() {
           >
             <div data-fx="rise" className="flex items-center gap-4">
               <span className="flex h-[22px] w-[22px] items-center justify-center border border-[#3a3026]/45 [font-family:Arial,Helvetica,sans-serif] text-[8px] tracking-[0.04em] text-[#302820] sm:h-6 sm:w-6 sm:text-[9px]">
-                03
+                {echo.number}
               </span>
               <span className="[font-family:Arial,Helvetica,sans-serif] text-[8px] font-semibold tracking-[0.23em] text-[#51463c] uppercase sm:text-[10px]">
-                The Echo
+                {echo.kicker}
               </span>
             </div>
 
@@ -418,25 +377,23 @@ export default function StoryRoute() {
               data-fx="words"
               className="mt-4 max-w-[590px] font-serif text-[clamp(32px,3.5vw,52px)] leading-[1.06] font-normal tracking-[-0.035em] text-[#201b17] sm:mt-5"
             >
-              Echo is that beginning — the quiet life before I knew I was looking for something
-              more.
+              {echo.heading}
             </h2>
 
             <p
               data-scrub-words
               className="mt-5 max-w-[500px] [font-family:Arial,Helvetica,sans-serif] text-[14px] leading-[1.5] text-[#716b61] sm:mt-6 sm:text-[17px] md:text-[clamp(13px,1.45vw,18px)]"
             >
-              It&apos;s a collection of moments, feelings, and unspoken desires that lived within
-              me, long before the dream took shape.
+              {echo.paragraph}
             </p>
 
             <Link
-              href="/#story"
+              href={echo.cta.href}
               data-fx="rise"
               data-delay="0.55"
               className="mt-7 inline-flex min-h-12 items-center gap-5 bg-[#211b18] px-7 py-3 font-sans text-[9px] font-medium tracking-[0.2em] text-[#f8f2e8] uppercase transition-colors hover:bg-[#41352b] sm:mt-8 sm:px-8 sm:text-[10px]"
             >
-              <span>Explore the Echo Collection</span>
+              <span>{echo.cta.label}</span>
               <span aria-hidden="true" className="text-base leading-none">
                 &rarr;
               </span>
@@ -458,8 +415,8 @@ export default function StoryRoute() {
               className="absolute inset-x-[3%] inset-y-[2%] z-10 overflow-hidden border-[9px] border-[#fbf4e7] bg-[#e8d3b7] shadow-[0_22px_42px_rgba(48,33,18,0.25)] sm:border-[12px]"
             >
               <Image
-                src="/images/story/Golden%20HourReadingNookOverlookingFlorence.webp"
-                alt="A woman reading in a sunlit room overlooking Florence"
+                src={echo.photo.src}
+                alt={echo.photo.alt}
                 fill
                 sizes="(max-width: 767px) 90vw, 43vw"
                 className="object-cover object-center"
@@ -472,16 +429,12 @@ export default function StoryRoute() {
               data-delay="0.5"
               className="font-allura absolute top-[10%] right-0 z-20 w-[145px] -rotate-3 border border-[#d8c8ad] bg-[#f7f0e2]/95 px-4 py-4 text-center text-[24px] leading-[1.15] text-[#55483a]/90 shadow-[0_8px_18px_rgba(48,33,18,0.14)] sm:right-[-2%] sm:w-[170px] sm:py-5 sm:text-[29px] md:top-[18%] md:right-[-14%]"
             >
-              Same place,
-              <br />
-              new
-              <br />
-              perspectives.
+              <Lines value={echo.note} />
             </p>
           </div>
 
           <Image
-            src="/images/story/IvoryFloweringBranchCutout.webp"
+            src={echo.branch}
             alt=""
             aria-hidden="true"
             width={340}
@@ -500,7 +453,7 @@ export default function StoryRoute() {
       >
         <div className="relative mx-auto max-w-[1500px]">
           <Image
-            src="/images/story/SepiaWatercolorBranchIllustration.webp"
+            src={nextChapter.ornament}
             alt=""
             aria-hidden="true"
             width={220}
@@ -509,7 +462,7 @@ export default function StoryRoute() {
             className="pointer-events-none absolute top-[-1.5rem] left-[2%] z-0 hidden h-[190px] w-[190px] -rotate-[18deg] object-contain opacity-80 lg:block"
           />
           <Image
-            src="/images/story/SepiaWatercolorBranchIllustration.webp"
+            src={nextChapter.ornament}
             alt=""
             aria-hidden="true"
             width={220}
@@ -524,9 +477,7 @@ export default function StoryRoute() {
               data-scrub-words
               className="font-serif text-[clamp(31px,4.2vw,58px)] leading-[1.1] font-normal tracking-[-0.035em] text-[#28211b] italic"
             >
-              Some chapters don&apos;t end.
-              <br />
-              They just lead you to the next.
+              <Lines value={nextChapter.heading} />
             </h2>
             <span
               aria-hidden="true"
@@ -540,85 +491,166 @@ export default function StoryRoute() {
             data-fx="rise"
             className="mt-8 grid items-center gap-5 sm:mt-10 md:grid-cols-[1fr_auto_1fr] md:gap-7"
           >
-            <Link
-              href="#unanswered-title"
-              data-slide="left"
-              data-dist="140"
-              className="inline-flex min-h-[64px] items-center justify-center gap-3 border border-[#756555]/50 px-5 py-4 font-sans text-[10px] font-medium tracking-[0.2em] text-[#302820] uppercase transition-colors hover:bg-[#e8d4b9] sm:justify-self-start sm:px-8"
-            >
-              <span aria-hidden="true" className="text-base">
-                &larr;
-              </span>
-              Previous
-            </Link>
+            {nav?.onPrev ? (
+              <button
+                type="button"
+                onClick={nav.onPrev}
+                data-slide="left"
+                data-dist="140"
+                className="inline-flex min-h-[64px] cursor-pointer items-center justify-center gap-3 border border-[#756555]/50 px-5 py-4 font-sans text-[10px] font-medium tracking-[0.2em] text-[#302820] uppercase transition-colors hover:bg-[#e8d4b9] sm:justify-self-start sm:px-8"
+              >
+                <span aria-hidden="true" className="text-base">
+                  &larr;
+                </span>
+                {nextChapter.prev.label}
+              </button>
+            ) : (
+              <Link
+                href={nextChapter.prev.href}
+                data-slide="left"
+                data-dist="140"
+                className="inline-flex min-h-[64px] items-center justify-center gap-3 border border-[#756555]/50 px-5 py-4 font-sans text-[10px] font-medium tracking-[0.2em] text-[#302820] uppercase transition-colors hover:bg-[#e8d4b9] sm:justify-self-start sm:px-8"
+              >
+                <span aria-hidden="true" className="text-base">
+                  &larr;
+                </span>
+                {nextChapter.prev.label}
+              </Link>
+            )}
 
             <span
               aria-hidden="true"
               className="hidden h-px w-full min-w-16 bg-[#756555]/40 md:block"
             />
 
-            <Link
-              href="#chapter-2"
-              data-slide="right"
-              data-dist="140"
-              className="group inline-flex min-h-[64px] items-center justify-between gap-4 bg-[#211b18] py-2 pr-2 pl-6 font-sans text-[10px] font-medium tracking-[0.19em] text-[#f8f2e8] uppercase transition-colors hover:bg-[#41352b] sm:pl-8 md:justify-self-end"
-            >
-              <span>Continue to Chapter 2</span>
-              <span
-                aria-hidden="true"
-                className="px-2 text-base transition-transform group-hover:translate-x-1"
+            {nav?.onNext ? (
+              <button
+                type="button"
+                onClick={nav.onNext}
+                data-slide="right"
+                data-dist="140"
+                className="group inline-flex min-h-[64px] cursor-pointer items-center justify-between gap-4 bg-[#211b18] py-2 pr-2 pl-6 font-sans text-[10px] font-medium tracking-[0.19em] text-[#f8f2e8] uppercase transition-colors hover:bg-[#41352b] sm:pl-8 md:justify-self-end"
               >
-                &rarr;
-              </span>
-              <Image
-                src="/images/story/CrimsonGownAmongSunlitRuins.webp"
-                alt=""
-                aria-hidden="true"
-                width={96}
-                height={60}
-                className="h-12 w-20 object-cover"
-              />
-            </Link>
+                <span>{nextChapter.next.label}</span>
+                <span
+                  aria-hidden="true"
+                  className="px-2 text-base transition-transform group-hover:translate-x-1"
+                >
+                  &rarr;
+                </span>
+                <Image
+                  src={nextChapter.next.thumb}
+                  alt=""
+                  aria-hidden="true"
+                  width={96}
+                  height={60}
+                  className="h-12 w-20 object-cover"
+                />
+              </button>
+            ) : (
+              <Link
+                href={nextChapter.next.href}
+                data-slide="right"
+                data-dist="140"
+                className="group inline-flex min-h-[64px] items-center justify-between gap-4 bg-[#211b18] py-2 pr-2 pl-6 font-sans text-[10px] font-medium tracking-[0.19em] text-[#f8f2e8] uppercase transition-colors hover:bg-[#41352b] sm:pl-8 md:justify-self-end"
+              >
+                <span>{nextChapter.next.label}</span>
+                <span
+                  aria-hidden="true"
+                  className="px-2 text-base transition-transform group-hover:translate-x-1"
+                >
+                  &rarr;
+                </span>
+                <Image
+                  src={nextChapter.next.thumb}
+                  alt=""
+                  aria-hidden="true"
+                  width={96}
+                  height={60}
+                  className="h-12 w-20 object-cover"
+                />
+              </Link>
+            )}
           </nav>
 
-          <div className="mt-14 grid gap-x-8 gap-y-10 sm:mt-16 sm:grid-cols-2 lg:mt-20 lg:grid-cols-[0.9fr_repeat(4,minmax(0,1fr))] lg:gap-x-7">
-            <p className="font-sans text-[10px] leading-[2] font-semibold tracking-[0.2em] text-[#51463c] uppercase sm:col-span-2 lg:col-span-1">
-              More from
-              <br />
-              Stage 0 — The Echo
-            </p>
-
-            {echoChapters.map((chapter) => (
-              <Link
-                key={chapter.id}
-                href={`#${chapter.id}`}
-                id={chapter.id}
-                aria-label={`Chapter ${chapter.number}: ${chapter.title}`}
-                data-fx="rise"
-                data-delay={(echoChapters.indexOf(chapter) * 0.14).toFixed(2)}
-                className="group block scroll-mt-24"
-              >
-                <div className="relative aspect-[1.55/1] overflow-hidden border border-[#756555]/45 bg-[#e8d4b9] shadow-[0_5px_12px_rgba(48,33,18,0.12)]">
-                  <Image
-                    src={chapter.image}
-                    alt={chapter.alt}
-                    fill
-                    sizes="(max-width: 639px) 90vw, (max-width: 1023px) 44vw, 20vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-                  />
-                </div>
-                <p className="mt-4 font-sans text-[9px] font-semibold tracking-[0.2em] text-[#51463c] uppercase">
-                  Chapter {chapter.number}
+          {chapterCards && chapterCards.length > 0 && (
+            <div className="mt-14 grid gap-x-8 gap-y-10 sm:mt-16 sm:grid-cols-2 lg:mt-20 lg:grid-cols-[0.9fr_repeat(4,minmax(0,1fr))] lg:gap-x-7">
+              {moreFromKicker && (
+                <p className="font-sans text-[10px] leading-[2] font-semibold tracking-[0.2em] text-[#51463c] uppercase sm:col-span-2 lg:col-span-1">
+                  {moreFromKicker.map((line, i) => (
+                    <Fragment key={i}>
+                      {line}
+                      {i < moreFromKicker.length - 1 && <br />}
+                    </Fragment>
+                  ))}
                 </p>
-                <h3 className="mt-1 font-serif text-[clamp(21px,1.8vw,27px)] leading-tight text-[#28211b] transition-colors group-hover:text-[#8a6a3b]">
-                  {chapter.title}
-                </h3>
-              </Link>
-            ))}
-          </div>
+              )}
+
+              {chapterCards.map((chapter, i) => {
+                const active = i === activeChapterIndex;
+                const label = `Chapter ${chapter.number}: ${chapter.title}`;
+                const className = "group block w-full scroll-mt-24 text-left";
+                const body = (
+                  <>
+                    <div
+                      className={`relative aspect-[1.55/1] overflow-hidden border bg-[#e8d4b9] shadow-[0_5px_12px_rgba(48,33,18,0.12)] ${
+                        active ? "border-[#8a6a3b]" : "border-[#756555]/45"
+                      }`}
+                    >
+                      <Image
+                        src={chapter.image.src}
+                        alt={chapter.image.alt}
+                        fill
+                        sizes="(max-width: 639px) 90vw, (max-width: 1023px) 44vw, 20vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                      />
+                    </div>
+                    <p
+                      className={`mt-4 font-sans text-[9px] font-semibold tracking-[0.2em] uppercase ${
+                        active ? "text-[#8a6a3b]" : "text-[#51463c]"
+                      }`}
+                    >
+                      Chapter {chapter.number}
+                    </p>
+                    <h3 className="mt-1 font-serif text-[clamp(21px,1.8vw,27px)] leading-tight text-[#28211b] transition-colors group-hover:text-[#8a6a3b]">
+                      {chapter.title}
+                    </h3>
+                  </>
+                );
+
+                return nav?.onSelectChapter ? (
+                  <button
+                    key={chapter.id}
+                    type="button"
+                    onClick={() => nav.onSelectChapter?.(i)}
+                    aria-label={label}
+                    aria-current={active ? "true" : undefined}
+                    data-fx="rise"
+                    data-delay={(i * 0.14).toFixed(2)}
+                    className={`${className} cursor-pointer`}
+                  >
+                    {body}
+                  </button>
+                ) : (
+                  <Link
+                    key={chapter.id}
+                    href={`#${chapter.id}`}
+                    id={chapter.id}
+                    aria-label={label}
+                    data-fx="rise"
+                    data-delay={(i * 0.14).toFixed(2)}
+                    className={className}
+                  >
+                    {body}
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
+      </Fragment>
       <Footer />
     </main>
   );
-}
+};
