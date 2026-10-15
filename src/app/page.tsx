@@ -3,6 +3,7 @@ import { Hero } from "@/components/home/Hero";
 import { EditorialSection } from "@/components/editorial/EditorialSection";
 import { DreamSection } from "@/components/dream/DreamSection";
 import { GardenSection } from "@/components/garden/GardenSection";
+import { defaultWhispersContent } from "@/data/whispers-content";
 import { IndiaSection } from "@/components/india/IndiaSection";
 import { OurStorySection } from "@/components/story/OurStorySection";
 import { FaqSection } from "@/components/faq/FaqSection";
@@ -31,7 +32,7 @@ export default function HomePage() {
           >
             <DreamSection />
           </StoryGate>
-          <GardenSection />
+          <GardenSection testimonials={defaultWhispersContent} />
           <IndiaSection />
           <OurStorySection />
           <FaqSection />
@@ -42,7 +43,7 @@ export default function HomePage() {
       ) : (
         <>
           <DreamSection />
-          <GardenSection />
+          <GardenSection testimonials={defaultWhispersContent} />
           <IndiaSection />
           <OurStorySection />
           <FaqSection />

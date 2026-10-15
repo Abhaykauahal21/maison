@@ -3,60 +3,8 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { GardenParticles } from "@/components/garden/GardenParticles";
+import { defaultWhisperImage, type WhisperImage, type WhisperTestimonial } from "@/data/whispers-content";
 import { makeTops, nearViewport } from "@/lib/scrub";
-
-export interface TestimonialItem {
-  id: string;
-  /** e.g. "Whisper #001" */
-  whisper: string;
-  /** What the visitor wrote to us. */
-  message: string;
-  /** Maison D'vine's reply. */
-  response: string;
-  author: string;
-  location: string;
-  leftNoteLines: string[];
-  rightNoteLines: string[];
-}
-
-export const initialTestimonials: TestimonialItem[] = [
-  {
-    id: "whisper-001",
-    whisper: "Whisper #001",
-    message:
-      "I really like the concept, it feels fresh. But honestly the prices look high for a brand that just started.",
-    response:
-      "A completely fair observation. Trust is earned, not demanded. Our pricing simply reflects the uncompromised cost of a slow, conscious, nine-month creation cycle. We appreciate you saying .",
-    author: "Anonymous",
-    location: "Delhi",
-    leftNoteLines: ["Trust is", "earned,", "not demanded."],
-    rightNoteLines: ["Slow,", "conscious,", "nine months."],
-  },
-  {
-    id: "whisper-002",
-    whisper: "Whisper #002",
-    message:
-      "Love the idea but I don't think I can spend 15k on a dress from a new brand right now.",
-    response:
-      "We deeply respect that boundary. Investing in a new vision requires certainty. You don't need to own a piece to be part of our dialogue, stay in the courtyard as long as you like.",
-    author: "Anonymous",
-    location: "Anonymous",
-    leftNoteLines: ["We respect", "that", "boundary."],
-    rightNoteLines: ["Stay in", "the courtyard."],
-  },
-  {
-    id: "whisper-003",
-    whisper: "Whisper #003",
-    message:
-      "I'm not the typical slow-fashion customer. I usually shop on impulse, but your story caught my attention. Curious to see where it leads.",
-    response:
-      "That's exactly the kind of honesty we want here. You don't have to fit the idea perfectly to be curious about it.",
-    author: "Shreya Rao",
-    location: "Mumbai, India",
-    leftNoteLines: ["Honesty", "is welcome", "here."],
-    rightNoteLines: ["Curious", "is enough."],
-  },
-];
 
 /* ------------------------------------------------------------------
    Scrapbook card (story-card.webp, 1672 x 941, transparent) sliced into
@@ -70,8 +18,7 @@ type Rect = [x0: number, y0: number, x1: number, y1: number];
 
 const RECTS = {
   left: [35, 115, 530, 840] as Rect,
-  center: [500, 150, 1235, 760] as Rect,
-  right: [1120, 160, 1645, 845] as Rect,
+  center: [500, 150, 1205, 760] as Rect,
   flower: [395, 410, 690, 880] as Rect,
 };
 
@@ -201,25 +148,6 @@ const Petals: React.FC = () => (
   </div>
 );
 
-const Note: React.FC<{
-  lines: string[];
-  d: number;
-  className?: string;
-  style?: React.CSSProperties;
-}> = ({ lines, d, className = "", style }) => (
-  <p
-    className={`gw-ink font-allura allura-regular font-script font-cursive text-center leading-[1.08] tracking-wide text-[#3d2d1e] ${className}`}
-    style={{ ["--d" as string]: `${d}s`, ...style }}
-  >
-    {lines.map((l, i) => (
-      <React.Fragment key={i}>
-        {l}
-        {i < lines.length - 1 && <br />}
-      </React.Fragment>
-    ))}
-  </p>
-);
-
 const Line: React.FC<{ d: number; children: React.ReactNode }> = ({ d, children }) => (
   <span className="gw-line">
     <span style={{ ["--d" as string]: `${d}s` }}>{children}</span>
@@ -243,7 +171,7 @@ const Words: React.FC<{ text: string; start: number; step?: number }> = ({ text,
 );
 
 interface TestimonialViewProps {
-  item: TestimonialItem;
+  item: WhisperTestimonial;
   swapClass: string;
   size: "lg" | "sm";
 }
@@ -312,6 +240,24 @@ const TestimonialView: React.FC<TestimonialViewProps> = ({ item, swapClass, size
   );
 };
 
+const WhisperPhoto: React.FC<{ image: WhisperImage; className: string }> = ({
+  image,
+  className,
+}) => (
+  <div
+    key={image.src}
+    className={`absolute overflow-hidden border-[0.7cqw] border-[#fffaf0] bg-[#f7efe1] shadow-[0_0.8cqw_1.8cqw_rgba(30,14,4,0.4)] ${className}`}
+  >
+    <Image
+      src={image.src}
+      alt={image.alt}
+      fill
+      sizes="(max-width: 767px) 30vw, 20vw"
+      className="object-cover"
+    />
+  </div>
+);
+
 /** How long each whisper stays before the next one (matches the .gw-progress animation). */
 const AUTO_MS = 9000;
 
@@ -319,11 +265,11 @@ const navBtnClass =
   "group flex items-center justify-center rounded-full border border-white/50 bg-black/35 text-white backdrop-blur-sm transition-all duration-300 hover:border-[#e9c98c] hover:bg-[#e9c98c]/20 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-xl";
 
 export interface GardenSectionProps {
-  testimonials?: TestimonialItem[];
+  testimonials: WhisperTestimonial[];
 }
 
 export const GardenSection: React.FC<GardenSectionProps> = ({
-  testimonials = initialTestimonials,
+  testimonials,
 }) => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
@@ -535,6 +481,7 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
   };
 
   const current = testimonials[currentIndex] || testimonials[0];
+  const currentImage = current.image ?? defaultWhisperImage;
   const swapClass = isTransitioning
     ? direction === "next"
       ? "opacity-0 -translate-x-4 blur-[3px]"
@@ -701,10 +648,9 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
                   className="absolute"
                   style={{ ...place(RECTS.center), ...crop(RECTS.center) }}
                 />
-                <div
-                  data-gw="right"
-                  className="absolute"
-                  style={{ ...place(RECTS.right), ...crop(RECTS.right) }}
+                <WhisperPhoto
+                  image={currentImage}
+                  className="top-[20%] right-[4%] z-10 h-[52%] w-[23%] rotate-[6deg]"
                 />
               </div>
 
@@ -727,19 +673,6 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
                 />
               </div>
 
-              {/* Handwritten note on the paper card only */}
-              <div
-                className="pointer-events-none absolute z-10 flex items-center justify-center"
-                style={{ left: "77%", top: "61.4%", width: "19.5%", height: "25%" }}
-              >
-                <Note
-                  key={`r${currentIndex}`}
-                  lines={current.rightNoteLines}
-                  d={0.45}
-                  className="-rotate-[11deg]"
-                  style={{ fontSize: "max(18px, 2.7cqw)", opacity: isTransitioning ? 0 : 1 }}
-                />
-              </div>
             </div>
           </div>
         </div>
@@ -818,43 +751,28 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
             {/* Shadows sit on each moving piece (cached with its layer) instead of a wrapper that
                 would be re-filtered every scroll frame */}
             <div className="relative z-10 flex items-start justify-center gap-[2vw]">
-              <div
-                data-gw="right"
-                className="relative mt-[8%] w-[58%] will-change-transform"
-                style={{
-                  aspectRatio: `${RECTS.right[2] - RECTS.right[0]} / ${RECTS.right[3] - RECTS.right[1]}`,
-                  filter: "drop-shadow(0 14px 18px rgba(30,14,4,0.45))",
-                  ...crop(RECTS.right),
-                }}
-              >
-                <div
-                  className="absolute flex items-center justify-center"
-                  style={{ left: "30%", top: "60%", width: "62%", height: "36%" }}
-                >
-                  <Note
-                    key={`mr${currentIndex}`}
-                    lines={current.rightNoteLines}
-                    d={0.4}
-                    className="-rotate-[11deg] text-[clamp(14px,4.6vw,28px)]"
-                  />
-                </div>
-              </div>
             </div>
 
             <div className="relative z-20 -mt-[6vw] w-full sm:-mt-10">
-              <div
-                data-gw="paper"
-                className="w-full will-change-transform"
-                style={{ filter: "drop-shadow(0 16px 20px rgba(30,14,4,0.5))", ...crop(RECTS.center) }}
-              >
-                <div className="px-[11%] pt-[13%] pb-[13%]">
-                  <TestimonialView
-                    key={currentIndex}
-                    item={current}
-                    swapClass={swapClass}
-                    size="sm"
-                  />
+              <div className="relative flex items-start">
+                <div
+                  data-gw="paper"
+                  className="w-[78%] will-change-transform sm:w-[80%]"
+                  style={{ filter: "drop-shadow(0 16px 20px rgba(30,14,4,0.5))", ...crop(RECTS.center) }}
+                >
+                  <div className="px-[11%] pt-[13%] pb-[13%]">
+                    <TestimonialView
+                      key={currentIndex}
+                      item={current}
+                      swapClass={swapClass}
+                      size="sm"
+                    />
+                  </div>
                 </div>
+                <WhisperPhoto
+                  image={currentImage}
+                  className="top-[10%] right-[1%] z-10 aspect-[0.78/1] w-[30%] rotate-[6deg]"
+                />
               </div>
             </div>
 
