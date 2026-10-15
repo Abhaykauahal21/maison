@@ -45,7 +45,9 @@ const STYLES = `
 .cm-shine-band { position: absolute; top: 0; bottom: 0; left: 0; width: 260%; background: linear-gradient(115deg, transparent 38%, rgba(255,240,205,.5) 50%, transparent 62%); will-change: transform; }
 .cm-btn::after { content: ""; position: absolute; top: 0; bottom: 0; width: 34%; left: -50%; background: linear-gradient(100deg, transparent, rgba(255,255,255,.22), transparent); animation: cm-sheen 5s ease-in-out 1s infinite; }
 @keyframes cm-sheen { 0%, 60% { left: -50%; } 100% { left: 130%; } }
-@media (prefers-reduced-motion: reduce) { .cm-float, .cm-seal, .cm-btn::after { animation: none; } }
+.cm-copy { opacity: 0; transform: translateY(18px); filter: blur(4px); transition: opacity .9s ease, transform .9s cubic-bezier(.16,1,.3,1), filter .9s ease; }
+[data-copy-visible="true"] .cm-copy { opacity: 1; transform: none; filter: none; }
+@media (prefers-reduced-motion: reduce) { .cm-float, .cm-seal, .cm-btn::after { animation: none; } .cm-copy { transition: none; } }
 `;
 
 const MOTES = Array.from({ length: 14 }, (_, i) => ({
@@ -57,44 +59,11 @@ const MOTES = Array.from({ length: 14 }, (_, i) => ({
   dx: (i % 2 === 0 ? 1 : -1) * (8 + (i % 4) * 6),
 }));
 
-const Rise: React.FC<{ lag?: number; className?: string; children: React.ReactNode }> = ({
-  lag = 0,
-  className = "",
-  children,
-}) => (
-  <span
-    data-s="rise"
-    data-lag={lag}
-    className={`-mb-[0.14em] block overflow-hidden pb-[0.14em] ${className}`}
-  >
-    <span
-      data-inner
-      className="block will-change-transform"
-      style={{ transform: "translateY(112%)" }}
-    >
-      {children}
-    </span>
-  </span>
-);
-
-/** Heading line: letters fan out from the line's centre and converge as you scroll. */
+/** Heading line; the containing copy block reveals on entry. */
 const Converge: React.FC<{ line: string }> = ({ line }) => {
-  const chars = Array.from(line);
-  const centre = (chars.length - 1) / 2;
   return (
     <span className="block" aria-hidden="true">
-      {chars.map((ch, i) => (
-        <span
-          key={i}
-          data-s="conv"
-          data-off={((i - centre) * 0.55).toFixed(2)}
-          data-lag={i * 6}
-          className="inline-block will-change-transform"
-          style={{ opacity: 0 }}
-        >
-          {ch === " " ? " " : ch}
-        </span>
-      ))}
+      {line}
     </span>
   );
 };
@@ -105,15 +74,19 @@ export const CloserChapterMobile: React.FC = () => {
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-    const q = <T extends Element>(sel: string) => Array.from(root.querySelectorAll<T>(sel));
-    const risers = q<HTMLElement>("[data-s='rise']");
-    const convs = q<HTMLElement>("[data-s='conv']");
-    const rules = q<HTMLElement>("[data-s='rule']");
-    const fades = q<HTMLElement>("[data-s='fade']");
-    const wipes = q<HTMLElement>("[data-s='wipe']");
-    const icons = q<HTMLElement>("[data-s='icon']");
-    const inks = q<HTMLElement>("[data-s='ink']");
-    const draws = q<SVGPathElement>("[data-s='draw']");
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        root.dataset.copyVisible = "true";
+        observer.disconnect();
+      }
+    }, { threshold: 0.05 });
+    observer.observe(root);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
     const frame = root.querySelector<HTMLElement>("[data-s='frame']");
     const iris = root.querySelector<HTMLElement>("[data-s='iris']");
     const shine = root.querySelector<HTMLElement>("[data-shine]");
@@ -134,7 +107,7 @@ export const CloserChapterMobile: React.FC = () => {
       // offscreen: nothing to do (this handler runs on every scroll, for every section)
       if (!nearViewport(rr, vh)) return;
       // all reads first (one style/layout pass), then all writes
-      T.read([frame, iris], risers, convs, rules, fades, wipes, icons, inks, draws);
+      T.read([frame, iris]);
       const t = clamp01((vh - rr.top) / (vh + rr.height));
       if (drift) drift.style.transform = `translate3d(0, ${((t - 0.5) * -26).toFixed(1)}px, 0)`;
 
@@ -152,43 +125,6 @@ export const CloserChapterMobile: React.FC = () => {
       // Same sweep the old background-position animation drew, now a compositor-only transform
       if (shine) shine.style.transform = `translate3d(${(-0.6154 * (120 - t * 240)).toFixed(2)}%, 0, 0)`;
 
-      risers.forEach((el) => {
-        const inner = el.querySelector<HTMLElement>("[data-inner]");
-        if (!inner) return;
-        const e = prog(el, Number(el.dataset.lag || 0));
-        inner.style.transform = `translate3d(0, ${((1 - e) * 112).toFixed(1)}%, 0)`;
-        inner.style.opacity = String(0.3 + 0.7 * e);
-      });
-      convs.forEach((el) => {
-        const e = prog(el, Number(el.dataset.lag || 0), 0.24);
-        el.style.opacity = String(e.toFixed(3));
-        el.style.transform = `translate3d(${(Number(el.dataset.off) * (1 - e)).toFixed(3)}em, 0, 0)`;
-      });
-      rules.forEach((el) => {
-        el.style.transform = `scaleX(${prog(el, Number(el.dataset.lag || 0), 0.14).toFixed(3)})`;
-      });
-      fades.forEach((el) => {
-        const e = prog(el, Number(el.dataset.lag || 0), 0.18);
-        el.style.opacity = String((0.15 + 0.85 * e).toFixed(3));
-        el.style.transform = `translate3d(0, ${((1 - e) * 18).toFixed(1)}px, 0)`;
-      });
-      wipes.forEach((el) => {
-        const e = prog(el, Number(el.dataset.lag || 0), 0.16);
-        el.style.clipPath = `inset(-10% ${((1 - e) * 104).toFixed(1)}% -10% 0)`;
-        el.style.opacity = String(0.2 + 0.8 * e);
-        el.style.transform = `translate3d(${((1 - e) * -16).toFixed(1)}px, 0, 0)`;
-      });
-      icons.forEach((el) => {
-        const e = prog(el, Number(el.dataset.lag || 0) + 30, 0.16);
-        el.style.transform = `scale(${e.toFixed(3)}) rotate(${((1 - e) * -90).toFixed(1)}deg)`;
-      });
-      inks.forEach((el) => {
-        const e = prog(el, Number(el.dataset.lag || 0), 0.2);
-        el.style.clipPath = `inset(-6% ${((1 - e) * 104).toFixed(1)}% -6% 0)`;
-      });
-      draws.forEach((el) => {
-        el.style.strokeDashoffset = String((1 - prog(el, 0, 0.22)).toFixed(3));
-      });
     };
 
     const onScroll = () => {
@@ -344,19 +280,13 @@ export const CloserChapterMobile: React.FC = () => {
         </div>
 
         {/* Handwritten note beside the frame */}
-        <div className="absolute z-10" style={{ left: "75%", top: "33%", width: "23%" }}>
+        <div className="cm-copy absolute z-10" style={{ left: "75%", top: "33%", width: "23%" }}>
           <p
             className="font-allura allura-regular font-script font-cursive origin-top-left -rotate-[8deg] leading-[1.08] tracking-normal text-[#493c33]"
             style={{ fontSize: "5.6cqw" }}
           >
-            {NOTE.map((l, i) => (
-              <span
-                key={l}
-                data-s="ink"
-                data-lag={i * 28}
-                className="block whitespace-nowrap"
-                style={{ clipPath: "inset(-6% 104% -6% 0)" }}
-              >
+            {NOTE.map((l) => (
+              <span key={l} className="block whitespace-nowrap">
                 {l}
               </span>
             ))}
@@ -373,9 +303,7 @@ export const CloserChapterMobile: React.FC = () => {
             aria-hidden="true"
           >
             <path
-              data-s="draw"
               pathLength={1}
-              style={{ strokeDasharray: 1, strokeDashoffset: 1 }}
               d="M12 20.5C12 20.5 3.5 15.2 3.5 8.7C3.5 5.8 5.7 3.5 8.5 3.5C10.2 3.5 11.6 4.4 12 5.5C12.4 4.4 13.8 3.5 15.5 3.5C18.3 3.5 20.5 5.8 20.5 8.7C20.5 15.2 12 20.5 12 20.5Z"
             />
           </svg>
@@ -383,7 +311,7 @@ export const CloserChapterMobile: React.FC = () => {
 
         {/* ===== Copy ===== */}
         <div
-          className="absolute z-20 text-center"
+          className="cm-copy absolute z-20 text-center"
           style={{ left: "10%", top: "48.4%", width: "80%" }}
         >
           <div
@@ -391,15 +319,13 @@ export const CloserChapterMobile: React.FC = () => {
             style={{ fontSize: "2.2cqw", gap: "2.4cqw" }}
           >
             <span
-              data-s="rule"
               className="block h-px origin-right bg-gradient-to-l from-[#8a6a3a] to-transparent"
-              style={{ width: "9cqw", transform: "scaleX(0)" }}
+              style={{ width: "9cqw" }}
             />
-            <Rise>The private archive</Rise>
+            <span>The private archive</span>
             <span
-              data-s="rule"
               className="block h-px origin-left bg-gradient-to-r from-[#8a6a3a] to-transparent"
-              style={{ width: "9cqw", transform: "scaleX(0)" }}
+              style={{ width: "9cqw" }}
             />
           </div>
 
@@ -413,14 +339,12 @@ export const CloserChapterMobile: React.FC = () => {
           </h2>
 
           <p
-            data-s="fade"
             className="mx-auto font-serif font-normal text-[#55473c]"
             style={{
               fontSize: "2.95cqw",
               lineHeight: 1.55,
               marginTop: "2.6cqw",
               maxWidth: "88%",
-              opacity: 0.15,
             }}
           >
             An exclusive space for early access, special drops, and stories that we share only with
@@ -431,20 +355,9 @@ export const CloserChapterMobile: React.FC = () => {
             className="mx-auto inline-flex flex-col text-left"
             style={{ marginTop: "3.6cqw", gap: "2.5cqw" }}
           >
-            {BENEFITS.map(({ Icon, text }, i) => (
-              <li
-                key={text}
-                data-s="wipe"
-                data-lag={i * 14}
-                className="flex items-center"
-                style={{ gap: "3cqw", clipPath: "inset(-10% 104% -10% 0)", opacity: 0.2 }}
-              >
-                <span
-                  data-s="icon"
-                  data-lag={i * 14}
-                  className="shrink-0 text-[#42362c] will-change-transform"
-                  style={{ transform: "scale(0)" }}
-                >
+            {BENEFITS.map(({ Icon, text }) => (
+              <li key={text} className="flex items-center" style={{ gap: "3cqw" }}>
+                <span className="shrink-0 text-[#42362c] will-change-transform">
                   <Icon strokeWidth={1.3} style={{ width: "4.4cqw", height: "4.4cqw" }} />
                 </span>
                 <span
@@ -457,7 +370,7 @@ export const CloserChapterMobile: React.FC = () => {
             ))}
           </ul>
 
-          <div data-s="fade" data-lag={20} style={{ marginTop: "4.4cqw", opacity: 0.15 }}>
+          <div style={{ marginTop: "4.4cqw" }}>
             <button
               type="button"
               className="cm-btn group relative flex w-full cursor-pointer items-center justify-between overflow-hidden bg-[#171310] font-serif font-medium tracking-[0.2em] text-[#f7f3ea] uppercase shadow-[0_6px_20px_rgba(20,15,10,0.4)] transition-colors duration-300 active:bg-[#2b231d]"

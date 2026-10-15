@@ -202,6 +202,15 @@ export const BlogDesktop: React.FC = () => {
                 </Rise>
               ))}
             </h2>
+            <Link
+              href="/"
+              className="mt-5 inline-flex min-h-10 items-center gap-2 border border-[#f1d5a4]/65 bg-[#17100d]/55 px-4 py-2 font-sans text-[9px] font-semibold tracking-[0.18em] text-[#fffaf1] uppercase backdrop-blur-sm transition-colors hover:border-[#f1d5a4] hover:bg-[#f1d5a4]/15 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#f1d5a4] sm:text-[10px]"
+            >
+              <span aria-hidden="true" className="text-base leading-none">
+                &larr;
+              </span>
+              Back to Home
+            </Link>
             <p
               className="mt-5 max-w-[470px] font-serif leading-[1.55] text-[#f7efe4] drop-shadow-[0_1px_5px_rgba(0,0,0,0.9)]"
               style={{ fontSize: "clamp(15px, 1.15vw, 19px)" }}

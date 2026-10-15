@@ -39,7 +39,7 @@ const chapters: Chapter[] = [
     id: "whispers",
     number: "04",
     name: "THE WHISPERS",
-    quote: "Real Stories. Real Women.",
+    quote: "Real Women. Spoken Freely.",
   },
   {
     id: "journey",

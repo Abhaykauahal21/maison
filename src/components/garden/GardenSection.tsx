@@ -661,16 +661,18 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
               </span>
             </div>
             <h2 className="mt-3 font-serif text-5xl leading-[1] font-normal tracking-[0.01em] text-white md:text-[4.2vw] xl:text-[4.6vw]">
-              <Line d={0.75}>Real Stories.</Line>
+              <Line d={0.75}>Real Women.</Line>
               <Line d={0.9}>
-                Real <em className="text-[#ecd09a] italic">Women.</em>
+                <em className="text-[#ecd09a] italic">Spoken Freely.</em>
               </Line>
             </h2>
             <p
-              className="gw-fadeup mt-5 max-w-[300px] font-sans text-sm leading-[1.65] tracking-[0.01em] text-[#ded6cb] md:text-[1.05vw]"
+              className="gw-fadeup mt-5 max-w-[360px] font-sans text-sm leading-[1.65] tracking-[0.01em] text-[#ded6cb] md:text-[1.05vw]"
               style={{ ["--d" as string]: "1.2s" }}
             >
-              Every dress carries a feeling. Here are the women who made them a part of their story.
+              Nothing here is a compliment we asked for.
+              <br />
+              Only the words without the velvet.
             </p>
             <div
               className="gw-fadeup mt-8 flex flex-col gap-5"
@@ -700,19 +702,9 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
                   style={{ ...place(RECTS.center), ...crop(RECTS.center) }}
                 />
                 <div
-                  data-gw="left"
-                  className="absolute"
-                  style={{ ...place(RECTS.left), ...crop(RECTS.left) }}
-                />
-                <div
                   data-gw="right"
                   className="absolute"
                   style={{ ...place(RECTS.right), ...crop(RECTS.right) }}
-                />
-                <div
-                  data-gw="flower"
-                  className="absolute"
-                  style={{ ...place(RECTS.flower), ...crop(RECTS.flower) }}
                 />
               </div>
 
@@ -735,19 +727,7 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
                 />
               </div>
 
-              {/* Handwritten notes on the small papers */}
-              <div
-                className="pointer-events-none absolute z-10 flex items-center justify-center"
-                style={{ left: "4.4%", top: "58.6%", width: "18.4%", height: "25%" }}
-              >
-                <Note
-                  key={`l${currentIndex}`}
-                  lines={current.leftNoteLines}
-                  d={0.2}
-                  className="-rotate-[11deg]"
-                  style={{ fontSize: "max(18px, 2.7cqw)", opacity: isTransitioning ? 0 : 1 }}
-                />
-              </div>
+              {/* Handwritten note on the paper card only */}
               <div
                 className="pointer-events-none absolute z-10 flex items-center justify-center"
                 style={{ left: "77%", top: "61.4%", width: "19.5%", height: "25%" }}
@@ -817,9 +797,9 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
               </span>
             </div>
             <h2 className="mt-3 font-serif text-[clamp(32px,10vw,48px)] leading-[1.04] font-normal text-white">
-              <SLine>Real Stories.</SLine>
+              <SLine>Real Women.</SLine>
               <SLine lag={22}>
-                Real <em className="text-[#ecd09a] italic">Women.</em>
+                <em className="text-[#ecd09a] italic">Spoken Freely.</em>
               </SLine>
             </h2>
             <p
@@ -828,38 +808,19 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
               className="mt-3 max-w-[340px] font-sans text-[13px] leading-relaxed text-[#ded6cb]"
               style={{ opacity: 0.15 }}
             >
-              Every dress carries a feeling. Here are the women who made them a part of their story.
+              Nothing here is a compliment we asked for.
+              <br />
+              Only the words without the velvet.
             </p>
           </div>
 
           <div className="mx-auto mt-8 w-full max-w-[640px]">
             {/* Shadows sit on each moving piece (cached with its layer) instead of a wrapper that
                 would be re-filtered every scroll frame */}
-            <div className="relative z-10 flex items-start justify-between gap-[2vw]">
-              <div
-                data-gw="left"
-                className="relative w-[51%] will-change-transform"
-                style={{
-                  aspectRatio: `${RECTS.left[2] - RECTS.left[0]} / ${RECTS.left[3] - RECTS.left[1]}`,
-                  filter: "drop-shadow(0 14px 18px rgba(30,14,4,0.45))",
-                  ...crop(RECTS.left),
-                }}
-              >
-                <div
-                  className="absolute flex items-center justify-center"
-                  style={{ left: "5%", top: "58%", width: "64%", height: "38%" }}
-                >
-                  <Note
-                    key={`ml${currentIndex}`}
-                    lines={current.leftNoteLines}
-                    d={0.2}
-                    className="-rotate-[11deg] text-[clamp(14px,4.6vw,28px)]"
-                  />
-                </div>
-              </div>
+            <div className="relative z-10 flex items-start justify-center gap-[2vw]">
               <div
                 data-gw="right"
-                className="relative mt-[8%] w-[48%] will-change-transform"
+                className="relative mt-[8%] w-[58%] will-change-transform"
                 style={{
                   aspectRatio: `${RECTS.right[2] - RECTS.right[0]} / ${RECTS.right[3] - RECTS.right[1]}`,
                   filter: "drop-shadow(0 14px 18px rgba(30,14,4,0.45))",

@@ -231,7 +231,7 @@ export const DreamFilm: React.FC = () => {
   }, []);
 
   return (
-    <div ref={trackRef} className="relative block w-full bg-[#0a0908]" style={{ height: "560svh" }}>
+    <div ref={trackRef} className="relative block w-full bg-[#0a0908]" style={{ height: "600svh" }}>
       <div ref={stageRef} className="sticky top-0 h-[100svh] w-full overflow-hidden">
         {/* Camera layer */}
         <div
@@ -240,12 +240,12 @@ export const DreamFilm: React.FC = () => {
           style={{ transformOrigin: "50% 68%", transform: "scale(1.06)" }}
         >
           <Image
-            src="/images/Dream-mobile.webp"
+            src="/images/dream-bg-updated.webp"
             alt="Maison D'Vine The Dream Collection"
             fill
             unoptimized
             sizes="100vw"
-            className="pointer-events-none object-cover object-[50%_40%] select-none"
+            className="pointer-events-none object-cover object-[50%_40%] select-none scale-[1.08] blur-[2px]"
           />
         </div>
 

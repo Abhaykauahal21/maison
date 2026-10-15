@@ -5,8 +5,8 @@ import Image from "next/image";
 import { INDIA_PIN_NAMES } from "@/components/india/IndiaPinTag";
 
 export interface CityStory {
-  /** Three photos: the big one, then the two small prints underneath. */
-  photos: [string, string, string];
+  /** Primary story photo first; optional companion prints can stay unused. */
+  photos: [string, ...string[]];
   name: string;
   role: string;
   quote: string;
@@ -111,13 +111,18 @@ export const IndiaStoryCard: React.FC<{ index: number; onClose: () => void }> = 
   if (!story) return null;
   return (
     <div className="relative w-full" style={{ aspectRatio: "1047 / 1503" }}>
-      <Print
-        src={story.photos[0]}
-        alt={`${story.name}, ${city}`}
-        sizes="26vw"
-        className="isc-photo"
+      <div
+        className="relative z-10"
         style={{ left: "11.4%", top: "2.4%", width: "72.5%", height: "71.4%" }}
-      />
+      >
+        <Print
+          src={story.photos[0]}
+          alt={`${story.name}, ${city}`}
+          sizes="26vw"
+          className="isc-photo"
+          style={{ left: 0, top: 0, width: "100%", height: "100%" }}
+        />
+      </div>
 
       {/* washi-tape label with the city */}
       <span
@@ -148,21 +153,6 @@ export const IndiaStoryCard: React.FC<{ index: number; onClose: () => void }> = 
           </p>
         </div>
       </div>
-
-      <Print
-        src={story.photos[1]}
-        alt=""
-        sizes="14vw"
-        className="isc-small"
-        style={{ left: "12.8%", top: "75.6%", width: "39.5%", height: "20%", ["--d" as string]: "0.55s", ["--r" as string]: "-2.5deg" }}
-      />
-      <Print
-        src={story.photos[2]}
-        alt=""
-        sizes="14vw"
-        className="isc-small"
-        style={{ left: "54%", top: "75.6%", width: "34%", height: "20%", ["--d" as string]: "0.72s", ["--r" as string]: "2deg" }}
-      />
 
       <button
         type="button"

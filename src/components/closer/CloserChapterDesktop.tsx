@@ -49,6 +49,31 @@ const STYLES = `
 .cd-ticket { -webkit-mask-image: radial-gradient(circle 11px at 0 50%, #0000 97%, #000), radial-gradient(circle 11px at 100% 50%, #0000 97%, #000); -webkit-mask-composite: source-in; mask-image: radial-gradient(circle 11px at 0 50%, #0000 97%, #000), radial-gradient(circle 11px at 100% 50%, #0000 97%, #000); mask-composite: intersect; }
 .cd-foil { position: absolute; top: 0; bottom: 0; left: 0; width: 38%; background: linear-gradient(100deg, transparent, rgba(255,232,170,.28), transparent); animation: cd-foil 5.2s ease-in-out 1.2s infinite; }
 @keyframes cd-foil { 0%, 55% { transform: translateX(-130%) skewX(-18deg); } 100% { transform: translateX(380%) skewX(-18deg); } }
+.closer-copy { opacity: 0; filter: blur(4px); transition: opacity 1s ease, filter 1s ease; }
+[data-copy-visible="true"] .closer-copy { opacity: 1; filter: none; }
+.closer-copy [data-win], .closer-copy [data-wipe], .closer-copy [data-ink], .closer-copy [data-ticket] { opacity: 0; transform: translateY(16px); transition: opacity .8s ease, transform .8s cubic-bezier(.16,1,.3,1), clip-path .8s ease; }
+.closer-copy [data-wipe] { clip-path: inset(-10% 100% -10% 0); }
+.closer-copy [data-ink] { clip-path: inset(-6% 100% -6% 0); }
+.closer-copy [data-icon] { transform: scale(0) rotate(-45deg); transition: transform .7s cubic-bezier(.16,1,.3,1); }
+.closer-copy [data-rule] { transform: scaleX(0); transition: transform .8s ease; }
+.closer-copy [data-heart] { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1s ease .8s; }
+[data-copy-visible="true"] .closer-copy [data-win],
+[data-copy-visible="true"] .closer-copy [data-wipe],
+[data-copy-visible="true"] .closer-copy [data-ink],
+[data-copy-visible="true"] .closer-copy [data-ticket] { opacity: 1; transform: none; }
+[data-copy-visible="true"] .closer-copy [data-wipe],
+[data-copy-visible="true"] .closer-copy [data-ink] { clip-path: inset(-10% 0 -10% 0); }
+[data-copy-visible="true"] .closer-copy [data-icon] { transform: scale(1) rotate(0); }
+[data-copy-visible="true"] .closer-copy [data-rule] { transform: scaleX(1); }
+[data-copy-visible="true"] .closer-copy [data-heart] { stroke-dashoffset: 0; }
+.closer-copy [data-wipe]:nth-child(1) { transition-delay: .35s; }
+.closer-copy [data-wipe]:nth-child(2) { transition-delay: .5s; }
+.closer-copy [data-wipe]:nth-child(3) { transition-delay: .65s; }
+.closer-copy [data-wipe]:nth-child(4) { transition-delay: .8s; }
+.closer-copy [data-ink]:nth-child(1) { transition-delay: .5s; }
+.closer-copy [data-ink]:nth-child(2) { transition-delay: .65s; }
+.closer-copy [data-ink]:nth-child(3) { transition-delay: .8s; }
+.closer-copy [data-ink]:nth-child(4) { transition-delay: .95s; }
 @media (prefers-reduced-motion: reduce) { .cd-seal, .cd-float, .cd-beat, .cd-foil { animation: none; } }
 `;
 
@@ -56,6 +81,19 @@ export const CloserChapterDesktop: React.FC = () => {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const tiltRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        track.dataset.copyVisible = "true";
+        observer.disconnect();
+      }
+    }, { threshold: 0.05 });
+    observer.observe(track);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const track = trackRef.current;
@@ -70,22 +108,9 @@ export const CloserChapterDesktop: React.FC = () => {
     const sepia = one<HTMLElement>("[data-sepia]");
     const sealGlow = one<HTMLElement>("[data-seal]");
     const streak = one<HTMLElement>("[data-streak]");
-    const rule = one<HTMLElement>("[data-rule]");
-    const letters = all<HTMLElement>("[data-c]");
-    const fades = all<HTMLElement>("[data-win]");
-    const wipes = all<HTMLElement>("[data-wipe]");
-    const icons = all<HTMLElement>("[data-icon]");
-    const inks = all<HTMLElement>("[data-ink]");
-    const heart = one<SVGPathElement>("[data-heart]");
     const ripples = all<HTMLElement>("[data-ripple]");
-    const ticket = one<HTMLElement>("[data-ticket]");
     const labels = all<HTMLElement>("[data-label]");
     const labelBar = one<HTMLElement>("[data-label-bar]");
-
-    const range = (el: HTMLElement, key: "win" | "wipe" | "icon" | "ink") => {
-      const [a, b] = (el.dataset[key] || "0,1").split(",").map(Number);
-      return { a, b };
-    };
 
     let target = 0;
     let cur = 0;
@@ -111,39 +136,6 @@ export const CloserChapterDesktop: React.FC = () => {
         sealGlow.style.transform = `scale(${(1 + s * 0.35).toFixed(3)})`;
       }
 
-      // headline letters converge
-      letters.forEach((l, i) => {
-        const e = sm(p, 0.03 + i * 0.004, 0.2 + i * 0.004);
-        l.style.opacity = e.toFixed(3);
-        l.style.transform = `translate3d(${(Number(l.dataset.off) * (1 - e)).toFixed(3)}em, 0, 0)`;
-      });
-      if (rule) rule.style.transform = `scaleX(${sm(p, 0.02, 0.12).toFixed(3)})`;
-
-      fades.forEach((el) => {
-        const { a, b } = range(el, "win");
-        const e = sm(p, a, b);
-        el.style.opacity = e.toFixed(3);
-        el.style.transform = `translate3d(0, ${((1 - e) * 22).toFixed(1)}px, 0)`;
-      });
-      wipes.forEach((el) => {
-        const { a, b } = range(el, "wipe");
-        const e = sm(p, a, b);
-        el.style.clipPath = `inset(-10% ${((1 - e) * 104).toFixed(1)}% -10% 0)`;
-        el.style.opacity = (0.2 + 0.8 * e).toFixed(3);
-        el.style.transform = `translate3d(${((1 - e) * -18).toFixed(1)}px, 0, 0)`;
-      });
-      icons.forEach((el) => {
-        const { a, b } = range(el, "icon");
-        const e = sm(p, a + 0.03, b + 0.03);
-        el.style.transform = `scale(${e.toFixed(3)}) rotate(${((1 - e) * -90).toFixed(1)}deg)`;
-      });
-      inks.forEach((el) => {
-        const { a, b } = range(el, "ink");
-        const e = sm(p, a, b);
-        el.style.clipPath = `inset(-6% ${((1 - e) * 104).toFixed(1)}% -6% 0)`;
-      });
-      if (heart) heart.style.strokeDashoffset = (1 - sm(p, 0.86, 0.96)).toFixed(3);
-
       // golden ripples leave the seal as the archive unlocks
       ripples.forEach((r, i) => {
         const k = sm(p, 0.48 + i * 0.08, 0.72 + i * 0.08);
@@ -151,15 +143,6 @@ export const CloserChapterDesktop: React.FC = () => {
         r.style.opacity = (k > 0 && k < 1 ? (1 - k) * 0.75 : 0).toFixed(3);
       });
 
-      // the Inner Circle ticket is dealt onto the page
-      if (ticket) {
-        const e = sm(p, 0.6, 0.76);
-        ticket.style.opacity = e.toFixed(3);
-        ticket.style.transform = `translate3d(0, ${((1 - e) * 54).toFixed(1)}px, 0) rotate(${(-(1 - e) * 6).toFixed(2)}deg) scale(${(0.95 + 0.05 * e).toFixed(4)})`;
-        ticket.style.pointerEvents = e > 0.6 ? "auto" : "none";
-      }
-
-      // chapter names along the top: the current one is lit
       const starts = [0, 0.26, 0.58, 0.85];
       labels.forEach((l, i) => {
         const on = p >= starts[i] - 0.001 && (i === starts.length - 1 || p < starts[i + 1]);
@@ -271,17 +254,10 @@ export const CloserChapterDesktop: React.FC = () => {
 
   const headLine = (line: string) => {
     const chars = Array.from(line);
-    const centre = (chars.length - 1) / 2;
     return (
       <span key={line} className="block" aria-hidden="true">
         {chars.map((ch, i) => (
-          <span
-            key={i}
-            data-c
-            data-off={((i - centre) * 0.55).toFixed(2)}
-            className="inline-block will-change-transform"
-            style={{ opacity: 0 }}
-          >
+          <span key={i} className="inline-block">
             {ch === " " ? " " : ch}
           </span>
         ))}
@@ -477,14 +453,13 @@ export const CloserChapterDesktop: React.FC = () => {
         </div>
 
         {/* ===== RIGHT: the copy ===== */}
-        <div className="absolute top-[54%] left-[50vw] z-20 w-[40vw] max-w-[620px] -translate-y-1/2 text-left">
+        <div className="closer-copy absolute top-[54%] left-[50vw] z-20 w-[40vw] max-w-[620px] -translate-y-1/2 text-left">
           <div className="flex items-center gap-3 font-serif font-medium tracking-[0.28em] text-[#635548] uppercase" style={{ fontSize: "clamp(10px, 0.85vw, 13px)" }}>
             <span
               data-rule
               className="block h-px w-10 origin-left bg-gradient-to-r from-[#8a6a3a] to-[#8a6a3a]/0"
-              style={{ transform: "scaleX(0)" }}
             />
-            <span data-win="0.02,0.12" style={{ opacity: 0 }}>
+            <span data-win="0.02,0.12">
               The private archive
             </span>
           </div>
@@ -500,7 +475,7 @@ export const CloserChapterDesktop: React.FC = () => {
           <p
             data-win="0.16,0.28"
             className="mt-4 max-w-[440px] font-serif leading-[1.62] text-[#55473c]"
-            style={{ fontSize: "clamp(13.5px, 1.05vw, 17px)", opacity: 0 }}
+            style={{ fontSize: "clamp(13.5px, 1.05vw, 17px)" }}
           >
             An exclusive space for early access, special drops, and stories that we share only with
             our closest community.
@@ -514,9 +489,8 @@ export const CloserChapterDesktop: React.FC = () => {
                   key={text}
                   data-wipe={`${a},${a + 0.08}`}
                   className="flex items-center gap-3.5"
-                  style={{ clipPath: "inset(-10% 104% -10% 0)", opacity: 0.2 }}
                 >
-                  <span data-icon={`${a},${a + 0.08}`} className="shrink-0 text-[#42362c] will-change-transform" style={{ transform: "scale(0)" }}>
+                  <span data-icon={`${a},${a + 0.08}`} className="shrink-0 text-[#42362c] will-change-transform">
                     <Icon strokeWidth={1.3} style={{ width: "clamp(17px, 1.4vw, 24px)", height: "clamp(17px, 1.4vw, 24px)" }} />
                   </span>
                   <span className="font-serif tracking-[0.015em] text-[#322a24]" style={{ fontSize: "clamp(13.5px, 1.1vw, 18px)" }}>
@@ -528,7 +502,7 @@ export const CloserChapterDesktop: React.FC = () => {
           </ul>
 
           {/* The Inner Circle ticket: the invitation itself is the button */}
-          <div data-ticket className="mt-7 will-change-transform" style={{ opacity: 0 }}>
+          <div data-ticket className="mt-7 will-change-transform">
             <button
               type="button"
               aria-label="Join the private archive"
@@ -585,7 +559,7 @@ export const CloserChapterDesktop: React.FC = () => {
         </div>
 
         {/* ===== Handwritten note, written by the scroll ===== */}
-        <div className="pointer-events-none absolute right-[5vw] top-[42%] z-20 select-none max-[1199px]:right-[3vw] max-[1199px]:top-[51%]">
+        <div className="closer-copy pointer-events-none absolute right-[5vw] top-[42%] z-20 select-none max-[1199px]:right-[3vw] max-[1199px]:top-[51%]">
           <p
             className="font-allura allura-regular font-script font-cursive -rotate-[6deg] text-left leading-[1.08] text-[#493c33]"
             style={{ fontSize: "clamp(22px, 2.9vw, 50px)" }}
@@ -595,7 +569,6 @@ export const CloserChapterDesktop: React.FC = () => {
                 key={l}
                 data-ink={`${0.72 + i * 0.05},${0.8 + i * 0.05}`}
                 className="block"
-                style={{ clipPath: "inset(-6% 104% -6% 0)" }}
               >
                 {l}
               </span>
@@ -617,7 +590,6 @@ export const CloserChapterDesktop: React.FC = () => {
               strokeWidth="1.2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              style={{ strokeDasharray: 1, strokeDashoffset: 1 }}
             />
           </svg>
         </div>

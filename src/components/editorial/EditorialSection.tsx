@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { EchoParticles } from "@/components/editorial/EchoParticles";
 import { EchoNote } from "@/components/editorial/EchoNote";
+import { EchoCard } from "@/components/editorial/EchoCard";
 import { useMatches } from "@/hooks/use-matches";
 
 const dresses = [
@@ -14,22 +15,46 @@ const dresses = [
     no: "I",
     title: ["THE DRESS", "SHE ALREADY HAD"],
     body: "If life were a photograph, I wasn’t the focus, I was the blur in the background, the quiet shape that gave balance to the scene but never claimed the light.",
-    imageSrc: "/images/editorial/dress-i-had.webp",
-    imageAlt: "A soft grey linen dress with a notched neckline",
+    cardTitle: "SOLACE",
+    descLines: ["In the moments", "I find myself."] as [string, string],
+    tag: "Floral Silk · Dawn",
+    imageSrc: "/images/solace.webp",
+    imageAlt: "Maison D'Vine Solace Gown in Floral Silk",
+    cardImageSrc: "/images/editorial/dress-i-had.webp",
+    cardImageAlt: "Navy evening gown shown without a background",
+    alternateCardImageSrc: "/images/solace-2-image.webp",
+    alternateCardImageAlt: "Model wearing the Solace gray dress",
+    objectPosition: "50% 15%",
   },
   {
     no: "II",
     title: ["THE DRESS", "SHE BORROWED"],
     body: "Sometimes, you borrow someone else’s dress hoping it will carry the confidence you couldn’t find in your own. That evening, my room looked like a small disaster. Clothes covered the bed, the chair, the floor.",
-    imageSrc: "/images/editorial/VintageFloralPeonyMaxiDress.webp",
-    imageAlt: "A cream maxi dress printed with coral peonies and blue blossoms",
+    cardTitle: "LONGING",
+    descLines: ["In what lives", "between our hearts."] as [string, string],
+    tag: "Crimson Tulle · Romance",
+    imageSrc: "/images/longing.webp",
+    imageAlt: "Maison D'Vine Longing Gown in Crimson Tulle",
+    cardImageSrc: "/images/editorial/VintageFloralPeonyMaxiDress.webp",
+    cardImageAlt: "Ivory floral maxi dress shown without a background",
+    alternateCardImageSrc: "/images/longing-2-image.webp",
+    alternateCardImageAlt: "Model wearing the Longing floral dress",
+    objectPosition: "50% 15%",
   },
   {
     no: "III",
     title: ["THE DRESS", "SHE BOUGHT"],
     body: "There are dresses you buy because they’re beautiful. And then there are dresses you buy because you hope they’ll turn you into someone else. I bought the dress after seeing it once, and never stopped seeing it again.",
-    imageSrc: "/images/editorial/dress-borrowed.webp",
-    imageAlt: "A midnight blue sweetheart-neckline dress with a full skirt",
+    cardTitle: "REVERIE",
+    descLines: ["For the dreams", "I don't say out loud."] as [string, string],
+    tag: "Noir Satin · Midnight",
+    imageSrc: "/images/reverie.webp",
+    imageAlt: "Maison D'Vine Reverie Gown in Noir Satin",
+    cardImageSrc: "/images/editorial/dress-borrowed.webp",
+    cardImageAlt: "Gray dress shown without a background",
+    alternateCardImageSrc: "/images/reverie-2image.png",
+    alternateCardImageAlt: "Model wearing the Reverie navy dress",
+    objectPosition: "50% 15%",
   },
 ];
 
@@ -109,95 +134,6 @@ const DressText: React.FC<{
     </div>
   );
 };
-
-/** The dress itself: swings through 3D on its own axis as the scroll moves it in and out. */
-const DressImage: React.FC<{ idx: number; active: number; register: Register; sizes: string }> = ({
-  idx,
-  active,
-  register,
-  sizes,
-}) => {
-  const d = dresses[idx];
-  return (
-    <div
-      ref={register}
-      data-idx={idx}
-      aria-hidden={idx !== active}
-      className="absolute inset-0 will-change-transform"
-      style={{
-        ...chapterVars(idx),
-        opacity: "clamp(0, calc(1 - var(--a) * 1.5), 1)",
-        transform:
-          "translate3d(calc(var(--d) * -34%), calc(var(--d) * -4%), calc(var(--a) * -380px)) rotateY(calc(var(--d) * 80deg)) rotateZ(calc(var(--d) * -7deg)) scale(calc(1 - var(--a) * 0.14))",
-      }}
-    >
-      {/* soft shadow on the paper below the hovering dress */}
-      <div
-        aria-hidden="true"
-        className="absolute bottom-[1%] left-1/2 h-[4%] w-[52%] -translate-x-1/2 rounded-[50%] bg-[#2a1d10]/45 blur-lg"
-        style={{ opacity: "clamp(0, calc(1 - var(--a) * 2), 1)" }}
-      />
-      <div className="animate-echo-dress-float relative h-full w-full">
-        <Image
-          src={d.imageSrc}
-          alt={d.imageAlt}
-          fill
-          sizes={sizes}
-          priority={idx === 0}
-          className="object-contain object-center drop-shadow-[0_22px_26px_rgba(40,26,12,0.42)]"
-        />
-      </div>
-    </div>
-  );
-};
-
-/** Warm light behind the dress; drifts slower than the dress for parallax depth. */
-const MOTES = [
-  { x: 14, y: 22, size: 5, k: 90, delay: 0 },
-  { x: 78, y: 16, size: 4, k: 150, delay: 1.2 },
-  { x: 88, y: 58, size: 6, k: 60, delay: 2.1 },
-  { x: 8, y: 66, size: 4, k: 130, delay: 0.7 },
-  { x: 30, y: 84, size: 3, k: 190, delay: 1.8 },
-  { x: 64, y: 90, size: 5, k: 110, delay: 2.6 },
-  { x: 52, y: 8, size: 3, k: 170, delay: 0.4 },
-];
-
-const DressBackdrop: React.FC<{ idx: number; register: Register }> = ({ idx, register }) => (
-  <div
-    ref={register}
-    data-idx={idx}
-    aria-hidden="true"
-    className="pointer-events-none absolute inset-0 flex items-center justify-center"
-    style={{
-      ...chapterVars(idx),
-      opacity: "clamp(0, calc(1 - var(--a) * 1.3), 1)",
-      transform: "translate3d(calc(var(--d) * 22%), 0, 0)",
-    }}
-  >
-    <div
-      className="absolute inset-[6%] rounded-full blur-2xl"
-      style={{
-        background: "radial-gradient(closest-side, rgba(255,238,200,0.6), transparent 75%)",
-      }}
-    />
-    {/* gold dust at different depths: each speck drifts at its own speed as you scroll */}
-    {MOTES.map((m, i) => (
-      <span
-        key={i}
-        className="animate-echo-dress-float absolute rounded-full bg-[#c9a46a] blur-[1px]"
-        style={{
-          left: `${m.x}%`,
-          top: `${m.y}%`,
-          width: m.size,
-          height: m.size,
-          opacity: 0.55,
-          animationDelay: `-${m.delay}s`,
-          translate: `calc(var(--d) * ${m.k}px) 0`,
-        }}
-      />
-    ))}
-  </div>
-);
 
 /** Clickable chapter progress: 01 / 03 plus a bar per chapter */
 const DressProgress: React.FC<{ active: number; onPick: (i: number) => void }> = ({
@@ -672,6 +608,7 @@ export const EditorialSection: React.FC = () => {
   }, [stepNext, stepPrev]);
 
   return (
+    <>
     <section
       ref={containerRef}
       id="story"
@@ -741,19 +678,29 @@ export const EditorialSection: React.FC = () => {
                 </div>
               </div>
 
-              {/* Right: the dress, swinging through 3D */}
-              <div className="absolute top-[9%] left-[46%] z-20 h-[80%] w-[46%] [perspective:1500px] [transform-style:preserve-3d]">
-                {dresses.map((_, idx) => (
-                  <DressBackdrop key={`bd-${idx}`} idx={idx} register={registerLayer} />
-                ))}
-                {dresses.map((_, idx) => (
-                  <DressImage
-                    key={idx}
-                    idx={idx}
-                    active={activeLook}
-                    register={registerLayer}
-                    sizes="46vw"
-                  />
+              {/* Right: the earlier scrapbook-style look cards */}
+              <div className="absolute top-[14%] left-[45%] z-20 flex w-[50.5%] items-start gap-3 md:gap-4 lg:gap-5 xl:gap-6">
+                {dresses.map((look, idx) => (
+                  <div
+                    key={look.cardTitle}
+                    className="min-w-0 flex-1 cursor-pointer transition-transform duration-500"
+                    style={{
+                      transform: `translateY(${idx === activeLook ? "-6px" : "0"}) rotate(${idx === activeLook ? 0 : [-1.6, 1.2, -0.9][idx]}deg)`,
+                    }}
+                  >
+                    <EchoCard
+                      title={look.cardTitle}
+                      descLines={look.descLines}
+                      tag={look.tag}
+                      index={idx + 1}
+                      imageSrc={look.cardImageSrc}
+                      imageAlt={look.cardImageAlt}
+                      alternateImageSrc={look.alternateCardImageSrc}
+                      alternateImageAlt={look.alternateCardImageAlt}
+                      objectPosition={look.objectPosition}
+                      imageFit="contain"
+                    />
+                  </div>
                 ))}
               </div>
             </div>
@@ -802,18 +749,32 @@ export const EditorialSection: React.FC = () => {
                   />
                 ))}
               </div>
-              <div className="relative my-3 min-h-0 w-full flex-1 [perspective:1200px] [transform-style:preserve-3d] sm:my-6 sm:min-h-[340px]">
-                {dresses.map((_, idx) => (
-                  <DressBackdrop key={`bd-${idx}`} idx={idx} register={registerLayer} />
-                ))}
-                {dresses.map((_, idx) => (
-                  <DressImage
-                    key={idx}
-                    idx={idx}
-                    active={activeLook}
-                    register={registerLayer}
-                    sizes="(max-width: 760px) 80vw, 460px"
-                  />
+              <div className="my-3 flex min-h-[300px] w-full flex-1 flex-col gap-2.5 sm:my-6 sm:min-h-[360px] sm:gap-3.5">
+                {dresses.map((look, idx) => (
+                  <div
+                    key={look.cardTitle}
+                    className="min-h-0 w-full cursor-pointer transition-[flex-grow,opacity,transform] duration-500"
+                    style={{
+                      flexGrow: idx === activeLook ? 2.2 : 1,
+                      flexBasis: 0,
+                      opacity: idx === activeLook ? 1 : 0.8,
+                    }}
+                  >
+                    <EchoCard
+                      variant="horizontal"
+                      active={idx === activeLook}
+                      title={look.cardTitle}
+                      descLines={look.descLines}
+                      tag={look.tag}
+                      index={idx + 1}
+                      imageSrc={look.cardImageSrc}
+                      imageAlt={look.cardImageAlt}
+                      alternateImageSrc={look.alternateCardImageSrc}
+                      alternateImageAlt={look.alternateCardImageAlt}
+                      objectPosition={look.objectPosition}
+                      imageFit="contain"
+                    />
+                  </div>
                 ))}
               </div>
             </div>
@@ -855,5 +816,7 @@ export const EditorialSection: React.FC = () => {
         </div>
       )}
     </section>
+
+    </>
   );
 };

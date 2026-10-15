@@ -289,7 +289,7 @@ export const DreamDesktop: React.FC = () => {
     "font-serif text-[clamp(12px,0.98vw,19px)] font-medium uppercase tracking-[0.34em] text-[#f0d9a6]";
 
   return (
-    <div ref={trackRef} className="relative w-full bg-[#0a0908]" style={{ height: "540vh" }}>
+    <div ref={trackRef} className="relative w-full bg-[#0a0908]" style={{ height: "580vh" }}>
       <div ref={stageRef} className="sticky top-0 h-screen w-full overflow-hidden">
         {/* Photograph: fades up from black once, then dollies with the scroll */}
         <div
@@ -306,12 +306,12 @@ export const DreamDesktop: React.FC = () => {
             style={{ transform: "scale(1.05)", transformOrigin: "60% 55%" }}
           >
             <Image
-              src="/images/dream-bg.webp"
+              src="/images/dream-bg-updated.webp"
               alt="Maison D'Vine The Dream Collection"
               fill
               unoptimized
               sizes="100vw"
-              className="pointer-events-none object-cover object-[50%_32%] select-none"
+              className="pointer-events-none object-cover object-[50%_32%] select-none scale-[1.06] blur-[2px]"
             />
           </div>
         </div>

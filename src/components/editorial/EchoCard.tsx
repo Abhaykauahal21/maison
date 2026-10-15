@@ -13,7 +13,10 @@ export interface EchoCardProps {
   index?: number;
   imageSrc: string;
   imageAlt: string;
+  alternateImageSrc?: string;
+  alternateImageAlt?: string;
   objectPosition?: string;
+  imageFit?: "cover" | "contain";
   className?: string;
   onClick?: () => void;
   variant?: "vertical" | "horizontal";
@@ -34,7 +37,10 @@ export const EchoCard: React.FC<EchoCardProps> = ({
   index,
   imageSrc,
   imageAlt,
+  alternateImageSrc,
+  alternateImageAlt,
   objectPosition = "center",
+  imageFit = "cover",
   className = "",
   onClick,
   variant = "vertical",
@@ -45,7 +51,21 @@ export const EchoCard: React.FC<EchoCardProps> = ({
   onPinFall,
 }) => {
   const cardRef = useRef<HTMLDivElement | null>(null);
+  const [showAlternateImage, setShowAlternateImage] = useState(false);
+  const [imageRevision, setImageRevision] = useState(0);
   const [tilt, setTilt] = useState({ x: 0, y: 0, isHovered: false });
+  const displayedImageSrc =
+    showAlternateImage && alternateImageSrc ? alternateImageSrc : imageSrc;
+  const displayedImageAlt =
+    showAlternateImage && alternateImageSrc ? alternateImageAlt || imageAlt : imageAlt;
+  const handleCardClick = () => {
+    if (alternateImageSrc) {
+      setShowAlternateImage((current) => !current);
+      setImageRevision((current) => current + 1);
+      return;
+    }
+    onClick?.();
+  };
   // Pin game: pull the pin and the card swings loose and drops, which opens its story;
   // when the story closes (fallen -> false) the card swings back onto its pin.
   const [phase, setPhase] = useState<"idle" | "falling" | "hanging">("idle");
@@ -97,7 +117,7 @@ export const EchoCard: React.FC<EchoCardProps> = ({
   if (variant === "horizontal") {
     return (
       <article
-        onClick={onClick}
+        onClick={handleCardClick}
         className={`group relative flex h-full w-full cursor-pointer items-center justify-between gap-3 overflow-hidden rounded-[2px] p-1.5 text-left select-none active:scale-[0.98] ${
           active
             ? "bg-[#fbf5ea]/55 shadow-[0_10px_26px_rgba(40,28,16,0.16)]"
@@ -110,23 +130,32 @@ export const EchoCard: React.FC<EchoCardProps> = ({
         }}
       >
         {/* Left: Portrait image, brightens + settles when active */}
-        <div className="relative h-full aspect-[0.82/1] flex-shrink-0 overflow-hidden bg-[#e0d6c8] shadow-sm rounded-[1px]">
-          <Image
-            src={imageSrc}
-            alt={imageAlt}
-            fill
-            loading="lazy"
-            unoptimized
-            sizes="160px"
-            style={{
-              objectPosition,
-              transform: active ? "scale(1)" : "scale(1.12)",
-              filter: active ? "saturate(1)" : "saturate(0.55)",
-              transition:
-                "transform 1s cubic-bezier(0.16, 1, 0.3, 1), filter 0.8s ease",
-            }}
-            className="object-cover"
-          />
+        <div
+          className={`relative h-full aspect-[0.82/1] flex-shrink-0 overflow-hidden shadow-sm rounded-[1px] ${
+            imageFit === "contain" ? "bg-[#f7f0e3]" : "bg-[#e0d6c8]"
+          }`}
+        >
+          <div
+            key={imageRevision}
+            className={`absolute inset-0 ${imageRevision > 0 ? "animate-echo-image-reveal" : ""}`}
+          >
+            <Image
+              src={displayedImageSrc}
+              alt={displayedImageAlt}
+              fill
+              loading="lazy"
+              unoptimized
+              sizes="160px"
+              style={{
+                objectPosition,
+                transform: active || imageFit === "contain" ? "scale(1)" : "scale(1.12)",
+                filter: active ? "saturate(1)" : "saturate(0.55)",
+                transition:
+                  "transform 1s cubic-bezier(0.16, 1, 0.3, 1), filter 0.8s ease",
+              }}
+              className={imageFit === "contain" ? "object-contain" : "object-cover"}
+            />
+          </div>
           {active && (
             <div
               key="shine"
@@ -185,7 +214,7 @@ export const EchoCard: React.FC<EchoCardProps> = ({
   return (
     <article
       ref={cardRef}
-      onClick={onPinFall ? startFall : onClick}
+      onClick={alternateImageSrc ? handleCardClick : onPinFall ? startFall : onClick}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       className={`group relative flex cursor-pointer flex-col text-left select-none will-change-transform ${
@@ -216,17 +245,30 @@ export const EchoCard: React.FC<EchoCardProps> = ({
       >
       <div className="flex flex-1 flex-col bg-gradient-to-b from-[#fdf9ef] to-[#f5ecda] p-[clamp(6px,0.6vw,11px)] pb-[clamp(10px,0.95vw,18px)] shadow-[0_3px_10px_rgba(40,28,16,0.18),0_14px_30px_rgba(40,28,16,0.16)] ring-1 ring-[#3a3026]/10 transition-shadow duration-500 group-hover:shadow-[0_6px_14px_rgba(40,28,16,0.22),0_22px_40px_rgba(40,28,16,0.22)]">
         {/* Photo */}
-        <div className="relative aspect-[0.74/1] w-full overflow-hidden bg-[#e0d6c8] ring-1 ring-black/10">
-          <Image
-            src={imageSrc}
-            alt={imageAlt}
-            fill
-            loading="lazy"
-            unoptimized
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 30vw, 300px"
-            style={{ objectPosition }}
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-108"
-          />
+        <div
+          className={`relative aspect-[0.74/1] w-full overflow-hidden ring-1 ring-black/10 ${
+            imageFit === "contain" ? "bg-[#f7f0e3]" : "bg-[#e0d6c8]"
+          }`}
+        >
+          <div
+            key={imageRevision}
+            className={`absolute inset-0 ${imageRevision > 0 ? "animate-echo-image-reveal" : ""}`}
+          >
+            <Image
+              src={displayedImageSrc}
+              alt={displayedImageAlt}
+              fill
+              loading="lazy"
+              unoptimized
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 30vw, 300px"
+              style={{ objectPosition }}
+              className={
+                imageFit === "contain"
+                  ? "object-contain"
+                  : "object-cover transition-transform duration-700 ease-out group-hover:scale-108"
+              }
+            />
+          </div>
 
           {/* Soft Vignette Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
@@ -277,14 +319,15 @@ export const EchoCard: React.FC<EchoCardProps> = ({
       </div>
 
       {/* long curved steel pin through the top of the card: click to pull it out */}
-      <button
-        type="button"
-        onClick={pullPin}
-        aria-label={`Pull the pin to read the story of ${title}`}
-        className={`group/pin absolute -top-[2.4vw] left-1/2 z-20 -translate-x-1/2 cursor-pointer px-1.5 ${
-          phase === "falling" ? "echo-pin-out" : phase === "hanging" ? "echo-pin-in" : ""
-        }`}
-      >
+      {!alternateImageSrc && (
+        <button
+          type="button"
+          onClick={pullPin}
+          aria-label={`Pull the pin to read the story of ${title}`}
+          className={`group/pin absolute -top-[2.4vw] left-1/2 z-20 -translate-x-1/2 cursor-pointer px-1.5 ${
+            phase === "falling" ? "echo-pin-out" : phase === "hanging" ? "echo-pin-in" : ""
+          }`}
+        >
         <svg
           viewBox="0 0 24 96"
           className="h-[clamp(52px,4.2vw,84px)] w-auto drop-shadow-[2px_4px_3px_rgba(40,28,16,0.4)] transition-transform duration-200 group-hover/pin:-translate-y-1"
@@ -315,7 +358,8 @@ export const EchoCard: React.FC<EchoCardProps> = ({
           <circle cx="12" cy="6.5" r="5.4" fill={`url(#steelHead-${title})`} stroke="#5b646c" strokeWidth="0.8" />
           <circle cx="10.2" cy="4.8" r="1.5" fill="#fff" fillOpacity="0.85" />
         </svg>
-      </button>
+        </button>
+      )}
     </article>
   );
 };

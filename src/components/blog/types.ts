@@ -18,12 +18,12 @@ export interface BlogPost {
 export const BLOG_POSTS: BlogPost[] = [
   {
     id: "dress-that-feels-like-you",
-    image: "/images/blog-1.webp",
+    image: "/images/blog-one-image.webp",
     date: "MAY 18, 2025",
     category: "STYLE GUIDE",
-    title: "How to Choose a Dress That Feels Like You",
+    title: "How Fashion Influences Confidence",
     description:
-      "A little guide to finding silhouettes, colours and details that match your story.",
+      "There are mornings when getting dressed feels ordinary. You open the wardrobe. You choose something. You leave. And there are other mornings when the decision feels strangely important. You...",
     href: "/blog/dress-that-feels-like-you",
     content: [
       {
@@ -46,7 +46,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         type: "image",
-        src: "/images/blog-3.webp",
+        src: "/images/blog-3-image.webp",
         alt: "Close details of a Maison D'Vine gown",
         caption: "Details are where a dress begins to speak.",
       },
@@ -59,12 +59,12 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     id: "a-day-at-maison-dvine",
-    image: "/images/blog-2.webp",
+    image: "/images/blog-2-image.webp",
     date: "JAN 28, 2025",
     category: "BEHIND THE SCENES",
-    title: "A Day at Maison D'Vine",
+    title: "How Stories Influence Fashion Design: From Emotion to Garment",
     description:
-      "A glimpse into our creative process, from sketchbook to the final stitch.",
+      "A Dress Can Begin Before the Fabric. When we think about fashion design, we often imagine a sketch. A silhouette. A fabric swatch. A colour palette. A designer standing over...",
     href: "/blog/a-day-at-maison-dvine",
     content: [
       {
@@ -78,7 +78,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         type: "image",
-        src: "/images/blog-1.webp",
+        src: "/images/blog-one-image.webp",
         alt: "Maison D'Vine atelier at work",
         caption: "From sketchbook to silk: the first draft is always the bravest.",
       },
@@ -100,12 +100,12 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     id: "places-that-inspire-us",
-    image: "/images/blog-3.webp",
+    image: "/images/blog-3-image.webp",
     date: "JAN 12, 2025",
     category: "INSPIRATION",
-    title: "The Places That Inspire Us",
+    title: "Dream to Eternity: A Journey Told Through Fashion",
     description:
-      "From quiet streets to grand estates — here's what keeps our creativity alive.",
+      "Before the Dress, There Was a Journey. A woman does not remain the same woman throughout her life. She dreams. She becomes. She remembers. She achieves. She returns. She learns....",
     href: "/blog/places-that-inspire-us",
     content: [
       {
@@ -128,7 +128,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         type: "image",
-        src: "/images/blog-2.webp",
+        src: "/images/blog-2-image.webp",
         alt: "An old estate in warm evening light",
         caption: "Where the evening light lingers, a new silhouette begins.",
       },

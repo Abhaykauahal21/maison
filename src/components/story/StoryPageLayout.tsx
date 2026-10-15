@@ -81,6 +81,16 @@ export const StoryPageLayout: React.FC<StoryPageLayoutProps> = ({
         aria-labelledby="story-title"
         className="relative isolate flex h-[100svh] max-h-[1100px] min-h-[720px] items-center overflow-hidden bg-[#17100d] text-[#f8f2e8]"
       >
+        <Link
+          href="/"
+          className="absolute top-[76px] left-7 z-30 inline-flex min-h-10 items-center gap-2 border border-[#f1d5a4]/65 bg-[#17100d]/35 px-4 py-2 font-sans text-[9px] font-semibold tracking-[0.18em] text-[#fffaf1] uppercase backdrop-blur-sm transition-colors hover:border-[#f1d5a4] hover:bg-[#f1d5a4]/10 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#f1d5a4] sm:left-12 sm:text-[10px] lg:left-[5.7vw]"
+        >
+          <span aria-hidden="true" className="text-base leading-none">
+            &larr;
+          </span>
+          Back to Home
+        </Link>
+
         <div data-hero-bg className="pointer-events-none absolute inset-0 -z-20">
           <Image
             src={hero.bg.src}
@@ -403,7 +413,7 @@ export const StoryPageLayout: React.FC<StoryPageLayoutProps> = ({
           <div
             data-slide="right"
             data-dist="260"
-            className="relative z-10 mt-10 aspect-[0.95/1] w-full max-w-[540px] self-center sm:mt-12 md:absolute md:top-1/2 md:right-[8%] md:mt-0 md:w-[43%] md:max-w-none md:-translate-y-1/2"
+            className="relative z-10 mt-10 aspect-auto w-full max-w-[540px] self-center sm:mt-12 md:absolute md:top-1/2 md:right-[8%] md:mt-0 md:aspect-[0.95/1] md:w-[43%] md:max-w-none md:-translate-y-1/2"
           >
             <div
               aria-hidden="true"
@@ -412,7 +422,7 @@ export const StoryPageLayout: React.FC<StoryPageLayoutProps> = ({
             <div
               data-fx="mask"
               data-scrub-img
-              className="absolute inset-x-[3%] inset-y-[2%] z-10 overflow-hidden border-[9px] border-[#fbf4e7] bg-[#e8d3b7] shadow-[0_22px_42px_rgba(48,33,18,0.25)] sm:border-[12px]"
+              className="relative z-10 mx-[3%] aspect-[0.95/1] overflow-hidden border-[9px] border-[#fbf4e7] bg-[#e8d3b7] shadow-[0_22px_42px_rgba(48,33,18,0.25)] sm:border-[12px] md:absolute md:inset-x-[3%] md:inset-y-[2%] md:mx-0"
             >
               <Image
                 src={echo.photo.src}
@@ -427,7 +437,7 @@ export const StoryPageLayout: React.FC<StoryPageLayoutProps> = ({
               data-parallax="0.1"
               data-fx="rise"
               data-delay="0.5"
-              className="font-allura absolute top-[10%] right-0 z-20 w-[145px] -rotate-3 border border-[#d8c8ad] bg-[#f7f0e2]/95 px-4 py-4 text-center text-[24px] leading-[1.15] text-[#55483a]/90 shadow-[0_8px_18px_rgba(48,33,18,0.14)] sm:right-[-2%] sm:w-[170px] sm:py-5 sm:text-[29px] md:top-[18%] md:right-[-14%]"
+              className="font-allura relative z-20 -mt-2 ml-auto w-[145px] -rotate-3 border border-[#d8c8ad] bg-[#f7f0e2]/95 px-4 py-4 text-center text-[24px] leading-[1.15] text-[#55483a]/90 shadow-[0_8px_18px_rgba(48,33,18,0.14)] sm:w-[170px] sm:py-5 sm:text-[29px] md:absolute md:top-[18%] md:right-[-14%] md:mt-0"
             >
               <Lines value={echo.note} />
             </p>
@@ -441,7 +451,7 @@ export const StoryPageLayout: React.FC<StoryPageLayoutProps> = ({
             height={640}
             sizes="(max-width: 767px) 34vw, 20vw"
             data-parallax="0.14"
-            className="pointer-events-none absolute right-[-4%] bottom-[-2%] z-20 w-[25%] rotate-[-7deg] object-contain drop-shadow-[0_8px_8px_rgba(48,33,18,0.2)] sm:right-[-6%] md:right-[1%] md:bottom-[-4%] md:w-[14%]"
+            className="pointer-events-none absolute right-[-4%] bottom-[-2%] z-0 w-[25%] rotate-[-7deg] object-contain drop-shadow-[0_8px_8px_rgba(48,33,18,0.2)] sm:right-[-6%] md:right-[1%] md:bottom-[-4%] md:z-20 md:w-[14%]"
           />
         </div>
       </section>

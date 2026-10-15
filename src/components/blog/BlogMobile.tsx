@@ -278,6 +278,16 @@ export const BlogMobile: React.FC = () => {
             ))}
           </h2>
 
+          <Link
+            href="/"
+            className="mt-5 inline-flex min-h-10 items-center gap-2 border border-[#f1d5a4]/65 bg-[#17100d]/55 px-4 py-2 font-sans text-[9px] font-semibold tracking-[0.18em] text-[#fffaf1] uppercase backdrop-blur-sm transition-colors hover:border-[#f1d5a4] hover:bg-[#f1d5a4]/15 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#f1d5a4] sm:text-[10px]"
+          >
+            <span aria-hidden="true" className="text-base leading-none">
+              &larr;
+            </span>
+            Back to Home
+          </Link>
+
           <p className="mt-4 max-w-[430px] font-serif text-[14.5px] leading-[1.55] text-[#f4ebdd] drop-shadow-[0_1px_5px_rgba(0,0,0,0.9)]">
             {DESC.map((l, i) => (
               <Rise key={l} lag={30 + i * 20}>
@@ -391,7 +401,7 @@ export const BlogMobile: React.FC = () => {
                       </p>
                       <div className="mt-4 flex items-center justify-between">
                         <span className="font-serif text-[11px] tracking-[0.2em] text-[#8a6a3a] uppercase">
-                          Read story
+                          Read more
                         </span>
                         <span
                           aria-hidden="true"

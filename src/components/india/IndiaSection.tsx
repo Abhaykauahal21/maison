@@ -4,7 +4,7 @@ import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import { IndiaRoutes, IndiaCompass } from "@/components/india/IndiaRoutes";
 import { IndiaMobileMap } from "@/components/india/IndiaMobileMap";
-import { IndiaStoryCard } from "@/components/india/IndiaStoryCard";
+import { CITY_STORIES, IndiaStoryCard } from "@/components/india/IndiaStoryCard";
 import { useParallax } from "@/hooks/use-parallax";
 import { SlideIn } from "@/components/common/SlideIn";
 
@@ -12,7 +12,7 @@ export const IndiaSection: React.FC = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const [inView, setInView] = useState(false);
   // pin whose story is shown on the right; null = the original collage
-  const [story, setStory] = useState<number | null>(null);
+  const [story, setStory] = useState<number | null>(3);
   const textParallaxRef = useParallax<HTMLDivElement>(0.03, 16);
   const collageParallaxRef = useParallax<HTMLDivElement>(0.06, 30);
 
@@ -174,16 +174,18 @@ export const IndiaSection: React.FC = () => {
             <div className={inView ? "animate-india-collage" : "opacity-0"}>
               <div className="animate-india-float">
                 {story === null ? (
-                  <div className="relative w-full h-auto drop-shadow-[0_10px_24px_rgba(0,0,0,0.22)] transition-transform duration-500 hover:scale-[1.015]">
-                    <Image
-                      src="/images/IndiaPage-right-collage.webp"
-                      alt="Mehak S. - Choreographer Story across India"
-                      width={1047}
-                      height={1503}
-                      quality={100}
-                      unoptimized
-                      className="pointer-events-none block h-auto w-full select-none"
-                    />
+                  <div className="relative w-full h-auto overflow-hidden rounded-[2px] border border-[#cdb79d]/60 bg-[#f3eadd] p-[1%] drop-shadow-[0_10px_24px_rgba(0,0,0,0.22)] transition-transform duration-500 hover:scale-[1.015]">
+                    <div className="relative h-auto w-full overflow-hidden">
+                      <Image
+                        src={CITY_STORIES[0].photos[0]}
+                        alt="Mehak S. - Choreographer Story across India"
+                        width={900}
+                        height={1100}
+                        quality={100}
+                        unoptimized
+                        className="pointer-events-none block h-auto w-full select-none object-cover"
+                      />
+                    </div>
                   </div>
                 ) : (
                   <div className="drop-shadow-[0_10px_24px_rgba(0,0,0,0.22)]">

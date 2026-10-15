@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function BlogPageRoute() {
   return (
-    <main className="min-h-screen w-full bg-[#0e0d0c] relative pt-20">
+    <main className="relative min-h-screen w-full bg-[#0e0d0c] pt-20">
       <Navbar />
       <BlogSection />
     </main>
