@@ -113,7 +113,7 @@ export const IndiaStoryCard: React.FC<{ index: number; onClose: () => void }> = 
     <div className="relative w-full" style={{ aspectRatio: "1047 / 1503" }}>
       <div
         className="relative z-10"
-        style={{ left: "11.4%", top: "2.4%", width: "72.5%", height: "71.4%" }}
+        style={{ left: "11.4%", top: "2.4%", width: "72.5%", height: "64%" }}
       >
         <Print
           src={story.photos[0]}
@@ -135,7 +135,7 @@ export const IndiaStoryCard: React.FC<{ index: number; onClose: () => void }> = 
       {/* torn paper plate */}
       <div
         className="isc-plate absolute z-10"
-        style={{ left: "36%", top: "45%", width: "60%", height: "29.5%", filter: "drop-shadow(0 8px 14px rgba(40,24,10,0.3))" }}
+        style={{ left: "36%", top: "69%", width: "60%", height: "29.5%", filter: "drop-shadow(0 8px 14px rgba(40,24,10,0.3))" }}
       >
         <div
           className="absolute inset-0 flex flex-col justify-center bg-[#f6efe0] px-[7%] py-[4%]"
