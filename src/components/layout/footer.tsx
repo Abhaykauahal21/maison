@@ -202,7 +202,7 @@ export const Footer: React.FC = () => {
   }, []);
 
   const navLinks = [
-    { label: "SHOP", href: "/#story" },
+    { label: "SHOP", href: "/dresses" },
     { label: "ABOUT", href: "/about" },
     { label: "JOURNAL", href: "/#journal" },
     { label: "CONTACT", href: "/#epilogue" },

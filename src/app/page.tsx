@@ -26,7 +26,7 @@ export default function HomePage() {
         <>
           <StoryGate
             className="-mt-1.5 sm:-mt-2 md:-mt-3.5 lg:-mt-5 xl:-mt-6"
-            height="clamp(340px,26vw,520px)"
+            height="clamp(420px,32vw,640px)"
             tornTop={false}
             maskVeil={false}
           >

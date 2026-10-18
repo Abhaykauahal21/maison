@@ -3,11 +3,15 @@ import React, { useState, useEffect } from "react";
 import { Search, ShoppingBag } from "lucide-react";
 import { IconButton } from "@/components/ui/IconButton";
 import { MobileMenu } from "@/components/layout/MobileMenu";
+import { BagDrawer } from "@/components/shop/BagDrawer";
+import { useShopStore, cartCount } from "@/store/shop-store";
+import { useMounted } from "@/hooks/use-mounted";
 
 /** Chapters of the page, in scroll order. `id` is the section's DOM id. */
 const NAV_CHAPTERS: { label: string; id: string; route?: string }[] = [
   { label: "The Echo", id: "story" },
   { label: "The Dream", id: "dream" },
+  { label: "Shop", id: "dresses", route: "/dresses" },
   { label: "Stories", id: "whispers" },
   { label: "Journey", id: "journey" },
   { label: "Journal", id: "blog" },
@@ -37,6 +41,9 @@ const TAPE_CLIP =
 export const Navbar: React.FC<{ /** Start with the paper strip already lowered (pages with a light top, not the dark hero). */ solid?: boolean }> = ({
   solid = false,
 }) => {
+  const mounted = useMounted();
+  const bagCount = useShopStore((s) => cartCount(s.cart));
+  const setCartOpen = useShopStore((s) => s.setCartOpen);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(solid);
   const [active, setActive] = useState<string | null>(null);
@@ -157,10 +164,13 @@ export const Navbar: React.FC<{ /** Start with the paper strip already lowered (
             <div className="flex items-center gap-1">
               <IconButton
                 icon={<ShoppingBag className="h-[16px] w-[16px] stroke-[1.3]" />}
-                label="Shopping Cart"
+                label="Open your bag"
+                onClick={() => setCartOpen(true)}
                 className={`-mr-1 sm:mr-0 ${scrolled ? "text-[#1c1815]!" : ""}`}
               />
-              <span className="hidden text-[12px] font-light select-none sm:inline">(0)</span>
+              <span className="hidden text-[12px] font-light select-none sm:inline">
+                ({mounted ? bagCount : 0})
+              </span>
             </div>
           </div>
         </div>
@@ -172,6 +182,8 @@ export const Navbar: React.FC<{ /** Start with the paper strip already lowered (
         links={NAV_CHAPTERS.map((c) => ({ label: c.label, href: c.route ?? `#${c.id}`, id: c.id, route: c.route }))}
         active={active}
       />
+
+      <BagDrawer />
     </>
   );
 };

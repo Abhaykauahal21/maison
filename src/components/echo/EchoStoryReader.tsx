@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { StoryPageLayout, type ChapterCard } from "@/components/story/StoryPageLayout";
+import { StoryReadingLayout, type ChapterCard } from "@/components/story/StoryReadingLayout";
 import { defaultEchoStory } from "@/data/echo-story";
 import { defaultOriginContent, type OriginContent } from "@/data/origin-content";
 
@@ -12,7 +12,7 @@ const nextChapterHeading = ["Some chapters don't end.", "They just lead you to t
 type VeilState = "idle" | "in" | "out";
 
 /**
- * Owns the current chapter index for /echo and feeds StoryPageLayout one chapter's worth of
+ * Owns the current chapter index for /echo and feeds StoryReadingLayout one chapter's worth of
  * content at a time. The layout (design) never changes — only the data does, so the same shape
  * can be served from the admin panel / an API.
  *
@@ -98,7 +98,7 @@ export function EchoStoryReader() {
 
   return (
     <>
-      <StoryPageLayout
+      <StoryReadingLayout
         content={content}
         intro={intro}
         chapterKey={chapter.id}
