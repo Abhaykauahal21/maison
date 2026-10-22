@@ -170,7 +170,7 @@ export function DressProduct({ dress }: { dress: Dress }) {
                       disabled={soldOut}
                       className={`min-w-[52px] cursor-pointer border px-3.5 py-2.5 text-[11px] tracking-[0.16em] transition-colors duration-300 disabled:cursor-not-allowed disabled:opacity-40 ${
                         on
-                          ? "border-[#1c1815] bg-[#1c1815] text-[#1c1815]"
+                          ? "border-[#1c1815] bg-[#1c1815] text-[#f3ead9]"
                           : "border-[#1c1815]/25 text-[#1c1815]/85 hover:border-[#8a6a3b] hover:text-[#8a6a3b]"
                       }`}
                     >
@@ -192,7 +192,7 @@ export function DressProduct({ dress }: { dress: Dress }) {
                 type="button"
                 onClick={addToBag}
                 disabled={soldOut}
-                className="flex-1 cursor-pointer bg-[#1c1815] py-4 text-[11px] tracking-[0.3em] text-[#1c1815] uppercase transition-colors duration-300 hover:bg-[#3a2f24] disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex-1 cursor-pointer bg-[#1c1815] py-4 text-[11px] tracking-[0.3em] text-[#f3ead9] uppercase transition-colors duration-300 hover:bg-[#3a2f24] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {soldOut ? "Sold out" : "Add to bag"}
               </button>
