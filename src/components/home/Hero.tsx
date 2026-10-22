@@ -12,6 +12,7 @@ import { useMatches } from "@/hooks/use-matches";
 export const Hero: React.FC = () => {
   const [isFilmOpen, setIsFilmOpen] = useState(false);
   const sectionRef = useRef<HTMLElement | null>(null);
+  const shadeRef = useRef<HTMLDivElement | null>(null);
   const wide = useMatches("(min-width: 768px) and (orientation: landscape)");
 
   // "Cover" reveal: the hero stays pinned while the Editorial section slides over it.
@@ -36,7 +37,13 @@ export const Hero: React.FC = () => {
       const coverStr = reduceMotion ? "0" : cover.toFixed(3);
       if (coverStr !== lastCover) {
         lastCover = coverStr;
-        hero.style.setProperty("--cover", coverStr);
+        // Phones: only the dark overlay reacts (one compositor-only opacity write, no
+        // style recalc of the whole hero). Desktop keeps the full parallax via --cover.
+        if (window.matchMedia("(min-width: 768px) and (orientation: landscape)").matches) {
+          hero.style.setProperty("--cover", coverStr);
+        } else if (shadeRef.current) {
+          shadeRef.current.style.opacity = String(Math.min(0.85, cover * 0.85));
+        }
       }
       // Once fully covered, hide the pinned hero so it never bleeds through later sections.
       const vis = cover >= 1 ? "hidden" : "visible";
@@ -160,19 +167,16 @@ export const Hero: React.FC = () => {
           ======================================================== */}
         {wide !== true && (
         <div className="relative block h-[100dvh] max-h-[1100px] min-h-[600px] w-full overflow-hidden md:landscape:hidden">
-          <div className="animate-hero-image-settle absolute inset-0 z-0">
+          <div className="absolute inset-0 z-0">
             <Image
               src="/images/hero-single-girl.webp"
               alt="Maison D'Vine Haute Couture Collection"
               fill
               priority
-              unoptimized
+              sizes="100vw"
               className="pointer-events-none object-cover object-[56%_30%] select-none"
             />
           </div>
-
-          {/* Floating golden particles on mobile */}
-          <HeroParticles />
 
           <div
             className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-b from-black/55 via-black/25 to-black/45"
@@ -181,10 +185,6 @@ export const Hero: React.FC = () => {
 
           <div
             className="relative z-20 flex h-full w-full flex-col justify-between px-6 pt-24 pb-8 sm:px-10 sm:pt-28 sm:pb-10 md:px-16"
-            style={{
-              transform: "translateY(calc(var(--cover, 0) * -32px))",
-              opacity: "calc(1 - var(--cover, 0) * 0.9)",
-            }}
           >
             <div className="flex flex-1 items-center">
               <div className="animate-hero-from-left w-full">
@@ -201,7 +201,8 @@ export const Hero: React.FC = () => {
 
         {/* Darkens the pinned hero as the next section slides over it */}
         <div
-          className="pointer-events-none absolute inset-0 z-40 bg-[#0a0908]"
+          ref={shadeRef}
+          className="pointer-events-none absolute inset-0 z-40 bg-[#0a0908] will-change-[opacity]"
           style={{ opacity: "calc(var(--cover, 0) * 0.85)" }}
           aria-hidden="true"
         />

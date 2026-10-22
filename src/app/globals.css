@@ -2543,3 +2543,11 @@ html.lenis, html.lenis body { height: auto; }
 @media (prefers-reduced-motion: reduce) {
   .ab-steam { animation: none; }
 }
+
+/* Phones / portrait: drop always-running decorative loops so scrolling stays smooth */
+@media (max-width: 767px), (orientation: portrait) {
+  .animate-btn-sheen {
+    animation: none;
+    display: none;
+  }
+}

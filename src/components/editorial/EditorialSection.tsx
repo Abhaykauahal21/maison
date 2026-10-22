@@ -228,12 +228,9 @@ const StoryButton: React.FC = () => {
 
 export const EditorialSection: React.FC = () => {
   const containerRef = useRef<HTMLElement | null>(null);
-  const mobileRef = useRef<HTMLDivElement | null>(null);
+  const trackRef = useRef<HTMLDivElement | null>(null);
   const wide = useMatches("(min-width: 1024px)");
   const showMobile = wide !== true;
-  const [mobileProgress, setMobileProgress] = useState(0);
-  const seg = (start: number, len: number) =>
-    Math.min(1, Math.max(0, (mobileProgress - start) / len));
   const [activeLook, setActiveLook] = useState(0);
   const [isPinned, setIsPinned] = useState(false);
 
@@ -261,32 +258,32 @@ export const EditorialSection: React.FC = () => {
     };
   }, []);
 
-  // Scroll-linked progress for the mobile layout: 0 = below the fold, 1 = fully in view.
-  // Bidirectional, so everything plays forward on scroll down and rewinds on scroll up.
+  // Phone / tablet carousel: native scroll-snap does the motion (compositor only); we just read
+  // which slide is centred and mirror it into `activeLook` for the dots.
   useEffect(() => {
-    const el = mobileRef.current;
+    const el = trackRef.current;
     if (!el || !showMobile) return;
     let raf = 0;
     const update = () => {
       raf = 0;
-      const rect = el.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const raw = (vh * 0.92 - rect.top) / (rect.height * 0.55);
-      const p = Math.round(Math.min(1, Math.max(0, raw)) * 100) / 100;
-      setMobileProgress((prev) => (prev === p ? prev : p));
+      const idx = Math.min(2, Math.max(0, Math.round(el.scrollLeft / Math.max(1, el.clientWidth))));
+      activeLookRef.current = idx;
+      setActiveLook((prev) => (prev === idx ? prev : idx));
     };
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(update);
     };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
+    el.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
+      el.removeEventListener("scroll", onScroll);
     };
   }, [showMobile]);
+
+  const goToSlide = useCallback((i: number) => {
+    const el = trackRef.current;
+    if (el) el.scrollTo({ left: i * el.clientWidth, behavior: "smooth" });
+  }, []);
 
   // ---- Scroll-linked progress engine -------------------------------------------------------------
   // `target` follows the wheel / touch directly; `cur` chases it with easing and is what the layers read.
@@ -504,6 +501,7 @@ export const EditorialSection: React.FC = () => {
 
     const checkTrigger = () => {
       if (isPinnedRef.current) return;
+      if (!window.matchMedia("(min-width: 1024px)").matches) return; // phones/tablets use the carousel
       if (Date.now() < unpinCooldownRef.current) return;
 
       const el = containerRef.current;
@@ -715,7 +713,7 @@ export const EditorialSection: React.FC = () => {
           - Tablets: a centred sheet that grows with its content
           ======================================================== */}
       {showMobile && (
-        <div ref={mobileRef} className="relative block h-auto w-full lg:hidden">
+        <div className="relative block h-auto w-full lg:hidden">
           <div className="relative mx-auto flex aspect-[487/1024] w-full max-w-[760px] flex-col px-6 pt-16 pb-14 text-[#221c17] sm:aspect-auto sm:min-h-[820px] sm:px-14 sm:pt-24 sm:pb-20">
             <Image
               src="/images/echo-bg-mobile.webp"
@@ -727,88 +725,71 @@ export const EditorialSection: React.FC = () => {
               className="pointer-events-none z-0 object-fill select-none"
             />
 
-            {/* Chapter words + dress; kept clear of the dried flowers in the top-right corner */}
-            <div
-              className="relative z-10 flex min-h-0 w-full flex-1 flex-col [perspective:1200px]"
-              style={{
-                opacity: seg(0.1, 0.3),
-                transform: `translate3d(0, ${(1 - seg(0.1, 0.3)) * 24}px, 0)`,
-                transition: "opacity 0.25s linear, transform 0.25s linear",
-              }}
-            >
-              <div className="relative h-[8.5rem] w-full pr-[14%] sm:h-[11rem]">
-                {/* Section heading, sits in the sheet's top padding right above the chapter title */}
-                <span className="font-bodoni pointer-events-none absolute bottom-full left-0 mb-0.5 text-[30px] leading-none font-normal tracking-[0.02em] whitespace-nowrap text-[#8a6a3b] italic [text-shadow:0_1px_0_rgba(255,246,225,0.8)] sm:mb-1 sm:text-[48px]">
-                  The Echo
-                </span>
-                {dresses.map((_, idx) => (
-                  <DressText
-                    key={idx}
-                    idx={idx}
-                    active={activeLook}
-                    register={registerLayer}
-                    titleClass="mt-1 font-bodoni text-[24px] leading-[0.98] font-normal tracking-[0.03em] text-[#14100c] uppercase min-[400px]:text-[27px] sm:text-[40px]"
-                    bodyClass="mt-2.5 font-serif text-[12.5px] leading-[1.6] text-[#2e2418] italic sm:text-[15px]"
-                  />
-                ))}
-              </div>
-              <div className="my-3 flex min-h-[300px] w-full flex-1 flex-col gap-2.5 sm:my-6 sm:min-h-[360px] sm:gap-3.5">
-                {dresses.map((look, idx) => (
+            <div className="relative z-10 flex min-h-0 w-full flex-1 flex-col">
+              <span className="font-bodoni pointer-events-none mb-2 text-[30px] leading-none font-normal tracking-[0.02em] whitespace-nowrap text-[#8a6a3b] italic [text-shadow:0_1px_0_rgba(255,246,225,0.8)] sm:mb-4 sm:text-[48px]">
+                The Echo
+              </span>
+
+              {/* Swipe carousel: one chapter per slide */}
+              <div
+                ref={trackRef}
+                className="-mx-6 flex min-h-0 flex-1 snap-x snap-mandatory overflow-x-auto overscroll-x-contain [scrollbar-width:none] sm:-mx-14 [&::-webkit-scrollbar]:hidden"
+              >
+                {dresses.map((d, idx) => (
                   <div
-                    key={look.cardTitle}
-                    className="min-h-0 w-full cursor-pointer transition-[flex-grow,opacity,transform] duration-500"
-                    style={{
-                      flexGrow: idx === activeLook ? 2.2 : 1,
-                      flexBasis: 0,
-                      opacity: idx === activeLook ? 1 : 0.8,
-                    }}
+                    key={d.slug}
+                    className="flex h-full w-full shrink-0 snap-center snap-always flex-col px-6 sm:px-14"
+                    aria-hidden={idx !== activeLook}
                   >
-                    <EchoCard
-                      variant="horizontal"
-                      active={idx === activeLook}
-                      title={look.cardTitle}
-                      href={`/dresses/${look.slug}`}
-                      imageSrc={look.cardImageSrc}
-                      imageAlt={look.cardImageAlt}
-                      objectPosition={look.objectPosition}
-                      imageFit="contain"
-                    />
+                    <h2 className="font-bodoni text-[24px] leading-[0.98] font-normal tracking-[0.03em] text-[#14100c] uppercase min-[400px]:text-[27px] sm:text-[40px]">
+                      {d.title.map((line) => (
+                        <span key={line} className="block">
+                          {line}
+                        </span>
+                      ))}
+                    </h2>
+                    <p className="mt-2.5 font-serif text-[12.5px] leading-[1.6] text-[#2e2418] italic sm:text-[15px]">
+                      {d.body}
+                    </p>
+                    <Link
+                      href={`/dresses/${d.slug}`}
+                      aria-label={`Shop ${d.cardTitle}`}
+                      className="group relative mt-3 block min-h-[220px] w-full flex-1 overflow-hidden bg-[#f7f0e3] shadow-[0_10px_26px_rgba(40,28,16,0.16)] ring-1 ring-[#3a3026]/10 sm:mt-5"
+                    >
+                      <Image
+                        src={d.cardImageSrc}
+                        alt={d.cardImageAlt}
+                        fill
+                        loading={idx === 0 ? "eager" : "lazy"}
+                        unoptimized
+                        sizes="(max-width: 760px) 100vw, 760px"
+                        style={{ objectPosition: d.objectPosition }}
+                        className="object-contain"
+                      />
+                      <span className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 bg-gradient-to-t from-[#1a140e]/85 to-transparent px-4 pt-8 pb-3 text-[#f6ecd9]">
+                        <span className="font-bodoni text-[16px] tracking-[0.2em] uppercase sm:text-[20px]">
+                          {d.cardTitle}
+                        </span>
+                        <span className="flex items-center gap-1.5 font-sans text-[10px] font-medium tracking-[0.2em] uppercase">
+                          Shop &rarr;
+                        </span>
+                      </span>
+                    </Link>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* CTA + progress + swipe hint */}
-            <div
-              className="relative z-10 flex w-full flex-col gap-3"
-              style={{
-                opacity: seg(0.5, 0.3),
-                transform: `translate3d(0, ${(1 - seg(0.5, 0.3)) * 18}px, 0)`,
-                transition: "opacity 0.25s linear, transform 0.25s linear",
-              }}
-            >
-              <div className="flex h-px w-full gap-1.5" aria-hidden="true">
-                {[0, 1, 2].map((i) => (
-                  <div key={i} className="relative h-px flex-1 bg-[#221c17]/15">
-                    <div
-                      className="absolute inset-y-0 left-0 h-[2px] -translate-y-1/2 bg-[#1c1815] transition-[width] duration-700 ease-out"
-                      style={{ width: i <= activeLook ? "100%" : "0%", top: "50%" }}
-                    />
-                  </div>
-                ))}
+            {/* progress + swipe hint + CTA */}
+            <div className="relative z-10 mt-4 flex w-full flex-col gap-3">
+              <div className="flex w-full items-center justify-between gap-4">
+                <DressProgress active={activeLook} onPick={goToSlide} />
+                <span className="font-sans text-[10px] tracking-[0.2em] text-[#3a3026]/70 uppercase" aria-hidden="true">
+                  Swipe &rarr;
+                </span>
               </div>
-
               <div className="flex justify-end">
                 <StoryButton />
-              </div>
-
-              <div className="flex w-full items-center justify-between gap-4">
-                <DressProgress active={activeLook} onPick={setLook} />
-                {activeLook < 2 && (
-                  <span className="animate-echo-swipe-hint text-[#3a3026]" aria-hidden="true">
-                    ↓
-                  </span>
-                )}
               </div>
             </div>
           </div>
