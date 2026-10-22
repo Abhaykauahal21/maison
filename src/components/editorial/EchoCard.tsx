@@ -2,15 +2,19 @@
 
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { ArrowRight, Eye } from "lucide-react";
 
 export interface EchoCardProps {
   title: string;
-  descLines: [string, string];
+  /** Poetic two-line caption. Leave out for an image + heading only card. */
+  descLines?: [string, string];
   /** Short fabric / mood descriptor, e.g. "Floral Silk · Dawn". */
   tag?: string;
   /** 1-based look number shown as "LOOK 01". */
   index?: number;
+  /** Makes the whole card a link, e.g. to the dress's product page. */
+  href?: string;
   imageSrc: string;
   imageAlt: string;
   alternateImageSrc?: string;
@@ -35,6 +39,7 @@ export const EchoCard: React.FC<EchoCardProps> = ({
   descLines,
   tag,
   index,
+  href,
   imageSrc,
   imageAlt,
   alternateImageSrc,
@@ -114,8 +119,17 @@ export const EchoCard: React.FC<EchoCardProps> = ({
     setTilt({ x: 0, y: 0, isHovered: false });
   }, []);
 
+  const wrap = (card: React.ReactNode) =>
+    href ? (
+      <Link href={href} aria-label={`Shop ${title}`} className="block h-full w-full">
+        {card}
+      </Link>
+    ) : (
+      card
+    );
+
   if (variant === "horizontal") {
-    return (
+    return wrap(
       <article
         onClick={handleCardClick}
         className={`group relative flex h-full w-full cursor-pointer items-center justify-between gap-3 overflow-hidden rounded-[2px] p-1.5 text-left select-none active:scale-[0.98] ${
@@ -184,6 +198,7 @@ export const EchoCard: React.FC<EchoCardProps> = ({
                 "grid-template-rows 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease 0.1s",
             }}
           >
+            {descLines && (
             <p className="overflow-hidden font-serif text-[13px] xs:text-[14px] sm:text-[16px] leading-[1.3] tracking-wide text-[#2e2418] italic">
               <span className="mt-1 block">{descLines[0]}</span>
               <span className="block">{descLines[1]}</span>
@@ -193,10 +208,21 @@ export const EchoCard: React.FC<EchoCardProps> = ({
                 </span>
               )}
             </p>
+            )}
           </div>
         </div>
 
-        {/* Right: Circular arrow, fills in when active */}
+        {/* Right: a visible "Shop" pill on link cards, otherwise the circular arrow */}
+        {href ? (
+          <span
+            className={`mr-1 flex flex-shrink-0 items-center gap-1.5 rounded-full px-3 py-2 font-sans text-[9.5px] font-medium tracking-[0.18em] uppercase transition-colors duration-500 ${
+              active ? "bg-[#1a140e] text-[#f6ecd9]" : "border border-[#3a3026]/50 text-[#3a3026]"
+            }`}
+          >
+            Shop
+            <ArrowRight className="h-3 w-3 stroke-[1.6]" />
+          </span>
+        ) : (
         <div
           className={`mr-1 flex h-8 w-8 xs:h-9 xs:w-9 sm:h-10 sm:w-10 flex-shrink-0 items-center justify-center rounded-full border transition-all duration-500 ${
             active
@@ -206,12 +232,13 @@ export const EchoCard: React.FC<EchoCardProps> = ({
         >
           <ArrowRight className="h-3.5 w-3.5 xs:h-4 xs:w-4 stroke-[1.4]" />
         </div>
+        )}
       </article>
     );
   }
 
   // DESKTOP VERTICAL LOOKBOOK CARD: a photo print on cream card stock, caption written on the card
-  return (
+  return wrap(
     <article
       ref={cardRef}
       onClick={alternateImageSrc ? handleCardClick : onPinFall ? startFall : onClick}
@@ -277,7 +304,7 @@ export const EchoCard: React.FC<EchoCardProps> = ({
           <div className="absolute inset-x-0 bottom-3 flex justify-center opacity-0 translate-y-3 transition-all duration-300 ease-out group-hover:opacity-100 group-hover:translate-y-0">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-black/60 px-3.5 py-1 text-[9.5px] font-sans font-medium tracking-[0.2em] text-white uppercase backdrop-blur-xs shadow-md">
               <Eye className="h-3 w-3" />
-              <span>DISCOVER</span>
+              <span>{href ? "SHOP NOW" : "DISCOVER"}</span>
             </span>
           </div>
         </div>
@@ -299,17 +326,28 @@ export const EchoCard: React.FC<EchoCardProps> = ({
           </div>
         </div>
 
+        {href && (
+          <span className="mt-[clamp(8px,0.8vw,14px)] flex items-center justify-center gap-2 bg-[#1a140e] py-[clamp(7px,0.6vw,11px)] font-sans text-[clamp(9px,0.72vw,12px)] font-medium tracking-[0.24em] text-[#f6ecd9] uppercase transition-colors duration-300 group-hover:bg-[#8a6a3b]">
+            Shop now
+            <ArrowRight className="h-3 w-3 stroke-[1.6] transition-transform duration-300 group-hover:translate-x-0.5" />
+          </span>
+        )}
+
         {/* Hairline that draws out on hover */}
+        {descLines && (
         <div className="mx-[clamp(2px,0.2vw,4px)] mt-[clamp(6px,0.6vw,12px)] h-px bg-[#3a3026]/15">
           <div className="h-full w-6 bg-[#a98a55] transition-all duration-700 ease-out group-hover:w-full" />
         </div>
+        )}
 
         {/* Poetic caption (the girl's own voice) + fabric tag */}
+        {descLines && (
         <p className="mt-2 px-[clamp(2px,0.2vw,4px)] font-serif text-[13px] leading-[1.45] tracking-wide text-[#2e2418] italic sm:text-sm lg:text-[clamp(14px,0.98vw,20px)]">
           {descLines[0]}
           <br />
           {descLines[1]}
         </p>
+        )}
         {tag && (
           <span className="mt-1.5 block px-[clamp(2px,0.2vw,4px)] font-sans text-[10px] font-medium tracking-[0.2em] text-[#7a6140] uppercase sm:text-[11px] lg:text-[clamp(10px,0.7vw,13px)]">
             {tag}
@@ -319,7 +357,7 @@ export const EchoCard: React.FC<EchoCardProps> = ({
       </div>
 
       {/* long curved steel pin through the top of the card: click to pull it out */}
-      {!alternateImageSrc && (
+      {!alternateImageSrc && !href && (
         <button
           type="button"
           onClick={pullPin}

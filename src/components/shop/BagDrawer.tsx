@@ -6,8 +6,7 @@ import Image from "next/image";
 import { Minus, Plus, X } from "lucide-react";
 import { cartCount, cartSubtotal, useShopStore } from "@/store/shop-store";
 import { useMounted } from "@/hooks/use-mounted";
-import { formatCurrency } from "@/lib/utils";
-import { shopConfig, whatsappLink } from "@/config/shop";
+import { formatPrice, shopConfig, whatsappLink } from "@/config/shop";
 
 /**
  * The bag — a torn slip of parchment that slides in from the right.
@@ -24,7 +23,7 @@ export function BagDrawer() {
   const removeFromCart = useShopStore((s) => s.removeFromCart);
 
   const items = mounted ? cart : [];
-  const subtotal = formatCurrency(cartSubtotal(items), shopConfig.currency, shopConfig.locale);
+  const subtotal = formatPrice(cartSubtotal(items));
 
   // Escape closes the bag; the page behind it stays put while it is open.
   useEffect(() => {
@@ -41,12 +40,7 @@ export function BagDrawer() {
 
   const orderOnWhatsApp = () => {
     const lines = items.map(
-      (c) =>
-        `• ${c.name} — Size ${c.size} × ${c.qty} — ${formatCurrency(
-          c.price * c.qty,
-          shopConfig.currency,
-          shopConfig.locale
-        )}`
+      (c) => `• ${c.name} — Size ${c.size} × ${c.qty} — ${formatPrice(c.price * c.qty)}`
     );
     const message = [
       "Hello Maison D'Vine, I would like to order:",
@@ -175,7 +169,7 @@ export function BagDrawer() {
                         </button>
                       </div>
                       <span className="text-[13px] text-[#1c1815]">
-                        {formatCurrency(c.price * c.qty, shopConfig.currency, shopConfig.locale)}
+                        {formatPrice(c.price * c.qty)}
                       </span>
                     </div>
                   </div>

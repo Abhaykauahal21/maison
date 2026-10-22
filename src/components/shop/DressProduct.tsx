@@ -4,8 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Dress } from "@/types/dress";
-import { formatCurrency } from "@/lib/utils";
-import { shopConfig, whatsappLink } from "@/config/shop";
+import { formatPrice, shopConfig, whatsappLink } from "@/config/shop";
 import { useShopStore } from "@/store/shop-store";
 import { useUiStore } from "@/store/ui-store";
 
@@ -24,10 +23,10 @@ export function DressProduct({ dress }: { dress: Dress }) {
   const addToCart = useShopStore((s) => s.addToCart);
   const addToast = useUiStore((s) => s.addToast);
 
-  const price = formatCurrency(dress.price, shopConfig.currency, shopConfig.locale);
+  const price = formatPrice(dress.price);
   const compare =
     dress.compareAtPrice && dress.compareAtPrice > dress.price
-      ? formatCurrency(dress.compareAtPrice, shopConfig.currency, shopConfig.locale)
+      ? formatPrice(dress.compareAtPrice)
       : null;
   const soldOut = dress.stock <= 0;
 
@@ -65,25 +64,25 @@ export function DressProduct({ dress }: { dress: Dress }) {
   };
 
   return (
-    <section className="relative w-full pt-28 pb-24 lg:pt-32 lg:pb-32">
+    <section className="relative w-full bg-[#efe5d1] pt-28 pb-24 lg:pt-32 lg:pb-32">
       <div className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-[4vw]">
         <Link
           href="/dresses"
-          className="inline-flex items-center gap-2 text-[10px] tracking-[0.3em] text-[#f3ead9]/60 uppercase transition-colors hover:text-[#d9b877]"
+          className="inline-flex items-center gap-2 text-[10px] tracking-[0.3em] text-[#1c1815]/60 uppercase transition-colors hover:text-[#8a6a3b]"
         >
           <span aria-hidden="true">←</span> The Wardrobe
         </Link>
 
-        <div className="mt-8 grid gap-10 lg:grid-cols-[1.05fr_1fr] lg:gap-16">
+        <div className="mt-8 grid gap-10 lg:grid-cols-[0.8fr_1fr] lg:gap-20">
           {/* ---------------- Gallery ---------------- */}
-          <div>
-            <div className="relative aspect-[4/5] overflow-hidden border border-[#f3ead9]/12 bg-[#e9dcc6]">
+          <div className="mx-auto w-full max-w-[420px] lg:mx-0">
+            <div className="relative aspect-[4/5] overflow-hidden border border-[#1c1815]/12 bg-[#e2d4ba]">
               <Image
                 src={dress.images[active].src}
                 alt={dress.images[active].alt}
                 fill
                 priority
-                sizes="(max-width: 1024px) 100vw, 50vw"
+                sizes="(max-width: 1024px) 100vw, 420px"
                 className="object-cover"
               />
               <span
@@ -109,10 +108,10 @@ export function DressProduct({ dress }: { dress: Dress }) {
                     onClick={() => setActive(i)}
                     aria-label={`View image ${i + 1}`}
                     aria-pressed={i === active}
-                    className={`relative h-[92px] w-[70px] cursor-pointer overflow-hidden border bg-[#e9dcc6] transition-colors ${
+                    className={`relative h-[92px] w-[70px] cursor-pointer overflow-hidden border bg-[#e2d4ba] transition-colors ${
                       i === active
-                        ? "border-[#d9b877]"
-                        : "border-[#f3ead9]/15 hover:border-[#f3ead9]/40"
+                        ? "border-[#8a6a3b]"
+                        : "border-[#1c1815]/15 hover:border-[#1c1815]/40"
                     }`}
                   >
                     <Image src={img.src} alt={img.alt} fill sizes="70px" className="object-cover" />
@@ -124,35 +123,35 @@ export function DressProduct({ dress }: { dress: Dress }) {
 
           {/* ---------------- Buy box ---------------- */}
           <div className="lg:sticky lg:top-28 lg:self-start">
-            <p className="text-[10px] tracking-[0.34em] text-[#d9b877] uppercase">
+            <p className="text-[10px] tracking-[0.34em] text-[#8a6a3b] uppercase">
               {dress.collection} · {dress.category}
             </p>
-            <h1 className="mt-3 font-serif text-[clamp(36px,5.5vw,58px)] leading-[1.02] text-[#f3ead9]">
+            <h1 className="mt-3 font-serif text-[clamp(36px,5.5vw,58px)] leading-[1.02] text-[#1c1815]">
               {dress.name}
             </h1>
-            <p className="mt-2 font-allura text-[24px] leading-snug text-[#d9b877]">
+            <p className="mt-2 font-allura text-[24px] leading-snug text-[#8a6a3b]">
               {dress.tagline}
             </p>
 
             <div className="mt-6 flex flex-wrap items-baseline gap-3">
-              <span className="font-serif text-[24px] text-[#f3ead9]">{price}</span>
+              <span className="font-serif text-[24px] text-[#1c1815]">{price}</span>
               {compare && (
-                <span className="text-[15px] text-[#f3ead9]/40 line-through">{compare}</span>
+                <span className="text-[15px] text-[#1c1815]/40 line-through">{compare}</span>
               )}
-              <span className="text-[11px] text-[#f3ead9]/45">inclusive of all taxes</span>
+              <span className="text-[11px] text-[#1c1815]/45">inclusive of all taxes</span>
             </div>
 
-            <p className="mt-6 max-w-[560px] text-[14.5px] leading-8 text-[#f3ead9]/75">
+            <p className="mt-6 max-w-[560px] text-[14.5px] leading-8 text-[#1c1815]/75">
               {dress.description}
             </p>
 
             {/* size */}
             <div className="mt-9">
               <div className="flex items-baseline justify-between">
-                <p className="text-[10px] tracking-[0.3em] text-[#f3ead9]/70 uppercase">
+                <p className="text-[10px] tracking-[0.3em] text-[#1c1815]/70 uppercase">
                   Select a size
                 </p>
-                <span className="font-allura text-[17px] text-[#d9b877]">
+                <span className="font-allura text-[17px] text-[#8a6a3b]">
                   Between sizes? Ask us
                 </span>
               </div>
@@ -171,8 +170,8 @@ export function DressProduct({ dress }: { dress: Dress }) {
                       disabled={soldOut}
                       className={`min-w-[52px] cursor-pointer border px-3.5 py-2.5 text-[11px] tracking-[0.16em] transition-colors duration-300 disabled:cursor-not-allowed disabled:opacity-40 ${
                         on
-                          ? "border-[#d9b877] bg-[#d9b877] text-[#1c1815]"
-                          : "border-[#f3ead9]/25 text-[#f3ead9]/85 hover:border-[#d9b877] hover:text-[#d9b877]"
+                          ? "border-[#1c1815] bg-[#1c1815] text-[#1c1815]"
+                          : "border-[#1c1815]/25 text-[#1c1815]/85 hover:border-[#8a6a3b] hover:text-[#8a6a3b]"
                       }`}
                     >
                       {s}
@@ -181,7 +180,7 @@ export function DressProduct({ dress }: { dress: Dress }) {
                 })}
               </div>
               {error && (
-                <p className="mt-3 text-[12px] text-[#e0a08a]">
+                <p className="mt-3 text-[12px] text-[#a8452b]">
                   Please choose a size to continue.
                 </p>
               )}
@@ -193,26 +192,26 @@ export function DressProduct({ dress }: { dress: Dress }) {
                 type="button"
                 onClick={addToBag}
                 disabled={soldOut}
-                className="flex-1 cursor-pointer bg-[#f3ead9] py-4 text-[11px] tracking-[0.3em] text-[#1c1815] uppercase transition-colors duration-300 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex-1 cursor-pointer bg-[#1c1815] py-4 text-[11px] tracking-[0.3em] text-[#1c1815] uppercase transition-colors duration-300 hover:bg-[#3a2f24] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {soldOut ? "Sold out" : "Add to bag"}
               </button>
               <button
                 type="button"
                 onClick={orderOnWhatsApp}
-                className="flex-1 cursor-pointer border border-[#f3ead9]/45 py-4 text-[11px] tracking-[0.3em] text-[#f3ead9] uppercase transition-colors duration-300 hover:border-[#d9b877] hover:text-[#d9b877]"
+                className="flex-1 cursor-pointer border border-[#1c1815]/50 py-4 text-[11px] tracking-[0.3em] text-[#1c1815] uppercase transition-colors duration-300 hover:border-[#8a6a3b] hover:text-[#8a6a3b]"
               >
                 Order on WhatsApp
               </button>
             </div>
 
-            <p className="mt-4 text-[12px] leading-6 text-[#f3ead9]/50">
+            <p className="mt-4 text-[12px] leading-6 text-[#1c1815]/50">
               {shopConfig.madeToOrderNote}
               {!soldOut && dress.stock <= 6 ? ` · only ${dress.stock} left` : ""}
             </p>
 
             {/* spec sheet */}
-            <dl className="mt-9 border-t border-[#f3ead9]/12 text-[13px]">
+            <dl className="mt-9 border-t border-[#1c1815]/12 text-[13px]">
               {[
                 ["Fabric", dress.fabric],
                 ["Colour", dress.color],
@@ -221,12 +220,12 @@ export function DressProduct({ dress }: { dress: Dress }) {
               ].map(([label, value]) => (
                 <div
                   key={label}
-                  className="flex gap-6 border-b border-[#f3ead9]/10 py-3.5"
+                  className="flex gap-6 border-b border-[#1c1815]/10 py-3.5"
                 >
-                  <dt className="w-[92px] shrink-0 text-[10px] tracking-[0.22em] text-[#f3ead9]/45 uppercase">
+                  <dt className="w-[92px] shrink-0 text-[10px] tracking-[0.22em] text-[#1c1815]/45 uppercase">
                     {label}
                   </dt>
-                  <dd className="text-[#f3ead9]/80">{value}</dd>
+                  <dd className="text-[#1c1815]/80">{value}</dd>
                 </div>
               ))}
             </dl>

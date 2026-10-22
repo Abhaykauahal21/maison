@@ -1,8 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Dress } from "@/types/dress";
-import { formatCurrency } from "@/lib/utils";
-import { shopConfig } from "@/config/shop";
+import { formatPrice } from "@/config/shop";
 
 /**
  * A dress on the catalogue wall — a printed plate on parchment.
@@ -11,10 +10,10 @@ import { shopConfig } from "@/config/shop";
  * "view" band, so the page stays quiet until you go looking for something.
  */
 export function DressCard({ dress, priority = false }: { dress: Dress; priority?: boolean }) {
-  const price = formatCurrency(dress.price, shopConfig.currency, shopConfig.locale);
+  const price = formatPrice(dress.price);
   const compare =
     dress.compareAtPrice && dress.compareAtPrice > dress.price
-      ? formatCurrency(dress.compareAtPrice, shopConfig.currency, shopConfig.locale)
+      ? formatPrice(dress.compareAtPrice)
       : null;
   const soldOut = dress.stock <= 0;
 

@@ -1,4 +1,4 @@
-import type { Dress } from "@/types/dress";
+import type { Dress, DressSpec } from "@/types/dress";
 
 /**
  * The catalogue — the dresses the shop shows.
@@ -9,6 +9,20 @@ import type { Dress } from "@/types/dress";
  *
  * Images are existing site assets, so the shop looks real immediately.
  */
+const careNotes = (extra: string): string[] => [
+  extra,
+  "Steam or press on a low heat, on the reverse side",
+  "Store hanging, in the cotton cover we send it in",
+  "Keep away from perfume, direct sun and rough jewellery",
+];
+
+const provenanceNotes = (fitting: string): DressSpec[] => [
+  ["Made in", "Our atelier, by a small team of pattern-makers and seamstresses"],
+  ["Dispatch", "2–3 weeks · cut and finished after you order"],
+  ["Fitting", fitting],
+  ["Shipping", "Across India, in tissue and a keepsake box · tracked"],
+];
+
 export const SEED_DRESSES: Dress[] = [
   {
     id: "dress-solace",
@@ -42,6 +56,22 @@ export const SEED_DRESSES: Dress[] = [
       images: [
         { src: "/images/editorial/dress-i-had.webp", alt: "The Solace gown, shown without a background" },
       ],
+    },
+    craft: {
+      quote:
+        "I often wonder about the unseen hands that held the space for her, shaping the ease long before the world ever saw her stand.",
+      details: [
+        ["Fabric", "Printed silk charmeuse · Fluid, with a soft sheen"],
+        ["Length", "Floor-length · Approx 148cm shoulder to hem"],
+        ["Colour", "Ivory floral · Dawn-toned, painted in-house"],
+        ["Neckline", "Soft V · Finished with a bias binding"],
+        ["Fit", "Bias-cut · Quietly corseted bodice · Back zip"],
+        ["Sleeves", "Sleeveless · Fine straps, adjustable"],
+        ["Lining", "Silk habotai · Each tier lined separately"],
+        ["Hem", "Hand-rolled · Pressed twice"],
+      ],
+      care: careNotes("Dry clean only, with a cleaner who knows silk"),
+      provenance: provenanceNotes("Standard sizes, or a bespoke fit consultation"),
     },
     createdAt: "2026-01-10T10:00:00.000Z",
     updatedAt: "2026-01-10T10:00:00.000Z",
@@ -79,6 +109,22 @@ export const SEED_DRESSES: Dress[] = [
         { src: "/images/editorial/VintageFloralPeonyMaxiDress.webp", alt: "The Longing gown, shown without a background" },
       ],
     },
+    craft: {
+      quote:
+        "Some dresses are made to be looked at. This one was made to be carried, layer by layer, the way a wish is carried.",
+      details: [
+        ["Fabric", "Architectural tulle · Silk charmeuse corsetry"],
+        ["Length", "Floor-length · Approx 150cm shoulder to hem"],
+        ["Colour", "Crimson · Deepens in low light"],
+        ["Neckline", "Sweetheart · Boned for structure"],
+        ["Fit", "Corseted bodice · Lace-up back · Full graduated skirt"],
+        ["Sleeves", "Sleeveless · Structured shoulder panels"],
+        ["Lining", "Silk charmeuse · Tulle layers lined separately"],
+        ["Skirt", "Graduated layers · Holds shape standing, moves in motion"],
+      ],
+      care: careNotes("Dry clean only · Do not wring or fold the tulle"),
+      provenance: provenanceNotes("Corset adjusted to your measurements on request"),
+    },
     createdAt: "2026-01-12T10:00:00.000Z",
     updatedAt: "2026-01-12T10:00:00.000Z",
   },
@@ -115,6 +161,22 @@ export const SEED_DRESSES: Dress[] = [
         { src: "/images/editorial/dress-borrowed.webp", alt: "The Reverie gown, shown without a background" },
       ],
     },
+    craft: {
+      quote:
+        "A promise kept quietly is still a promise. This one was cut slowly, and finished by hand, so it would never feel hurried.",
+      details: [
+        ["Fabric", "Heavy bias-cut satin · Pours over the body"],
+        ["Length", "Floor-length · Approx 152cm shoulder to hem"],
+        ["Colour", "Noir · Midnight blue in strong light"],
+        ["Neckline", "Low cowl back · Soft round front"],
+        ["Fit", "Bias-cut · Skims, never clings"],
+        ["Closure", "Twenty-two covered buttons · Hand-looped"],
+        ["Lining", "Silk crepe · Bodice only, so the skirt stays fluid"],
+        ["Slit", "Placed for walking, not for photographs"],
+      ],
+      care: careNotes("Dry clean only · Spot-test before treating any mark"),
+      provenance: provenanceNotes("Standard sizes, or a bespoke fit consultation"),
+    },
     createdAt: "2026-01-15T10:00:00.000Z",
     updatedAt: "2026-01-15T10:00:00.000Z",
   },
@@ -134,7 +196,7 @@ export const SEED_DRESSES: Dress[] = [
     sizes: ["XS", "S", "M", "L", "XL"],
     stock: 15,
     featured: true,
-    published: true,
+    published: false,
     images: [
       { src: "/images/daydream.webp", alt: "Maison D'Vine The Daydream ivory floral gown" },
       { src: "/images/story/Golden%20Window%20Reverie.webp", alt: "The Daydream gown by a sunlit window" },
@@ -149,6 +211,22 @@ export const SEED_DRESSES: Dress[] = [
       images: [
         { src: "/images/story/Golden%20Window%20Reverie.webp", alt: "A woman in the Daydream gown by a sunlit window" },
       ],
+    },
+    craft: {
+      quote:
+        "I often wonder about the unseen hands that held the space for her, shaping the ease long before the world ever saw her stand.",
+      details: [
+        ["Fabric", "Floral chiffon · Whisper-weight"],
+        ["Length", "Floor-length · Approx 146cm shoulder to hem"],
+        ["Colour", "Ivory floral · Fades toward the hem"],
+        ["Neckline", "Gathered round neckline · Fine micro-pleats"],
+        ["Fit", "Empire bodice · Pulls on without closure"],
+        ["Sleeves", "Sleeveless · Structured shoulder panels"],
+        ["Lining", "Organza · Each tier lined separately"],
+        ["Hem", "Rolled by hand · Weighted to fall evenly"],
+      ],
+      care: careNotes("Gentle hand wash cold, or dry clean · Never wring chiffon"),
+      provenance: provenanceNotes("Standard sizes, or a bespoke fit consultation"),
     },
     createdAt: "2026-02-01T10:00:00.000Z",
     updatedAt: "2026-02-01T10:00:00.000Z",
@@ -169,7 +247,7 @@ export const SEED_DRESSES: Dress[] = [
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
     stock: 6,
     featured: true,
-    published: true,
+    published: false,
     images: [
       { src: "/images/awakening.webp", alt: "Maison D'Vine The Awakening noir silk gown" },
       { src: "/images/story/CrimsonGownAmongSunlitRuins.webp", alt: "The Awakening gown among sunlit ruins" },
@@ -184,6 +262,22 @@ export const SEED_DRESSES: Dress[] = [
       images: [
         { src: "/images/story/CrimsonGownAmongSunlitRuins.webp", alt: "The Awakening gown among sunlit stone ruins" },
       ],
+    },
+    craft: {
+      quote:
+        "The shoulders are sculpted for the weight she carried alone. Everything else is cut to let her put it down.",
+      details: [
+        ["Fabric", "Silk crepe · Matte, with a heavy drape"],
+        ["Length", "Floor-length with a soft train · Approx 160cm"],
+        ["Colour", "Noir · Deep, even, without shine"],
+        ["Neckline", "High, clean neckline · Open back"],
+        ["Fit", "Column skirt · Fitted through the hip"],
+        ["Sleeves", "Sculpted shoulders · Padded by hand"],
+        ["Lining", "Silk habotai · Fully lined"],
+        ["Train", "Breaks softly at the floor · Arrives just after she does"],
+      ],
+      care: careNotes("Dry clean only · Hang the train, never fold it"),
+      provenance: provenanceNotes("Bespoke fit consultation recommended"),
     },
     createdAt: "2026-02-05T10:00:00.000Z",
     updatedAt: "2026-02-05T10:00:00.000Z",

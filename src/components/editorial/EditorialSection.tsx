@@ -16,6 +16,7 @@ const dresses = [
     title: ["THE DRESS", "SHE ALREADY HAD"],
     body: "If life were a photograph, I wasn’t the focus, I was the blur in the background, the quiet shape that gave balance to the scene but never claimed the light.",
     cardTitle: "SOLACE",
+    slug: "solace",
     descLines: ["In the moments", "I find myself."] as [string, string],
     tag: "Floral Silk · Dawn",
     imageSrc: "/images/solace.webp",
@@ -31,6 +32,7 @@ const dresses = [
     title: ["THE DRESS", "SHE BORROWED"],
     body: "Sometimes, you borrow someone else’s dress hoping it will carry the confidence you couldn’t find in your own. That evening, my room looked like a small disaster. Clothes covered the bed, the chair, the floor.",
     cardTitle: "LONGING",
+    slug: "longing",
     descLines: ["In what lives", "between our hearts."] as [string, string],
     tag: "Crimson Tulle · Romance",
     imageSrc: "/images/longing.webp",
@@ -46,6 +48,7 @@ const dresses = [
     title: ["THE DRESS", "SHE BOUGHT"],
     body: "There are dresses you buy because they’re beautiful. And then there are dresses you buy because you hope they’ll turn you into someone else. I bought the dress after seeing it once, and never stopped seeing it again.",
     cardTitle: "REVERIE",
+    slug: "reverie",
     descLines: ["For the dreams", "I don't say out loud."] as [string, string],
     tag: "Noir Satin · Midnight",
     imageSrc: "/images/reverie.webp",
@@ -690,13 +693,9 @@ export const EditorialSection: React.FC = () => {
                   >
                     <EchoCard
                       title={look.cardTitle}
-                      descLines={look.descLines}
-                      tag={look.tag}
-                      index={idx + 1}
+                      href={`/dresses/${look.slug}`}
                       imageSrc={look.cardImageSrc}
                       imageAlt={look.cardImageAlt}
-                      alternateImageSrc={look.alternateCardImageSrc}
-                      alternateImageAlt={look.alternateCardImageAlt}
                       objectPosition={look.objectPosition}
                       imageFit="contain"
                     />
@@ -764,13 +763,9 @@ export const EditorialSection: React.FC = () => {
                       variant="horizontal"
                       active={idx === activeLook}
                       title={look.cardTitle}
-                      descLines={look.descLines}
-                      tag={look.tag}
-                      index={idx + 1}
+                      href={`/dresses/${look.slug}`}
                       imageSrc={look.cardImageSrc}
                       imageAlt={look.cardImageAlt}
-                      alternateImageSrc={look.alternateCardImageSrc}
-                      alternateImageAlt={look.alternateCardImageAlt}
                       objectPosition={look.objectPosition}
                       imageFit="contain"
                     />
