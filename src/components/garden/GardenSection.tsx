@@ -189,48 +189,49 @@ const TestimonialView: React.FC<TestimonialViewProps> = ({ item, swapClass, size
     <div className={`flex flex-col transition-all duration-200 ease-out ${swapClass}`}>
       <span
         className="gw-word font-serif font-bold tracking-[0.04em] text-[#16120e]"
-        style={{ fontSize: lg ? "max(11px, 1.3cqw)" : "13px", animationDelay: "0s", paddingLeft: lg ? "3cqw" : 0 }}
+        style={{ fontSize: lg ? "max(11px, 1.3cqw)" : "clamp(11.5px,4.3cqw,16px)", animationDelay: "0s", paddingLeft: lg ? "3cqw" : 0 }}
       >
         {item.whisper}
       </span>
       <p
         className="font-serif leading-[1.38] text-[#16120e]"
         style={{
-          fontSize: lg ? "max(12px, 1.62cqw)" : "clamp(14px,4vw,18px)",
-          marginTop: lg ? "0.9cqw" : "10px",
+          fontSize: lg ? "max(12px, 1.62cqw)" : "clamp(12.5px,5cqw,18px)",
+          marginTop: lg ? "0.9cqw" : "2.4cqw",
           paddingLeft: lg ? "3cqw" : 0,
         }}
       >
         <Words text={item.message} start={msgStart} />
       </p>
-      <div style={{ marginTop: lg ? "1.2cqw" : "12px", paddingLeft: lg ? "7.5cqw" : 0 }}>
+      {/* the pressed flower sits over the paper's lower-left, so the reply and signature are indented past it */}
+      <div style={{ marginTop: lg ? "1.2cqw" : "3cqw", paddingLeft: lg ? "7.5cqw" : "17cqw" }}>
         <span
           className="gw-word font-serif font-bold text-[#16120e]"
-          style={{ fontSize: lg ? "max(11px, 1.2cqw)" : "12.5px", animationDelay: `${respStart - 0.1}s` }}
+          style={{ fontSize: lg ? "max(11px, 1.2cqw)" : "clamp(11px,4.1cqw,15px)", animationDelay: `${respStart - 0.1}s` }}
         >
           Maison D&apos;vine Response:
         </span>
         <p
           className="font-serif leading-[1.5] text-[#46392e] italic"
-          style={{ fontSize: lg ? "max(11px, 1.24cqw)" : "clamp(12px,3.3vw,14.5px)", marginTop: "0.25em" }}
+          style={{ fontSize: lg ? "max(11px, 1.24cqw)" : "clamp(11px,4.1cqw,14.5px)", marginTop: "0.25em" }}
         >
           <Words text={item.response} start={respStart} step={0.022} />
         </p>
       </div>
       <div
         className="gw-word flex flex-col"
-        style={{ marginTop: lg ? "1.2cqw" : "14px", paddingLeft: lg ? "7.5cqw" : 0, animationDelay: `${signStart}s` }}
+        style={{ marginTop: lg ? "1.2cqw" : "3cqw", paddingLeft: lg ? "7.5cqw" : "17cqw", animationDelay: `${signStart}s` }}
       >
         <span
           className="font-serif font-medium tracking-[0.02em] text-[#1c1815]"
-          style={{ fontSize: lg ? "max(13px, 1.7cqw)" : "17px" }}
+          style={{ fontSize: lg ? "max(13px, 1.7cqw)" : "clamp(14px,5.6cqw,19px)" }}
         >
           {item.author}
         </span>
         {showLocation && (
           <span
             className="font-serif tracking-wider text-[#635344]"
-            style={{ fontSize: lg ? "max(11px, 1.1cqw)" : "12px", marginTop: "2px" }}
+            style={{ fontSize: lg ? "max(11px, 1.1cqw)" : "clamp(10.5px,3.9cqw,14px)", marginTop: "2px" }}
           >
             {item.location}
           </span>
@@ -758,15 +759,28 @@ export const GardenSection: React.FC<GardenSectionProps> = ({
                 <div
                   data-gw="paper"
                   className="w-[78%] will-change-transform sm:w-[80%]"
-                  style={{ filter: "drop-shadow(0 16px 20px rgba(30,14,4,0.5))", ...crop(RECTS.center) }}
+                  style={{
+                    filter: "drop-shadow(0 16px 20px rgba(30,14,4,0.5))",
+                    containerType: "inline-size",
+                    ...crop(RECTS.center),
+                  }}
                 >
-                  <div className="px-[11%] pt-[13%] pb-[13%]">
-                    <TestimonialView
-                      key={currentIndex}
-                      item={current}
-                      swapClass={swapClass}
-                      size="sm"
-                    />
+                  {/* Every whisper is laid out in the same grid cell (the others hidden), so the card is
+                      always as tall as the longest one: it never grows or shrinks as the whispers turn */}
+                  <div className="grid pt-[25%] pr-[13%] pb-[12%] pl-[11%]">
+                    {testimonials.map((t, i) => (
+                      <div
+                        key={`${i}-${i === currentIndex}`}
+                        aria-hidden={i !== currentIndex}
+                        className={`[grid-area:1/1] ${i === currentIndex ? "" : "invisible"}`}
+                      >
+                        <TestimonialView
+                          item={t}
+                          swapClass={i === currentIndex ? swapClass : ""}
+                          size="sm"
+                        />
+                      </div>
+                    ))}
                   </div>
                 </div>
                 <WhisperPhoto

@@ -145,7 +145,7 @@ export const EchoCard: React.FC<EchoCardProps> = ({
       >
         {/* Left: Portrait image, brightens + settles when active */}
         <div
-          className={`relative h-full aspect-[0.82/1] flex-shrink-0 overflow-hidden shadow-sm rounded-[1px] ${
+          className={`relative h-full max-w-[40%] aspect-[0.82/1] flex-shrink-0 overflow-hidden shadow-sm rounded-[1px] ${
             imageFit === "contain" ? "bg-[#f7f0e3]" : "bg-[#e0d6c8]"
           }`}
         >
@@ -181,11 +181,9 @@ export const EchoCard: React.FC<EchoCardProps> = ({
         {/* Middle: Title always; poetic caption unfolds when active */}
         <div className="flex min-w-0 flex-1 flex-col justify-center pl-1 pr-1">
           <h3
-            className="font-bodoni text-[15px] xs:text-[17px] sm:text-[19px] font-normal uppercase text-[#1a140e]"
-            style={{
-              letterSpacing: active ? "0.2em" : "0.14em",
-              transition: "letter-spacing 0.7s cubic-bezier(0.16, 1, 0.3, 1)",
-            }}
+            className={`truncate font-bodoni text-[13px] xs:text-[15px] sm:text-[19px] font-normal uppercase text-[#1a140e] transition-[letter-spacing] duration-700 ${
+              active ? "tracking-[0.1em] sm:tracking-[0.2em]" : "tracking-[0.08em] sm:tracking-[0.14em]"
+            }`}
           >
             {title}
           </h3>
@@ -215,7 +213,7 @@ export const EchoCard: React.FC<EchoCardProps> = ({
         {/* Right: a visible "Shop" pill on link cards, otherwise the circular arrow */}
         {href ? (
           <span
-            className={`mr-1 flex flex-shrink-0 items-center gap-1.5 rounded-full px-3 py-2 font-sans text-[9.5px] font-medium tracking-[0.18em] uppercase transition-colors duration-500 ${
+            className={`mr-1 flex flex-shrink-0 items-center gap-1 rounded-full px-2.5 py-1.5 font-sans text-[9px] font-medium tracking-[0.14em] uppercase transition-colors duration-500 sm:gap-1.5 sm:px-3 sm:py-2 sm:text-[9.5px] sm:tracking-[0.18em] ${
               active ? "bg-[#1a140e] text-[#f6ecd9]" : "border border-[#3a3026]/50 text-[#3a3026]"
             }`}
           >

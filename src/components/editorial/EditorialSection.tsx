@@ -737,6 +737,10 @@ export const EditorialSection: React.FC = () => {
               }}
             >
               <div className="relative h-[8.5rem] w-full pr-[14%] sm:h-[11rem]">
+                {/* Section heading, sits in the sheet's top padding right above the chapter title */}
+                <span className="font-bodoni pointer-events-none absolute bottom-full left-0 mb-0.5 text-[30px] leading-none font-normal tracking-[0.02em] whitespace-nowrap text-[#8a6a3b] italic [text-shadow:0_1px_0_rgba(255,246,225,0.8)] sm:mb-1 sm:text-[48px]">
+                  The Echo
+                </span>
                 {dresses.map((_, idx) => (
                   <DressText
                     key={idx}
